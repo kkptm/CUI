@@ -3,12 +3,12 @@ CUI : a GUI framework for c++ (Commercially available without any copyright rest
 
 Use it like C#
 
-Button,CheckBo,ComboBox,,GridView,Label,Panel,PasswordBox,PictureBox,ProgressBar,RadioBox,RichTextBox,RoundTextBox,Switch,TabControl,TextBox
+Button,CheckBox,ComboBox,,GridView,Label,Panel,PasswordBox,PictureBox,ProgressBar,RadioBox,RichTextBox,RoundTextBox,Switch,TabControl,TextBox
 
 Sample:
 
 
-	class TestWindow:public Form
+	class TestWindow : Form(L"TestWindow", { 0,0 }, { 1240,600 })
 	{
 	private:
 	    void button1_OnMouseClick(void* sender, MouseEventArgs e)
@@ -22,7 +22,7 @@ Sample:
 	    Button* button1;
 	    testWindow()
 	    {
-	        button1 = (Button*)this->AddControl(new Button(L"BUTTON1", 10, this->LastChildRB().y + 5, 120, 24));
+	        button1 = (Button*)this->AddControl(new Button(L"BUTTON1", 10, 10, 120, 24));
 	        button1->OnMouseClick += button1_OnMouseClick;
 	    }
 	};
