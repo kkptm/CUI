@@ -137,7 +137,7 @@ void TestWindow::Init()
     bt2->OnMouseClick += bt2_OnMouseClick;
 
     panel1 = (Panel*)tabControl1->get(0)->AddControl(new Panel(10, 40, 400, 200));
-    panel1->AddControl(new Label(L"Í¼Æ¬¿ò(Ö§³ÖÍÏ×§)", 10, 10))->Font = new Font(L"Arial", 12);
+    panel1->AddControl(new Label(L"Í¼Æ¬¿ò(Ö§³ÖÍÏ×§)", 10, 10));
     picturebox1 = (PictureBox*)panel1->AddControl(new PictureBox(120, 10, 260, 120));
     picturebox1->Image = this->Image;
     picturebox1->OnDropFile += [](void* sender, List<std::wstring> files)
@@ -159,7 +159,7 @@ void TestWindow::Init()
             ((Control*)sender)->SingleUpdate();
         }
     };
-    panel1->AddControl(new Label(L"Progress Bar", 10, picturebox1->Bottom + 5))->Font = new Font(L"Arial", 12);
+    panel1->AddControl(new Label(L"Progress Bar", 10, picturebox1->Bottom + 5));
     progressbar1 = (ProgressBar*)panel1->AddControl(new ProgressBar(120, picturebox1->Bottom + 5, 260, 24));
     gridview1 = (GridView*)tabControl1->get(1)->AddControl(new GridView(10, 10, 1000, 200));
     gridview1->HeadFont = new Font(L"Arial", 24);

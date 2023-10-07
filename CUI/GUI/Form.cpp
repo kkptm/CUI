@@ -177,10 +177,9 @@ bool Form::DoEvent()
     {
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
         return true;
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
+    Sleep(1);
     for(auto form : Application::Forms)
 	{
 		form.second->Update();

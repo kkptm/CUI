@@ -39,7 +39,7 @@ UIClass Control::Type() { return UIClass::UI_Base; }
 void Control::Update() {}
 void Control::SingleUpdate()
 {
-	this->ParentForm->ControlChanged = true;
+	if(this->ParentForm) this->ParentForm->ControlChanged = true;
 }
 GET_CPP(Control, int, Count)
 {

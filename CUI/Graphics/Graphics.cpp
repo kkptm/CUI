@@ -917,23 +917,9 @@ void Graphics::FillTriangle(D2D1_TRIANGLE triangle, D2D1_COLOR_F color)
 }
 void Graphics::DrawTriangle(D2D1_TRIANGLE triangle, D2D1_COLOR_F color, float width)
 {
-    ID2D1PathGeometry* geo = nullptr;
-    if (SUCCEEDED(_D2DFactory->CreatePathGeometry(&geo)))
-    {
-        ID2D1GeometrySink* tmp = NULL;
-        if (SUCCEEDED(geo->Open(&tmp)))
-        {
-            tmp->BeginFigure(triangle.point1, D2D1_FIGURE_BEGIN_FILLED);
-            tmp->AddLine(triangle.point2);
-            tmp->AddLine(triangle.point3);
-            tmp->AddLine(triangle.point1);
-            tmp->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
-            tmp->Close();
-            this->pRenderTarget->DrawGeometry(geo, this->GetColorBrush(color), width);
-            tmp->Release();
-        }
-        geo->Release();
-    }
+    this->DrawLine(triangle.point1, triangle.point2, color, width);
+    this->DrawLine(triangle.point2, triangle.point3, color, width);
+    this->DrawLine(triangle.point3, triangle.point1, color, width);
 }
 void Graphics::FillPolygon(std::initializer_list<D2D1_POINT_2F> points, D2D1_COLOR_F color)
 {

@@ -151,40 +151,29 @@ std::wstring StringHelper::Replace(std::wstring str, std::wstring oldstr, std::w
     return result;
 }
 std::string StringHelper::ToUpper(std::string str) {
-    std::string result;
-    result.reserve(str.length());
-    std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](unsigned char c) { return std::toupper(c); });
+    std::string result('\0', str.size());
+    for (int i = 0; i < str.size(); i++)
+        result[i] = toupper(str[i]);
     return result;
 }
 std::wstring StringHelper::ToUpper(std::wstring str) {
-    std::wstring result;
-    result.reserve(str.length());
-    std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](wchar_t c) { return std::toupper(c, std::locale()); });
+    std::wstring result(L'\0', str.size());
+    for (int i = 0; i < str.size(); i++)
+        result[i] = towupper(str[i]);
     return result;
 }
 std::string StringHelper::ToLower(std::string str) {
-    std::string result;
-    result.reserve(str.length());
-    std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](unsigned char c) { return std::tolower(c); });
+    std::string result('\0', str.size());
+    for (int i = 0; i < str.size(); i++)
+        result[i] = tolower(str[i]);
     return result;
 }
 std::wstring StringHelper::ToLower(std::wstring str) {
-    std::wstring result;
-    result.reserve(str.length());
-    std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](wchar_t c) { return std::tolower(c, std::locale()); });
+    std::wstring result(L'\0',str.size());
+    for (int i = 0; i < str.size(); i++)
+        result[i] = towlower(str[i]);
     return result;
 }
-/*
-
-    static bool StartsWith(std::string str, std::string prefix);
-    static bool StartsWith(std::wstring str, std::wstring prefix);
-    static bool EndsWith(std::string str, std::string suffix);
-    static bool EndsWith(std::wstring str, std::wstring suffix);
-*/
 bool StringHelper::StartsWith(std::string str, std::string prefix) {
 	return str.substr(0, prefix.size()) == prefix;
 }

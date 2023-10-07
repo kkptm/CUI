@@ -15,5 +15,5 @@ int main()
         if(mainForm->progressbar1->IsVisual)
             mainForm->ControlChanged = true;
     }
-	return 0;
+    return 0;
 }
