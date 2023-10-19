@@ -4,6 +4,7 @@
 #include <vector>
 #include <commdlg.h>
 #include <Shlobj.h>
+#include "defines.h"
 #undef MessageBox
 
 HWND GetCurrentActiveWindow();

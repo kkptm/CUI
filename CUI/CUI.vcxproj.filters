@@ -165,6 +165,12 @@
     <ClInclude Include="imgs.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\defines.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ProcessSelectWindow.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -295,6 +301,9 @@
     </ClCompile>
     <ClCompile Include="CustomControls.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\ProcessSelectWindow.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

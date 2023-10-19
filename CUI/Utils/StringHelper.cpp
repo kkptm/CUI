@@ -151,25 +151,25 @@ std::wstring StringHelper::Replace(std::wstring str, std::wstring oldstr, std::w
     return result;
 }
 std::string StringHelper::ToUpper(std::string str) {
-    std::string result('\0', str.size());
+    std::string result(str.size(), '\0');
     for (int i = 0; i < str.size(); i++)
         result[i] = toupper(str[i]);
     return result;
 }
 std::wstring StringHelper::ToUpper(std::wstring str) {
-    std::wstring result(L'\0', str.size());
+    std::wstring result(str.size(),L'\0');
     for (int i = 0; i < str.size(); i++)
         result[i] = towupper(str[i]);
     return result;
 }
 std::string StringHelper::ToLower(std::string str) {
-    std::string result('\0', str.size());
+    std::string result(str.size(), '\0');
     for (int i = 0; i < str.size(); i++)
         result[i] = tolower(str[i]);
     return result;
 }
 std::wstring StringHelper::ToLower(std::wstring str) {
-    std::wstring result(L'\0',str.size());
+    std::wstring result(str.size(), L'\0');
     for (int i = 0; i < str.size(); i++)
         result[i] = towlower(str[i]);
     return result;

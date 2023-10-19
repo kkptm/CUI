@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "defines.h"
 struct TimeSpan
 {
 	INT64 _ticks;

@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include "defines.h"
 
 template <class _Kty, class _Vty>
 class Dictionary : public std::unordered_map<_Kty, _Vty>

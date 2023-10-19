@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include "TimeSpan.h"
 class Stopwatch
 {

@@ -5,10 +5,6 @@
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4018)
 
-#ifndef PROPERTY_CPP
-#define GET_CPP(c,t,n) t c::property__get_##n() 
-#define SET_CPP(c,t,n) void c::property__set_##n(t value)
-#endif // !PROPERTY_CPP
 Control::Control()
 	:
 	Enable(true),

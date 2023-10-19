@@ -3,16 +3,6 @@
 #include <DWrite.h>
 #include <wincodec.h>
 
-#ifndef PROPERTY
-#define PROPERTY(t,n) __declspec( property (put = property__set_##n, get = property__get_##n)) t n
-#define GET(t,n) t property__get_##n() 
-#define SET(t,n) void property__set_##n(t value)
-
-#define READONLY_PROPERTY(t,n) __declspec( property (get = property__get_##n) ) t n
-#define WRITEONLY_PROPERTY(t,n) __declspec( property (put = property__set_##n) ) t n
-#define _readonly_property(t,n) READONLY_PROPERTY(t,n);GET(t,n)
-#endif // !PROPERTY
-
 class Factory
 {
 public:

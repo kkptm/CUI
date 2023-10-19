@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <fstream>
+#include "defines.h"
 
 enum class FileMode
 {

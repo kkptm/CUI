@@ -5,11 +5,14 @@
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <winternl.h>
+#include "defines.h"
 class Process
 {
 public:
 	int Id;
+	std::wstring ProcessName;
 	Process(int _id);
+	Process(int _id, std::wstring _processName);
 	static Process CurrentProcess();
 	static Process FromHandle(HANDLE handle);
 	static Process FromWindow(HWND hwnd);
@@ -17,10 +20,11 @@ public:
 	static std::vector<Process> GetProcessesByName(const std::string _name);
 	static std::vector<Process> GetProcesses();
 	static HWND FindMainWindow(int processId);
+	static std::vector<HWND> GetForms(int processId);
 	static Process Start(const std::string fileName, const std::string arguments = "", const std::string workingDirectory = "");
 	HWND MainWindowHandle();
+	std::vector<HWND> Forms();
 	std::string MainWindowTitle();
-	std::string ProcessName();
 	int ParentProcessId();
 	int SessionId();
 	int BasePriority();

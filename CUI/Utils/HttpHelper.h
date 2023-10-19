@@ -3,6 +3,7 @@
 #include <string>
 #include <wininet.h>
 #include <Winhttp.h>
+#include "defines.h"
 typedef void(*HTTP_STREAM_CALLBACK)(std::string);
 class HttpHelper
 {

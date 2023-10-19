@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <fstream>
+#include "defines.h"
 class FileInfo
 {
 private:
@@ -33,4 +34,11 @@ public:
     std::vector<FileInfo> GetFiles();
     std::vector<DirectoryInfo> GetDirectories();
 };
+
+//enshrouded.exe+1C0C6A //掉落伤害
+//enshrouded.exe+28EDBA //跳跃体力
+//enshrouded.exe+1FCE28 //奔跑体力
+//1D7F6033624
+//1D7F6038524
+
 

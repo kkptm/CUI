@@ -2,6 +2,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <iostream>
 #include <winsock.h>
+#include "defines.h"
 
 #pragma comment(lib, "ws2_32.lib")
 class TCPSocket {

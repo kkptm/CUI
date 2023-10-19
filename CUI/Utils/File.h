@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
+#include "defines.h"
 enum class FileAttributes
 {
     ReadOnly = 0x1,

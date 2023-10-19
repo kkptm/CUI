@@ -1,8 +1,5 @@
 #include "Form.h"
-#ifndef PROPERTY_CPP
-#define GET_CPP(c,t,n) t c::property__get_##n() 
-#define SET_CPP(c,t,n) void c::property__set_##n(t value)
-#endif // !PROPERTY_CPP
+
 GET_CPP(Form, POINT, Location)
 {
     if (this->Handle)
@@ -119,6 +116,7 @@ SET_CPP(Form, bool, Visable)
 {
     ShowWindow(this->Handle, value ? SW_SHOW : SW_HIDE);
 }
+#include "../Utils/Dialog.h"
 Form::Form(std::wstring _text, POINT _location, SIZE _size)
 {
     static bool ClassInited = false;
@@ -142,18 +140,19 @@ Form::Form(std::wstring _text, POINT _location, SIZE _size)
         }
         ClassInited = true;
     }
-    this->Handle = CreateWindowW(L"CoreNativeWindow",
+    this->Handle = CreateWindowExW(
+        0L,
+        L"CoreNativeWindow",
         _text.c_str(),
         this->Style,
-        this->Location.x == 0 ? CW_USEDEFAULT : this->Location.x,
-        this->Location.y == 0 ? CW_USEDEFAULT : this->Location.y,
-        this->Size.cx == 0 ? CW_USEDEFAULT : this->Size.cx,
-        this->Size.cy == 0 ? CW_USEDEFAULT : this->Size.cy,
-        NULL,
+        this->Location.x == 0 ? ((int)0x80000000) : this->Location.x, 
+        this->Location.y == 0 ? ((int)0x80000000) : this->Location.y,
+        this->Size.cx == 0 ? ((int)0x80000000) : this->Size.cx,
+        this->Size.cy == 0 ? ((int)0x80000000) : this->Size.cy,
+        GetCurrentActiveWindow(),
         this->Menu,
-        GetModuleHandleW(NULL),
-        NULL
-    );
+        GetModuleHandleW(0),
+        0);
     SetWindowLongPtrW(this->Handle, GWLP_USERDATA, (LONG_PTR)this);
     DragAcceptFiles(this->Handle, TRUE);
     Render = new Graphics(this->Handle);
@@ -166,9 +165,31 @@ void Form::Show()
     SetWindowLong(this->Handle, GWL_STYLE, this->Style);
     ShowWindow(this->Handle, SW_SHOWNORMAL);
 }
+
+void Form::ShowDialog()
+{
+    if (this->Menu) SetMenu(this->Handle, this->Menu);
+    if (this->Icon) SendMessage(this->Handle, WM_SETICON, ICON_BIG, (LPARAM)this->Icon);
+    SetWindowLong(this->Handle, GWL_STYLE, this->Style);
+    ShowWindow(this->Handle, SW_SHOWNORMAL);
+    while (IsWindow(this->Handle))
+    {
+        MSG msg;
+        if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            if (msg.hwnd == this->Handle || (msg.message == WM_SYSCOMMAND && msg.wParam == SC_RESTORE))
+            {
+                DispatchMessageW(&msg);
+                if(IsWindow(this->Handle))
+                    this->Update();
+            }
+        }
+    }
+}
 void Form::Close()
 {
-    CloseWindow(this->Handle);
+    SendMessageA(this->Handle, WM_CLOSE, 0, 0);
 }
 bool Form::DoEvent()
 {
@@ -201,7 +222,6 @@ bool Form::Update()
 {
     if (ControlChanged)
     {
-
         this->Render->BeginRender(this->BackColor);
         if (this->Image)
         {
@@ -460,6 +480,8 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
     case WM_CLOSE:
     {
         this->OnFormClosing(this);
+        this->Render->~Graphics();
+        return true;
     }
     break;
     case WM_COMMAND:
@@ -476,7 +498,7 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
         this->Selected = NULL;
         se->SingleUpdate();
     }
-    if(this->Render)this->Update();
+    if(IsWindow(this->Handle) && this->Render)this->Update();
     return true;
 }
 void Form::RenderImage()

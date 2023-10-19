@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 
+#include "defines.h"
 #include "List.h"
 #include "File.h"
 #include "Guid.h"
@@ -21,23 +22,11 @@
 #include "Environment.h"
 #include "StringHelper.h"
 
+
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #ifndef RELOC
 #define RELOC(p,o) (void*)((char*)p ? (((char*)p + o + 4) + (*(int*)((char*)p + o))) : NULL)
-#endif
-
-#ifndef typeof
-#define typeof(x) decltype(x)
-#endif
-
-#ifndef PROPERTY
-#define PROPERTY(t,n) __declspec( property (put = property__set_##n, get = property__get_##n)) t n
-#define READONLY_PROPERTY(t,n) __declspec( property (get = property__get_##n) ) t n
-#define WRITEONLY_PROPERTY(t,n) __declspec( property (put = property__set_##n) ) t n
-#define GET(t,n) t property__get_##n() 
-#define SET(t,n) void property__set_##n(t value)
-#define _readonly_property(t,n) READONLY_PROPERTY(t,n);GET(t,n)
 #endif
 
 DWORD NtBuildVersion();

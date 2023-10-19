@@ -1,15 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <vector>
-#ifndef PROPERTY
-#define PROPERTY(t,n) __declspec( property (put = property__set_##n, get = property__get_##n)) t n
-#define READONLY_PROPERTY(t,n) __declspec( property (get = property__get_##n) ) t n
-#define WRITEONLY_PROPERTY(t,n) __declspec( property (put = property__set_##n) ) t n
-#define GET(t,n) t property__get_##n() 
-#define SET(t,n) void property__set_##n(t value)
-#define _readonly_property(t,n) READONLY_PROPERTY(t,n);GET(t,n)
-#endif // !PROPERTY
-
+#include "defines.h"
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4018)

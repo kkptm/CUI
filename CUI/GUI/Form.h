@@ -91,6 +91,7 @@ public:
     DWORD Style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     Form(std::wstring _text = L"NativeWindow", POINT _location = { 0,0 }, SIZE _size = { 600,400 });
     void Show();
+    void ShowDialog();
     void Close();
 
     virtual Control* AddControl(Control* c);

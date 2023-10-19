@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <string>
 #include <vector>
+#include "defines.h"
 #include "List.h"
 enum class MouseButtons
 {

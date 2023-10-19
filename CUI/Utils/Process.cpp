@@ -5,6 +5,13 @@ Process::Process(int _id)
 {
 	this->Id = _id;
 }
+
+Process::Process(int _id, std::wstring _processName)
+{
+	this->Id = _id;
+	this->ProcessName = _processName;
+}
+
 Process Process::CurrentProcess()
 {
 	return Process((int)GetCurrentProcessId());
@@ -51,7 +58,7 @@ std::vector<Process> Process::GetProcesses()
 	{
 		do
 		{
-			result.push_back(Process(pe.th32ProcessID));
+			result.push_back(Process(pe.th32ProcessID, pe.szExeFile));
 		} while (Process32Next(hSnapshot, &pe));
 	}
 	CloseHandle(hSnapshot);
@@ -74,6 +81,26 @@ HWND Process::FindMainWindow(int processId)
 			return TRUE;
 		}, (LPARAM)&tmp);
 	return hwnd;
+}
+std::vector<HWND> Process::GetForms(int processId)
+{
+	std::vector<HWND> result = std::vector<HWND>();
+	auto tmp = std::pair<int, std::vector<HWND>&>(processId, result);
+	EnumWindows([](HWND wnd, LPARAM param)->BOOL
+		{
+			auto p = (std::pair<int, std::vector<HWND>&>*)param;
+			DWORD processId;
+			if (GetWindowThreadProcessId(wnd, &processId) && processId == p->first)
+			{
+				p->second.push_back(wnd);
+			}
+			return TRUE;
+		}, (LPARAM)&tmp);
+	return result;
+}
+std::vector<HWND> Process::Forms()
+{
+	return GetForms(this->Id);
 }
 Process Process::Start(const std::string fileName, const std::string arguments, const std::string workingDirectory)
 {
@@ -99,16 +126,6 @@ std::string Process::MainWindowTitle()
 	if (length == 0) return "";
 	std::vector<char> buffer(length + 1);
 	GetWindowTextA(hwnd, buffer.data(), length + 1);
-	return std::string(buffer.data());
-}
-std::string Process::ProcessName()
-{
-	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, this->Id);
-	if (hProcess == NULL) return "";
-	std::vector<char> buffer(MAX_PATH);
-	DWORD size = MAX_PATH;
-	QueryFullProcessImageNameA(hProcess, 0, buffer.data(), &size);
-	CloseHandle(hProcess);
 	return std::string(buffer.data());
 }
 int Process::ParentProcessId()
