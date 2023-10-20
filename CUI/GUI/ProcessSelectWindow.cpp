@@ -25,9 +25,8 @@ void ProcessSelectWindow::_selectButton_OnMouseClick(void* sender, MouseEventArg
 	ProcessSelectWindow* window = (ProcessSelectWindow*)_btn->ParentForm;
 	if (window->_table->SelectedRowIndex >= 0)
 	{
-		auto pid = (HANDLE)window->_table->SelectedRow().Cells[1].Tag;
 		window->Close();
-		window->SelectedProcessId = (HANDLE)pid;
+		window->SelectedProcessId = (HANDLE)window->_table->SelectedRow().Cells[1].Tag;
 	}
 }
 ProcessSelectWindow::ProcessSelectWindow() : Form(L"Ñ¡Ôñ½ø³Ì", { 0,0 }, { 400,540 })

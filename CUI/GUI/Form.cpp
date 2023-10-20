@@ -153,7 +153,7 @@ Form::Form(std::wstring _text, POINT _location, SIZE _size)
         this->Menu,
         GetModuleHandleW(0),
         0);
-    SetWindowLongPtrW(this->Handle, GWLP_USERDATA, (LONG_PTR)this);
+    SetWindowLongPtrW(this->Handle, GWLP_USERDATA, (LONG_PTR)this ^ 0xFFFFFFFFFFFFFFFF);
     DragAcceptFiles(this->Handle, TRUE);
     Render = new Graphics(this->Handle);
     Application::Forms.Add(this->Handle, this);
@@ -576,15 +576,14 @@ D2D1_POINT_2F Form::MaxChildRB()
 }
 LRESULT CALLBACK Form::WINMSG_PROCESS(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    Form* form = (Form*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
-    if (form && Application::Forms.ContainsKey(form->Handle))
+    Form* form = (Form*)(GetWindowLongPtrW(hWnd, GWLP_USERDATA) ^ 0xFFFFFFFFFFFFFFFF);
+    if ((ULONG64)form != 0xFFFFFFFFFFFFFFFF && Application::Forms.ContainsKey(form->Handle))
     {
         form->ProcessMessage(message, wParam, lParam, 0, 0);
         if (message == WM_NCDESTROY)
         {
             form->OnFormClosed(form);
             Application::Forms.Remove(form->Handle);
-            delete form;
             if (Application::Forms.Count() == 0)
             {
                 exit(0);
