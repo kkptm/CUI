@@ -14,6 +14,8 @@ int main()
 
     auto h= psfm->SelectedProcessId;
     auto h1 = psfm1->SelectedProcessId;
+    delete psfm;
+    delete psfm1;
 
     mainForm->Text = L"test window";
     mainForm->Icon = (HICON)::LoadImageA(NULL, "app.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);

@@ -1,4 +1,4 @@
-#include "Form.h"
+ï»¿#include "Form.h"
 
 GET_CPP(Form, POINT, Location)
 {
@@ -60,15 +60,10 @@ GET_CPP(Form, SIZE, ClientSize)
 	}
 }
 GET_CPP(Form, std::wstring, Text) {
-    int len = GetWindowTextLengthW(Handle);
-    wchar_t* buffer = new wchar_t[len + 1];
-    GetWindowTextW(Handle, buffer, len + 1);
-    std::wstring result = buffer;
-    delete[] buffer;
-    return result;
+    return _text;
 }
 SET_CPP(Form, std::wstring, Text) {
-    SetWindowTextW(Handle, value.c_str());
+    _text = value;
 }
 GET_CPP(Form, bool, ShowInTaskBar)
 {
@@ -117,8 +112,9 @@ SET_CPP(Form, bool, Visable)
     ShowWindow(this->Handle, value ? SW_SHOW : SW_HIDE);
 }
 #include "../Utils/Dialog.h"
-Form::Form(std::wstring _text, POINT _location, SIZE _size)
+Form::Form(std::wstring text, POINT _location, SIZE _size)
 {
+    this->_text = text;
     static bool ClassInited = false;
     this->Location = _location;
     this->Size = _size;
@@ -157,12 +153,43 @@ Form::Form(std::wstring _text, POINT _location, SIZE _size)
     DragAcceptFiles(this->Handle, TRUE);
     Render = new Graphics(this->Handle);
     Application::Forms.Add(this->Handle, this);
+
+    float xtmp = this->Size.cx - (this->HeadHeight * 3);
+    _minBox = (Button*)this->AddControl(new Button(L"â€”", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    xtmp += this->HeadHeight;
+    _maxBox = (Button*)this->AddControl(new Button(L"â", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    xtmp += this->HeadHeight;
+    _closeBox = (Button*)this->AddControl(new Button(L"âœ–", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+
+    _minBox->OnMouseClick += [](void* sender, MouseEventArgs)
+        {
+            ((Button*)sender)->ParentForm->Handle;
+            ShowWindow(((Button*)sender)->ParentForm->Handle, SW_MINIMIZE);
+        };
+    _maxBox->OnMouseClick += [](void* sender, MouseEventArgs)
+        {
+            ((Button*)sender)->ParentForm->Handle;
+            if(IsZoomed(((Button*)sender)->ParentForm->Handle))
+				ShowWindow(((Button*)sender)->ParentForm->Handle, SW_RESTORE);
+			else
+				ShowWindow(((Button*)sender)->ParentForm->Handle, SW_MAXIMIZE);
+        };
+    _closeBox->OnMouseClick += [](void* sender, MouseEventArgs)
+        {
+            ((Button*)sender)->ParentForm->Close();
+        };
+    _minBox->Boder = 0.0f; _minBox->Round = 0.0f; _minBox->BackColor = D2D1_COLOR_F{0.0f,0.0f,0.0f,0.0f};
+    _maxBox->Boder = 0.0f; _maxBox->Round = 0.0f; _maxBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
+    _closeBox->Boder = 0.0f; _closeBox->Round = 0.0f; _closeBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
+
 }
 void Form::Show()
 {
     if (this->Menu) SetMenu(this->Handle, this->Menu);
     if(this->Icon) SendMessage(this->Handle, WM_SETICON, ICON_BIG, (LPARAM)this->Icon);
     SetWindowLong(this->Handle, GWL_STYLE, this->Style);
+    _minBox->Visable = this->MinBox;
+    _maxBox->Visable = this->MaxBox;
     ShowWindow(this->Handle, SW_SHOWNORMAL);
 }
 
@@ -171,6 +198,8 @@ void Form::ShowDialog()
     if (this->Menu) SetMenu(this->Handle, this->Menu);
     if (this->Icon) SendMessage(this->Handle, WM_SETICON, ICON_BIG, (LPARAM)this->Icon);
     SetWindowLong(this->Handle, GWL_STYLE, this->Style);
+    _minBox->Visable = this->MinBox;
+    _maxBox->Visable = this->MaxBox;
     ShowWindow(this->Handle, SW_SHOWNORMAL);
     while (IsWindow(this->Handle))
     {
@@ -223,10 +252,17 @@ bool Form::Update()
     if (ControlChanged)
     {
         this->Render->BeginRender(this->BackColor);
+        this->Render->Resize();
         if (this->Image)
         {
             this->RenderImage();
         }
+        this->Render->FillRect(0, 0, this->Size.cx, this->HeadHeight, { 0.5f ,0.5f ,0.5f ,0.25f });
+        float headTextTop = (this->HeadHeight - this->Render->DefaultFontObject->FontHeight) * 0.5f;
+        if (headTextTop < 0.0f)
+            headTextTop = 0.0f;
+        this->Render->DrawString(this->Text, 5.0f, headTextTop, this->ForeColor);
+        this->OnPaint(this);
         for (int i = 0; i < this->Controls.Count; i++)
         {
             auto c = this->Controls[i]; if (!c->Visable)continue;
@@ -251,7 +287,7 @@ Control* Form::AddControl(Control* c)
 {
     if (c->Parent)
     {
-        throw "¸Ã¿Ø¼þÒÑÊôÓÚÆäËûÈÝÆ÷!";
+        throw "è¯¥æŽ§ä»¶å·²å±žäºŽå…¶ä»–å®¹å™¨!";
         return NULL;
     }
     if (this->Controls.Contains(c))
@@ -259,6 +295,7 @@ Control* Form::AddControl(Control* c)
         return c;
     }
     this->Controls.Add(c);
+    c->Top += this->HeadHeight;
     c->Parent = NULL;
     c->ParentForm = this;
     c->Render = this->Render;
@@ -266,7 +303,8 @@ Control* Form::AddControl(Control* c)
 }
 bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof)
 {
-    if (!this->Enable || !this->Visable) return true;
+    if (!this->Enable || !this->Visable) return true; 
+    //POINT mouse = { ((int)(short)LOWORD(lParam)),((int)(short)HIWORD(lParam)) };
     POINT mouse;
     GetCursorPos(&mouse);
     ScreenToClient(this->Handle, &mouse);
@@ -275,6 +313,19 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
     {
     case WM_MOUSEMOVE:
     {
+        if (offset.x || offset.y)
+        {
+            if (GetCapture() == this->Handle) {
+                // ç§»åŠ¨çª—å£
+                POINT pt;
+                pt.x = ((int)(short)LOWORD(lParam));
+                pt.y = ((int)(short)HIWORD(lParam));
+                RECT rect;
+                GetWindowRect(this->Handle, &rect);
+                MoveWindow(this->Handle, rect.left + pt.x - offset.x, rect.top + pt.y - offset.y,
+                    rect.right - rect.left, rect.bottom - rect.top, TRUE);
+            }
+        }
         if (this->Selected && (GetKeyState(VK_LBUTTON) & 0x8000))
         {
             if (this->Selected->IsVisual)
@@ -338,18 +389,36 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
     case WM_RBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_LBUTTONUP:
-    case WM_RBUTTONUP:
     case WM_MBUTTONUP:
+    case WM_RBUTTONUP:
     case WM_LBUTTONDBLCLK:
     {
-        if (WM_LBUTTONUP == message && this->Selected)
+        if (WM_LBUTTONDOWN == message)
         {
-            if (this->Selected->IsVisual)
+            offset = { 0,0 };
+            if (((int)(short)HIWORD(lParam)) < this->HeadHeight)
             {
-                HitControl = this->Selected;
-                auto location = this->Selected->AbsLocation;
-                this->Selected->ProcessMessage(message, wParam, lParam, mouse.x - location.x, mouse.y - location.y);
-                break;
+                offset.x = ((int)(short)LOWORD(lParam));
+                offset.y = ((int)(short)HIWORD(lParam));
+                SetCapture(this->Handle);
+            }
+        }
+        else if (WM_LBUTTONUP == message)
+        {
+            if (offset.x || offset.y)
+            {
+                offset = { 0,0 }; 
+                ReleaseCapture();
+            }
+            if (this->Selected)
+            {
+                if (this->Selected->IsVisual)
+                {
+                    HitControl = this->Selected;
+                    auto location = this->Selected->AbsLocation;
+                    this->Selected->ProcessMessage(message, wParam, lParam, mouse.x - location.x, mouse.y - location.y);
+                    break;
+                }
             }
         }
         bool is_First = true;
@@ -434,6 +503,22 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
         RECT rec;
         GetClientRect(this->Handle, &rec);
         this->OnSizeChanged(this);
+        float xtmp = this->Size.cx - (this->HeadHeight * 3);
+        if (_minBox)
+        {
+            _minBox->Left = xtmp; _minBox->Size = SIZE{ this->HeadHeight ,this->HeadHeight };
+        }
+        xtmp += this->HeadHeight;
+        if (_maxBox)
+        {
+            _maxBox->Left = xtmp; _maxBox->Size = SIZE{ this->HeadHeight ,this->HeadHeight };
+        }
+        xtmp += this->HeadHeight;
+        if (_closeBox)
+        {
+            _closeBox->Left = xtmp; _closeBox->Size = SIZE{ this->HeadHeight ,this->HeadHeight };
+        }
+
         this->Render->Resize();
         this->ControlChanged = true;
     }
@@ -553,7 +638,7 @@ D2D1_POINT_2F Form::LastChildRB()
         auto last = this->Controls.Last();
         auto loc = last->Location;
         auto siz = last->Size;
-        return D2D1_POINT_2F{ (float)loc.x + siz.cy,(float)loc.y + siz.cy };
+        return D2D1_POINT_2F{ (float)loc.x + siz.cy,(float)loc.y + siz.cy - this->HeadHeight };
     }
     return { 0,0 };
 }
@@ -572,6 +657,7 @@ D2D1_POINT_2F Form::MaxChildRB()
             if (tmp.y > result.y)result.y = tmp.y;
         }
     }
+    result.y -= this->HeadHeight;
     return result;
 }
 LRESULT CALLBACK Form::WINMSG_PROCESS(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

@@ -18,7 +18,7 @@ Font::Font(std::wstring fontFamilyName, float _fontsize)
         this->_fontSize,
         L"",
         &_fontObject);
-    this->FontHeight = this->GetTextSize(L"I").height;
+    this->FontHeight = this->GetTextSize(L'I').height;
 }
 Font::~Font()
 {
@@ -49,7 +49,7 @@ SET_CPP(Font, float, FontSize)
             &_fontObject);
     }
     this->_fontSize = value;
-    this->FontHeight = this->GetTextSize(L"I").height;
+    this->FontHeight = this->GetTextSize(L'I').height;
 }
 GET_CPP(Font, std::wstring, FontName)
 {
@@ -72,7 +72,7 @@ SET_CPP(Font, std::wstring, FontName)
             &_fontObject);
     }
     this->_fontName = value;
-    this->FontHeight = this->GetTextSize(L"I").height;
+    this->FontHeight = this->GetTextSize(L'I').height;
 }
 D2D1_SIZE_F Font::GetTextSize(std::wstring str, float w, float h)
 {

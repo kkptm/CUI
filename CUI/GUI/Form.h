@@ -23,6 +23,11 @@ class Form
 {
     POINT _Location_INIT;
     SIZE _Size_INTI;
+    std::wstring _text;
+    POINT offset;
+    Button* _minBox;
+    Button* _maxBox;
+    Button* _closeBox;
 public:
     MouseWheelEvent OnMouseWheel;
     MouseMoveEvent OnMouseMove;
@@ -51,14 +56,17 @@ public:
     CommandEvent OnCommand;
 
     HWND Handle;
+    bool MinBox = true;
+    bool MaxBox = true;
     bool ControlChanged = false;
     class Control* Selected = NULL;
     class Control* UnderMouse = NULL;
     List<class Control*> Controls = List<class Control*>();
     List<class Control*> ForeGroundControls = List<class Control*>();
     Graphics* Render;
-
+    int HeadHeight = 24;
     D2D1_COLOR_F BackColor = Colors::WhiteSmoke;
+    D2D1_COLOR_F ForeColor = Colors::Black;
     ID2D1Bitmap* Image = NULL;
     ImageSizeMode SizeMode = ImageSizeMode::Normal;
 
@@ -88,7 +96,7 @@ public:
 
     HICON Icon = NULL;
     HMENU Menu = NULL;
-    DWORD Style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    DWORD Style = WS_POPUP;
     Form(std::wstring _text = L"NativeWindow", POINT _location = { 0,0 }, SIZE _size = { 600,400 });
     void Show();
     void ShowDialog();

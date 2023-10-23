@@ -487,16 +487,8 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 	{
 		if (lParam & GCS_RESULTSTR)
 		{
-			const auto GetMousePos = [](HWND Hwnd)
-			{
-				POINT p;
-				GetCursorPos(&p);
-				ScreenToClient(Hwnd, &p);
-				return p;
-			};
 			HIMC hIMC;
 			DWORD dwSize;
-			POINT pos = GetMousePos(this->ParentForm->Handle);
 			hIMC = ImmGetContext(this->ParentForm->Handle);
 			dwSize = ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, NULL, 0);
 			dwSize += sizeof(WCHAR);

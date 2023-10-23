@@ -19,18 +19,18 @@ void Button::Update()
 	auto absRect = this->AbsRect;
 	d2d->PushDrawRect(absRect.left, absRect.top, absRect.right - absRect.left, absRect.bottom - absRect.top);
 	{
-		d2d->FillRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f), size.cx - this->Boder, size.cy - this->Boder, this->BackColor, this->Image ? 0.0f : this->Height * 0.25f);
+		d2d->FillRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f), size.cx - this->Boder, size.cy - this->Boder, this->BackColor, this->Image ? 0.0f : this->Height * Round);
 		if (this->Image)
 		{
 			this->RenderImage();
 		}
 		if (isUnderMouse && isSelected)
 		{
-			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.7f }, this->Image ? 0.0f : this->Height * 0.25f);
+			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.7f }, this->Image ? 0.0f : this->Height * Round);
 		}
 		else if (isUnderMouse)
 		{
-			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.4f }, this->Image ? 0.0f : this->Height * 0.25f);
+			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.4f }, this->Image ? 0.0f : this->Height * Round);
 		}
 		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
 		auto textSize = font->GetTextSize(this->Text);
