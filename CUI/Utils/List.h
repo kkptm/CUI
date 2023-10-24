@@ -158,7 +158,7 @@ public:
             this->erase(this->begin() + index);
         }
     }
-    int IndexOf(T& value)
+    int IndexOf(T value)
     {
         for (int i = 0; i < this->Count; i++)
         {
@@ -169,11 +169,11 @@ public:
         }
         return -1;
     }
-    bool Contains(T& value)
+    bool Contains(T value)
     {
         return IndexOf(value) >= 0;
     }
-    int LastIndexOf(T& value)
+    int LastIndexOf(T value)
     {
         for (int i = this->Count - 1; i >= 0; i--)
         {

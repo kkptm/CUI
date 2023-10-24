@@ -56,6 +56,8 @@ ProcessSelectWindow::ProcessSelectWindow() : Form(L"Ñ¡Ôñ½ø³Ì", { 0,0 }, { 400,54
 	this->AddControl(_searchBox);
 	this->AddControl(_table);
 	this->AddControl(_selectButton);
+	this->MinBox = false;
+	this->MaxBox = false;
 }
 
 ProcessSelectWindow::~ProcessSelectWindow()

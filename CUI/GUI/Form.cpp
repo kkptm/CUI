@@ -136,15 +136,17 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
         }
         ClassInited = true;
     }
+    int desktopWidth = GetSystemMetrics(SM_CXSCREEN);
+    int desktopHeight = GetSystemMetrics(SM_CYSCREEN);
     this->Handle = CreateWindowExW(
         0L,
         L"CoreNativeWindow",
         _text.c_str(),
         this->Style,
-        this->Location.x == 0 ? ((int)0x80000000) : this->Location.x, 
-        this->Location.y == 0 ? ((int)0x80000000) : this->Location.y,
-        this->Size.cx == 0 ? ((int)0x80000000) : this->Size.cx,
-        this->Size.cy == 0 ? ((int)0x80000000) : this->Size.cy,
+        this->Location.x == 0 ? ((int)(desktopWidth - this->Size.cx) / 2) : this->Location.x,
+        this->Location.y == 0 ? ((int)(desktopHeight - this->Size.cy) / 2) : this->Location.y,
+        this->Size.cx,
+        this->Size.cy,
         GetCurrentActiveWindow(),
         this->Menu,
         GetModuleHandleW(0),
@@ -155,11 +157,11 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     Application::Forms.Add(this->Handle, this);
 
     float xtmp = this->Size.cx - (this->HeadHeight * 3);
-    _minBox = (Button*)this->AddControl(new Button(L"—", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    _minBox = (Button*)this->AddControl(new Button(L"―", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
     _maxBox = (Button*)this->AddControl(new Button(L"❐", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
-    _closeBox = (Button*)this->AddControl(new Button(L"✖", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    _closeBox = (Button*)this->AddControl(new Button(L"✕", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
 
     _minBox->OnMouseClick += [](void* sender, MouseEventArgs)
         {
@@ -213,6 +215,10 @@ void Form::ShowDialog()
                 if(IsWindow(this->Handle))
                     this->Update();
             }
+        }
+        else
+        {
+            Sleep(1);
         }
     }
 }
@@ -282,24 +288,6 @@ bool Form::Update()
         return true;
     }
     return false;;
-}
-Control* Form::AddControl(Control* c)
-{
-    if (c->Parent)
-    {
-        throw "该控件已属于其他容器!";
-        return NULL;
-    }
-    if (this->Controls.Contains(c))
-    {
-        return c;
-    }
-    this->Controls.Add(c);
-    c->Top += this->HeadHeight;
-    c->Parent = NULL;
-    c->ParentForm = this;
-    c->Render = this->Render;
-    return c;
 }
 bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof)
 {

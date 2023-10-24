@@ -78,38 +78,10 @@ void ComboBox::Update()
 			drawLeft = drawTop = (this->Height - textSize.height) / 2.0f;
 		}
 		d2d->DrawString(this->Text, abslocation.x + drawLeft, abslocation.y + drawTop, this->ForeColor, this->Font);
-		float exbL = abslocation.x + (size.cx - this->Height);
-		d2d->FillRect(exbL, abslocation.y, this->Height, this->Height, this->ButtonBackColor);
-		if (this->Expand)
-		{
-			float exbT = abslocation.y;
-			float recSize = this->Height;
-			float tmpb = recSize * 0.3f;
-			float tmpc = recSize * 0.7f;
-			d2d->FillPolygon(
-				{
-					{exbL + tmpb,exbT + tmpb },
-					{exbL + tmpc,exbT + tmpb },
-					{exbL + (recSize * 0.5f),exbT + tmpc},
-					{exbL + tmpb,exbT + tmpb }
-				},
-				this->ForeColor);
-		}
-		else
-		{
-			float exbT = abslocation.y;
-			float recSize = this->Height;
-			float tmpb = recSize * 0.3f;
-			float tmpc = recSize * 0.7f;
-			d2d->FillPolygon(
-				{
-					{exbL + tmpb,exbT + tmpb },
-					{exbL + tmpc,exbT + (recSize * 0.5f) },
-					{exbL + tmpb,exbT + tmpc},
-					{exbL + tmpb,exbT + tmpb }
-				},
-				this->ForeColor);
-		}
+		auto tSize = font->GetTextSize(L'¦å');
+		float tLeft = this->Width - (tSize.width * 1.5f);
+		float tTop = (this->Height - tSize.height) * 0.5f;
+		d2d->DrawString(L"¦å", abslocation.x + tLeft, abslocation.y+ tTop, this->ForeColor);
 		if (this->Expand)
 		{
 			for (int i = this->ExpandScroll; i < this->ExpandScroll + this->ExpandCount && i < this->values.Count; i++)
@@ -272,9 +244,9 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		{
 			if (xof >= 0 && yof >= 0)
 			{
-				if (yof > 0 && yof < this->Width)
+				if (yof > 0)
 				{
-					if (xof > (this->Width - this->Height))
+					if (yof < this->Height)
 					{
 						this->Expand = !this->Expand;
 						this->ParentForm->Update();
@@ -293,7 +265,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 						this->SingleUpdate();
 						break;
 					}
-					if (this->Expand)
+					else if (this->Expand)
 					{
 						int _yof = int((yof - this->Height) / this->Height);
 						if (_yof <= this->ExpandCount)

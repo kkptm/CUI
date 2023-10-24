@@ -102,7 +102,26 @@ public:
     void ShowDialog();
     void Close();
 
-    virtual Control* AddControl(Control* c);
+    template<typename T>
+    T AddControl(T c)
+    {
+        if (c->Parent)
+        {
+            throw "该控件已属于其他容器!";
+            return NULL;
+        }
+        if (this->Controls.Contains(c))
+        {
+            return c;
+        }
+        this->Controls.Add(c);
+        c->Top += this->HeadHeight;
+        c->Parent = NULL;
+        c->ParentForm = this;
+        c->Render = this->Render;
+        return c;
+    }
+
     virtual bool ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof);
     virtual bool Update();
     virtual void RenderImage();

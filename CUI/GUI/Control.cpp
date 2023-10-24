@@ -49,23 +49,6 @@ Control* Control::get(int index)
 {
 	return this->Children[index];
 }
-Control* Control::AddControl(Control* c)
-{
-	if (c->Parent)
-	{
-		throw "该控件已属于其他容器!";
-		return NULL;
-	}
-	if (this->Children.Contains(c))
-	{
-		return c;
-	}
-	c->Parent = this;
-	c->ParentForm = this->ParentForm;
-	c->Render = this->Render;
-	this->Children.Add(c);
-	return c;
-}
 void Control::RemoveControl(Control* c)
 {
 	this->Children.Remove(c);
