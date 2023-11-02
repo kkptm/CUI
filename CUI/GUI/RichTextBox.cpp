@@ -661,6 +661,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 				}
 				if (!input[i]) break;
 			}
+			delete[] input;
 			tmp.Add(L'\0');
 			this->InputText(tmp.data());
 			ImmReleaseContext(this->ParentForm->Handle, hIMC);

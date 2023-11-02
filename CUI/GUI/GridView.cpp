@@ -521,7 +521,7 @@ bool GridView::UpdateEdit()
 			auto head_font = HeadFont ? HeadFont : font;
 			float head_height = this->HeadHeight == 0.0f ? head_font->FontHeight : this->HeadHeight;
 			float rendertop = head_height + (row_height * drawIndex);
-			if (rendertop >= 0 && rendertop <= this->Height)
+			if (rendertop >= head_height && rendertop <= this->Height)
 			{
 				c->Location = POINT{ (int)renderLeft ,(int)rendertop };
 				c->Size = SIZE{ (int)this->Colunms[this->SelectedColunmIndex].Width ,(int)row_height };
