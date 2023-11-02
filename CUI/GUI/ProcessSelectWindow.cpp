@@ -33,13 +33,13 @@ ProcessSelectWindow::ProcessSelectWindow() : Form(L"选择进程", { 0,0 }, { 400,54
 {
 	this->SelectedProcessId = (HANDLE)-1;
 
-	_searchBox = new TextBox(L"", 10, 10, 370, 30);
-	_table = new GridView(10, 50, 370, 400);
-	_selectButton = new Button(L"确定", 10, 460, 370, 30);
+	_searchBox = new TextBox(L"", 10, this->HeadHeight + 10, 370, 30);
+	_table = new GridView(10, this->HeadHeight + 50, 370, 400);
+	_selectButton = new Button(L"确定", 10, this->HeadHeight + 460, 370, 30);
 
 
-	_table->Colunms.push_back(GridViewColunm{ L"进程名", 200 , ColumnType::Text });
-	_table->Colunms.push_back(GridViewColunm{ L"PID", 60 , ColumnType::Text });
+	_table->Colunms.push_back(GridViewColunm{ L"进程名", 200 , ColumnType::Text, false });
+	_table->Colunms.push_back(GridViewColunm{ L"PID", 60 , ColumnType::Text, false });
 	std::vector<Process> processes = Process::GetProcesses();
 	for (auto p : processes)
 	{

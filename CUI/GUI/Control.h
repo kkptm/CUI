@@ -59,6 +59,7 @@ typedef Event<void(*)(void*, wchar_t)> CharInputEvent;
 typedef Event<void(*)(void*)> GotFocusEvent;
 typedef Event<void(*)(void*)> LostFocusEvent;
 typedef Event<void(*)(void*, List<std::wstring>)> DropFileEvent;
+typedef Event<void(*)(void*)> SelectionChangedEvent;
 
 class Control
 {
@@ -100,7 +101,7 @@ public:
 	bool Enable;
 	bool Visable;
 	bool Checked;
-	INT64 Tag;
+	UINT64 Tag;
 	ImageSizeMode SizeMode = ImageSizeMode::Zoom;
 	Font* Font;
 	Graphics* Render;

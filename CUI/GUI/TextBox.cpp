@@ -12,6 +12,7 @@ TextBox::TextBox(std::wstring text, int x, int y, int width, int height)
 }
 void TextBox::InputText(std::wstring input)
 {
+	std::wstring oldStr = this->Text;
 	int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
 	int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
 	if (sele >= this->Text.size() && sels >= this->Text.size())
@@ -65,9 +66,11 @@ void TextBox::InputText(std::wstring input)
 		}
 	}
 	this->Text = std::wstring(tmp.Pointer());
+	this->OnTextChanged(this, oldStr, this->Text);
 }
 void TextBox::InputBack()
 {
+	std::wstring oldStr = this->Text;
 	int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
 	int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
 	int selLen = sele - sels;
@@ -93,9 +96,11 @@ void TextBox::InputBack()
 			this->Text = tmp.data();
 		}
 	}
+	this->OnTextChanged(this, oldStr, this->Text);
 }
 void TextBox::InputDelete()
 {
+	std::wstring oldStr = this->Text;
 	int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
 	int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
 	int selLen = sele - sels;
@@ -121,6 +126,7 @@ void TextBox::InputDelete()
 			this->Text = tmp.data();
 		}
 	}
+	this->OnTextChanged(this, oldStr, this->Text);
 }
 void TextBox::UpdateScroll(bool arrival)
 {
@@ -185,7 +191,11 @@ void TextBox::Update()
 				{
 					for (auto sr : selRange)
 					{
-						d2d->FillRect(sr.left + abslocation.x + TextMargin - OffsetX, (sr.top + abslocation.y) - OffsetY, sr.width, sr.height, this->SelectedBackColor);
+						d2d->FillRect(
+							sr.left + abslocation.x + TextMargin - OffsetX,
+							(sr.top + abslocation.y) + OffsetY,
+							sr.width, sr.height,
+							this->SelectedBackColor);
 					}
 				}
 				else
@@ -196,7 +206,8 @@ void TextBox::Update()
 						Colors::Black);
 				}
 				d2d->DrawStringLayout(this->Text,
-					(float)abslocation.x + TextMargin - OffsetX, ((float)abslocation.y) + OffsetY,
+					(float)abslocation.x + TextMargin - OffsetX, 
+					((float)abslocation.y) + OffsetY,
 					FLT_MAX, render_height,
 					this->ForeColor,
 					DWRITE_TEXT_RANGE{ (UINT32)sels, (UINT32)selLen },
@@ -517,20 +528,24 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 			dwSize += sizeof(WCHAR);
 			wchar_t* input = new wchar_t[dwSize];
 			memset(input, 0, dwSize);
-			ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, input, dwSize);
-			List<wchar_t> tmp;
-			for (int i = 0; i < dwSize - 2; i++)
+			if (ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, input, dwSize) > 0)
 			{
-				if (input[i] > 255)
+
+				List<wchar_t> tmp;
+				for (int i = 0; i < dwSize - 2; i++)
 				{
-					tmp.Add(input[i]);
+					if (input[i] > 0xFF)
+					{
+						tmp.Add(input[i]);
+					}
+					if (!input[i]) break;
 				}
-				if (!input[i]) break;
+				delete[] input;
+				tmp.Add(L'\0');
+				this->InputText(tmp.data());
+				UpdateScroll();
 			}
-			tmp.Add(L'\0');
-			this->InputText(tmp.data());
 			ImmReleaseContext(this->ParentForm->Handle, hIMC);
-			UpdateScroll();
 			this->SingleUpdate();
 		}
 	}

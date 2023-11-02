@@ -14,6 +14,7 @@ public:
 	std::wstring Name = L"";
 	float Width = 120;
 	ColumnType Type = ColumnType::Text;
+	bool CanEdit = true;
 };
 class CellValue : public std::wstring
 {
@@ -67,6 +68,7 @@ public:
 	D2D1_COLOR_F ScrollBackColor = Colors::LightGray;
 	D2D1_COLOR_F ScrollForeColor = Colors::DimGrey;
 	OnGridViewCheckStateChangedEvent OnGridViewCheckStateChanged;
+	SelectionChangedEvent SelectionChanged;
 	GridViewRow& SelectedRow();
 	std::wstring& SelectedValue();
 	void Clear();
@@ -76,6 +78,7 @@ private:
 	int GetGridViewRenderRowCount(GridView* ct);
 	void DrawScroll();
 	void SetScrollByPos(float yof);
+	bool UpdateEdit();
 public:
 	void Update() override;
 	void AutoSizeColumn(int col);

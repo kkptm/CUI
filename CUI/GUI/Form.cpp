@@ -157,12 +157,11 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     Application::Forms.Add(this->Handle, this);
 
     float xtmp = this->Size.cx - (this->HeadHeight * 3);
-    _minBox = (Button*)this->AddControl(new Button(L"―", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    _minBox = (Button*)this->AddControl(new Button(L"―", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
-    _maxBox = (Button*)this->AddControl(new Button(L"❐", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
+    _maxBox = (Button*)this->AddControl(new Button(L"❐", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
-    _closeBox = (Button*)this->AddControl(new Button(L"✕", xtmp, -this->HeadHeight, this->HeadHeight, this->HeadHeight));
-
+    _closeBox = (Button*)this->AddControl(new Button(L"✕", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     _minBox->OnMouseClick += [](void* sender, MouseEventArgs)
         {
             ((Button*)sender)->ParentForm->Handle;
@@ -209,11 +208,24 @@ void Form::ShowDialog()
         if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
-            if (msg.hwnd == this->Handle || (msg.message == WM_SYSCOMMAND && msg.wParam == SC_RESTORE))
+            ULONG64 form = (ULONG64)(GetWindowLongPtrW(msg.hwnd, GWLP_USERDATA) ^ 0xFFFFFFFFFFFFFFFF);
+            if (msg.hwnd == this->Handle || 
+                form == 0xFFFFFFFFFFFFFFFF ||
+                (msg.message == WM_SYSCOMMAND && msg.wParam == SC_RESTORE))
             {
-                DispatchMessageW(&msg);
-                if(IsWindow(this->Handle))
+                if (IsWindow(this->Handle))
+                {
+                    DispatchMessageW(&msg);
                     this->Update();
+                }
+                else
+                {
+                    DefWindowProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+                }
+            }
+            else
+            {
+                DefWindowProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
             }
         }
         else
@@ -255,7 +267,7 @@ bool Form::WaiteEvent()
 }
 bool Form::Update()
 {
-    if (ControlChanged)
+    if (ControlChanged && IsWindow(this->Handle))
     {
         this->Render->BeginRender(this->BackColor);
         this->Render->Resize();
@@ -267,7 +279,19 @@ bool Form::Update()
         float headTextTop = (this->HeadHeight - this->Render->DefaultFontObject->FontHeight) * 0.5f;
         if (headTextTop < 0.0f)
             headTextTop = 0.0f;
-        this->Render->DrawString(this->Text, 5.0f, headTextTop, this->ForeColor);
+        if (this->CenterTitle)
+        {
+            auto tSize = this->Render->DefaultFontObject->GetTextSize(this->Text);
+            float textRangeWidth = this->Size.cx - (this->HeadHeight * 3);
+            float headTextLeft = (textRangeWidth - tSize.width) * 0.5f;
+            if (headTextLeft < 0.0f)
+                headTextLeft = 0.0f;
+
+            this->Render->DrawString(this->Text, headTextLeft, headTextTop, this->ForeColor);
+        }
+        else
+            this->Render->DrawString(this->Text, 5.0f, headTextTop, this->ForeColor);
+
         this->OnPaint(this);
         for (int i = 0; i < this->Controls.Count; i++)
         {
@@ -629,6 +653,14 @@ D2D1_POINT_2F Form::LastChildRB()
         return D2D1_POINT_2F{ (float)loc.x + siz.cy,(float)loc.y + siz.cy - this->HeadHeight };
     }
     return { 0,0 };
+}
+Control* Form::LastChild()
+{
+    if (this->Controls.Count)
+    {
+		return this->Controls.Last();
+	}
+	return NULL;
 }
 D2D1_POINT_2F Form::MaxChildRB()
 {

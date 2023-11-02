@@ -103,34 +103,34 @@ void TestWindow::Init()
     icos[4] = this->Render->ToBitmapFromSvg(icon4);
     this->BackColor = Colors::grey31;
     this->SizeMode = ImageSizeMode::StretchIamge;
-    label1 = this->AddControl(new Label(L"Label", 10, 10));
+
+
+    label1 = this->AddControl(new Label(L"Label", 10, this->HeadHeight + 10));
     label1->OnMouseWheel += label1_OnMouseWheel;
-    clabel1 = this->AddControl(new CustomLabel1(L"Custom Label", 400, 10));
-    button1 = this->AddControl(new Button(L"BUTTON1", 10, this->LastChildRB().y + 5, 120, 24));
+    clabel1 = this->AddControl(new CustomLabel1(L"Custom Label", 400, this->HeadHeight + 10));
+    button1 = this->AddControl(new Button(L"BUTTON1", 10, this->LastChild()->Bottom + 5, 120, 24));
     button1->OnMouseClick += button1_OnMouseClick;
-    textbox0 = this->AddControl(new TextBox(L"TextBox", 10, this->LastChildRB().y + 5, 120, 20));
-    textbox1 = this->AddControl(new CustomTextBox1(L"Custom TextBox", 10, this->LastChildRB().y + 5, 120, 20));
-    pwdbox1 = this->AddControl(new PasswordBox(L"pwd", 10, this->LastChildRB().y + 5, 120, 20));
-    combobox1 = this->AddControl(new ComboBox(L"item1", 10, this->LastChildRB().y + 5, 120, 24));
+    textbox0 = this->AddControl(new TextBox(L"TextBox", 10, this->LastChild()->Bottom + 5, 120, 20));
+    textbox1 = this->AddControl(new CustomTextBox1(L"Custom TextBox", 10, this->LastChild()->Bottom + 5, 120, 20));
+    pwdbox1 = this->AddControl(new PasswordBox(L"pwd", 10, this->LastChild()->Bottom + 5, 120, 20));
+    combobox1 = this->AddControl(new ComboBox(L"item1", 10, this->LastChild()->Bottom + 5, 120, 24));
     for (int i = 0; i < 10; i++)
     {
         combobox1->values.Add(StringHelper::Format(L"item%d", i));
     }
     checkbox1 = this->AddControl(new CheckBox(L"CheckBox", combobox1->Right + 5, button1->Top));
-    radiobox1 = this->AddControl(new RadioBox(L"RadioBox1", combobox1->Right + 5, this->LastChildRB().y + 5));
+    radiobox1 = this->AddControl(new RadioBox(L"RadioBox1", combobox1->Right + 5, this->LastChild()->Bottom + 5));
     radiobox1->Checked = true;
-    radiobox2 = this->AddControl(new RadioBox(L"RadioBox2", combobox1->Right + 5, this->LastChildRB().y + 5));
+    radiobox2 = this->AddControl(new RadioBox(L"RadioBox2", combobox1->Right + 5, this->LastChild()->Bottom + 5));
     radiobox1->OnChecked += radiobox1_OnChecked;
     radiobox2->OnChecked += radiobox2_OnChecked;
     textbox2 = this->AddControl(new RichTextBox(L"Multiline text\nMultiline text\nMultiline text\nMultiline text\nMultiline text", 260, button1->Top, 600, 60));
     textbox2->AllowMultiLine = true;
     tabControl1 = this->AddControl(new TabControl(10, combobox1->Bottom + 5, 1200, 300));
-    tabControl1->AddPage(L"Page 1");
-    tabControl1->AddPage(L"Grid View");
-    tabControl1->AddPage(L"Icon Buttons")->BackColor = D2D1_COLOR_F{ 1,1,1,0.3 };
     tabControl1->BackColor = D2D1_COLOR_F{ 1,1,1,0.0 };
-    tabControl1->get(0)->BackColor = D2D1_COLOR_F{ 1,1,1,0.5 };
-    tabControl1->get(1)->BackColor = D2D1_COLOR_F{ 1,1,1,0.5 };
+    tabControl1->AddPage(L"Page 1")->BackColor = D2D1_COLOR_F{ 1,1,1,0.3 };
+    tabControl1->AddPage(L"Grid View")->BackColor = D2D1_COLOR_F{ 1,1,1,0.3 };
+    tabControl1->AddPage(L"Icon Buttons")->BackColor = D2D1_COLOR_F{ 1,1,1,0.3 };
     tabControl1->get(0)->AddControl(new Label(L"基本容器", 10, 10))->Font = new Font(L"Arial", 12);
 
     bt2 = tabControl1->get(0)->AddControl(new Button(L"打开图片", 80, 10, 120, 24));

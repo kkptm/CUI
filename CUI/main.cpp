@@ -20,7 +20,6 @@ int main()
     mainForm->Text = L"test window";
     mainForm->Icon = (HICON)::LoadImageA(NULL, "app.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
     mainForm->Show();
-
     while (1)
     {
         Form::DoEvent();

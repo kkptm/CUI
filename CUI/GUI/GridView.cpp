@@ -1,6 +1,7 @@
 #pragma once
 #include "GridView.h"
 #include "Form.h"
+#include "TextBox.h"
 #pragma comment(lib, "Imm32.lib")
 
 CellValue::CellValue(std::wstring s) : std::wstring(s)
@@ -471,6 +472,67 @@ void GridView::Update()
 		d2d->FillRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.5f });
 	}
 	d2d->PopDrawRect();
+	if (this->Count == 0)
+	{
+		this->AddControl(new TextBox(L"", 10, 10))->Visable = true;
+		this->get(0)->Tag = 0xFFFFFFFFFFFFFFFF;
+		this->get(0)->OnTextChanged += [](void* sender, std::wstring, std::wstring)
+			{
+				GridView* gd = (GridView*)((Control*)sender)->Parent;
+				int xx = ((Control*)sender)->Tag >> 32;
+				int yy = ((Control*)sender)->Tag & 0xffffffff;
+				if (xx >= 0 && yy >= 0)
+				{
+					std::wstring str = ((Control*)sender)->Text.c_str();
+					gd->Rows[yy].Cells[xx] = str;
+				}
+
+			};
+	}
+	TextBox* c = (TextBox*)this->get(0);
+	if (this->UpdateEdit() && (isSelected || this->ParentForm->Selected ==c))
+	{
+		c->Update();
+	}
+}
+
+bool GridView::UpdateEdit()
+{
+	TextBox* c = (TextBox*)this->get(0);
+	if (this->SelectedColunmIndex >= 0 && 
+		this->Colunms[this->SelectedColunmIndex].Type == ColumnType::Text &&
+		this->Colunms[this->SelectedColunmIndex].CanEdit)
+	{
+		if (this->SelectedRowIndex >= 0)
+		{
+
+			int topIndex = this->ScrollRowPosition;
+			int drawIndex = this->SelectedRowIndex - topIndex;
+			auto d2d = this->Render;
+			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			float font_height = font->FontHeight;
+			float row_height = font_height + 2.0f;
+
+			float renderLeft = 0.0f;
+			for (int i = 0; i < this->SelectedColunmIndex; i++)
+			{
+				renderLeft += this->Colunms[i].Width;
+			}
+			auto head_font = HeadFont ? HeadFont : font;
+			float head_height = this->HeadHeight == 0.0f ? head_font->FontHeight : this->HeadHeight;
+			float rendertop = head_height + (row_height * drawIndex);
+			if (rendertop >= 0 && rendertop <= this->Height)
+			{
+				c->Location = POINT{ (int)renderLeft ,(int)rendertop };
+				c->Size = SIZE{ (int)this->Colunms[this->SelectedColunmIndex].Width ,(int)row_height };
+				c->Visable = true;
+				return true;
+			}
+			return false;
+		}
+	}
+	c->Visable = false;
+	return false;
 }
 void GridView::AutoSizeColumn(int col)
 {
@@ -509,6 +571,14 @@ void GridView::AutoSizeColumn(int col)
 bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof)
 {
 	if (!this->Enable || !this->Visable) return true;
+	TextBox* c = (TextBox*)this->get(0);
+	auto location = c->Location;
+	auto size = c->ActualSize();
+	bool HitEdit = 
+		(xof >= location.x &&
+		yof >= location.y &&
+		xof <= (location.x + size.cx) &&
+		yof <= (location.y + size.cy)) || c->Visable;
 	switch (message)
 	{
 	case WM_DROPFILES:
@@ -624,8 +694,31 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 					}
 					else
 					{
-						this->SelectedColunmIndex = undermouseindex.x;
-						this->SelectedRowIndex = undermouseindex.y;
+						if (this->SelectedColunmIndex != undermouseindex.x || this->SelectedRowIndex != undermouseindex.y)
+						{
+							if (this->get(0)->Visable)
+							{
+								int oldx = this->get(0)->Tag >> 32;
+								int oldy = this->get(0)->Tag & 0xffffffff;
+								if (oldx >= 0 && oldy >= 0)
+								{
+									std::wstring str = this->get(0)->Text.c_str();
+									this->Rows[oldy].Cells[oldx] = str;
+								}
+							}
+							if (this->Colunms[undermouseindex.x].Type == ColumnType::Text && this->Colunms[undermouseindex.x].CanEdit)
+							{
+								TextBox* tb = (TextBox*)this->get(0);
+								tb->Visable = true;
+								tb->Tag = (ULONG64)undermouseindex.x << 32 | (ULONG64)undermouseindex.y;
+								tb->Text = this->Rows[undermouseindex.y].Cells[undermouseindex.x];
+								tb->SelectionStart = 0;
+								this->ParentForm->Selected = tb;
+							}
+							this->SelectedColunmIndex = undermouseindex.x;
+							this->SelectedRowIndex = undermouseindex.y;
+							this->SelectionChanged(this);
+						}
 					}
 				}
 			}
@@ -699,9 +792,13 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	{
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyUp(this, event_obj);
+		if (HitEdit)
+			c->ProcessMessage(message, wParam, lParam, xof - location.x, yof - location.y);
 	}
 	break;
 	}
+	if (HitEdit)
+		c->ProcessMessage(message, wParam, lParam, xof - location.x, yof - location.y);
 	return true;
 }
 

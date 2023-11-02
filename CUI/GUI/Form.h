@@ -58,6 +58,7 @@ public:
     HWND Handle;
     bool MinBox = true;
     bool MaxBox = true;
+    bool CenterTitle = true;
     bool ControlChanged = false;
     class Control* Selected = NULL;
     class Control* UnderMouse = NULL;
@@ -115,7 +116,6 @@ public:
             return c;
         }
         this->Controls.Add(c);
-        c->Top += this->HeadHeight;
         c->Parent = NULL;
         c->ParentForm = this;
         c->Render = this->Render;
@@ -127,6 +127,7 @@ public:
     virtual void RenderImage();
     D2D1_POINT_2F LastChildRB();
     D2D1_POINT_2F MaxChildRB();
+    Control* LastChild();
     static bool DoEvent();
     //如果需要实现动画效果或者存在循环刷新绘制的控件请使用DoEvent,因为WaiteEvent会阻塞线程直到新消息到达
     static bool WaiteEvent();
