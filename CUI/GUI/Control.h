@@ -1,11 +1,11 @@
 #pragma once
-#include <Windows.h>
+#include "../Graphics/Colors.h"
+#include "../Graphics/Font.h"
+#include "../Graphics/Graphics.h"
+#include "../Utils/Event.h"
 #include <string>
 #include <vector>
-#include "../Utils/Event.h"
-#include "../Graphics/Colors.h"
-#include "../Graphics/Graphics.h"
-#include "../Graphics/Font.h"
+#include <Windows.h>
 
 enum class ImageSizeMode : char
 {
@@ -73,7 +73,6 @@ private:
 	std::wstring _text;
 	List<Control*> Children;
 public:
-	EventHandler OnEventHandler;
 	CheckedEvent OnChecked;
 	MouseWheelEvent OnMouseWheel;
 	MouseMoveEvent OnMouseMove;
@@ -109,7 +108,7 @@ public:
 	~Control();
 	virtual UIClass Type();
 	virtual void Update();
-	virtual void SingleUpdate();
+	virtual void PostRender();
 	READONLY_PROPERTY(int, Count);
 	GET(int, Count);
 	Control* operator[](int index);
@@ -120,7 +119,7 @@ public:
 	{
 		if (c->Parent)
 		{
-			throw "该控件已属于其他容器!";
+			throw std::exception("该控件已属于其他容器!");
 			return NULL;
 		}
 		if (this->Children.Contains(c))
@@ -179,5 +178,6 @@ public:
 	SET(class ID2D1Bitmap*, Image);
 	virtual void RenderImage();
 	virtual SIZE ActualSize();
+	void setTextPrivate(std::wstring);
 	virtual bool ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof);
 };

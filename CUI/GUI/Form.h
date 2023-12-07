@@ -16,11 +16,13 @@
 #include "Switch.h"
 #include "TabControl.h"
 #include "TextBox.h"
-typedef Event<void(*)(void* sender, int Id,int info)> CommandEvent;
+#include "Taskbar.h"
+typedef Event<void(*)(void* sender, int Id, int info)> CommandEvent;
 typedef Event<void(*)(void*)> FormClosingEvent;
 typedef Event<void(*)(void*)> FormClosedEvent;
 class Form
 {
+private:
     POINT _Location_INIT;
     SIZE _Size_INTI;
     std::wstring _text;
@@ -28,6 +30,7 @@ class Form
     Button* _minBox;
     Button* _maxBox;
     Button* _closeBox;
+    void updateHead();
 public:
     MouseWheelEvent OnMouseWheel;
     MouseMoveEvent OnMouseMove;
@@ -55,9 +58,11 @@ public:
     //菜单事件,id表示菜单项的id,info表示菜单项的信息
     CommandEvent OnCommand;
 
-    HWND Handle;
+    HWND Handle = NULL;
     bool MinBox = true;
     bool MaxBox = true;
+    bool CloseBox = true;
+    bool VisibleHead = true;
     bool CenterTitle = true;
     bool ControlChanged = false;
     class Control* Selected = NULL;
@@ -96,8 +101,6 @@ public:
     SET(bool, Visable);
 
     HICON Icon = NULL;
-    HMENU Menu = NULL;
-    DWORD Style = WS_POPUP;
     Form(std::wstring _text = L"NativeWindow", POINT _location = { 0,0 }, SIZE _size = { 600,400 });
     void Show();
     void ShowDialog();
@@ -121,9 +124,10 @@ public:
         c->Render = this->Render;
         return c;
     }
-
+    bool RemoveControl(Control* c);
     virtual bool ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof);
-    virtual bool Update();
+    virtual bool Update(bool force = false);
+    virtual bool ForceUpdate();
     virtual void RenderImage();
     D2D1_POINT_2F LastChildRB();
     D2D1_POINT_2F MaxChildRB();

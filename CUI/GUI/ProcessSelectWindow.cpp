@@ -34,6 +34,7 @@ ProcessSelectWindow::ProcessSelectWindow() : Form(L"选择进程", { 0,0 }, { 400,54
 	this->SelectedProcessId = (HANDLE)-1;
 
 	_searchBox = new TextBox(L"", 10, this->HeadHeight + 10, 370, 30);
+	_searchBox->BackColor = Colors::GhostWhite;
 	_table = new GridView(10, this->HeadHeight + 50, 370, 400);
 	_selectButton = new Button(L"确定", 10, this->HeadHeight + 460, 370, 30);
 

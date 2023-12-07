@@ -89,12 +89,12 @@ bool Switch::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 			this->ParentForm->Selected = this;
 			if (lastSelected && lastSelected != this)
 			{
-				lastSelected->SingleUpdate();
+				lastSelected->PostRender();
 			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP://mouse up
@@ -110,7 +110,7 @@ bool Switch::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 		this->ParentForm->Selected = NULL;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click
@@ -122,7 +122,7 @@ bool Switch::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 			this->Checked = !this->Checked;
 			MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 			this->OnMouseDoubleClick(this, event_obj);
-			this->SingleUpdate();
+			this->PostRender();
 		}
 	}
 	break;

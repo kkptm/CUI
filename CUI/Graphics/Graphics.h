@@ -109,7 +109,7 @@ public:
     void PopDrawRect();
     void SetAntialiasMode(D2D1_ANTIALIAS_MODE antialiasMode);
     void SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE antialiasMode);
-    //如果是直接使用大小创建的内存渲染对象的话这里必须传入一个目标Graphics对象，否则返回的位图无法使用
+    //如果是直接使用大小创建的内存渲染对象的话这里必须传入一个目标Graphics对象,否则返回的位图无法在其他渲染对象上使用
     ID2D1Bitmap* ToBitmap(Graphics* targetUsing = NULL);
     ID2D1Bitmap* CreateBitmap(IWICBitmap* wb);
     ID2D1Bitmap* CreateBitmap(const char* path);

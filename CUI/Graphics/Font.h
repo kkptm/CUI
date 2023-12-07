@@ -1,9 +1,9 @@
 #pragma once
-#include <D2D1.h>
-#include <vector>
-#include <string>
-#include <dwrite.h>
 #include "../Utils/defines.h"
+#include <D2D1.h>
+#include <dwrite.h>
+#include <string>
+#include <vector>
 class Font
 {
 private:

@@ -272,7 +272,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			std::wstring MaskText(this->Text.size(), L'*');
 			SelectionEnd = font->HitTestTextPosition(MaskText, FLT_MAX, render_height, (xof - TextMargin) + this->OffsetX, yof - TextMargin);
 			UpdateScroll();
-			this->SingleUpdate();
+			this->PostRender();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, HIWORD(wParam));
 		this->OnMouseMove(this, event_obj);
@@ -288,7 +288,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				auto lse = this->ParentForm->Selected;
 				this->ParentForm->Selected = this;
-				if (lse) lse->SingleUpdate();
+				if (lse) lse->PostRender();
 			}
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
 			float render_height = this->Height - (TextMargin * 2.0f);
@@ -297,7 +297,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP://mouse up
@@ -313,7 +313,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click
@@ -321,7 +321,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		this->ParentForm->Selected = this;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDoubleClick(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_KEYDOWN://keyboard down
@@ -436,7 +436,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_CHAR:
@@ -480,7 +480,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 				}
 			}
 		}
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_IME_COMPOSITION://imm action
@@ -508,7 +508,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			this->InputText(tmp.data());
 			ImmReleaseContext(this->ParentForm->Handle, hIMC);
 			UpdateScroll();
-			this->SingleUpdate();
+			this->PostRender();
 		}
 	}
 	break;
@@ -516,7 +516,7 @@ bool PasswordBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 	{
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	}

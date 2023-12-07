@@ -72,6 +72,7 @@ public:
 	GridViewRow& SelectedRow();
 	std::wstring& SelectedValue();
 	void Clear();
+	void ChangeEditionSelected(int col, int row);
 private:
 	POINT GetGridViewUnderMouseItem(int x, int y, GridView* ct);
 	D2D1_RECT_F GetGridViewScrollBlockRect(GridView* ct);

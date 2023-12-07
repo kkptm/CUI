@@ -253,3 +253,15 @@ INT64 GetTick()
 {
 	return *(__int64*)0x7FFE0348;
 }
+void MakePermute(std::vector<int> nums, std::vector<std::vector<int>>& result, int start) {
+	if (start == nums.size() - 1) {
+		result.push_back(nums);
+		return;
+	}
+
+	for (int i = start; i < nums.size(); i++) {
+		std::swap(nums[start], nums[i]);
+		MakePermute(nums, result, start + 1);
+		std::swap(nums[start], nums[i]);
+	}
+}

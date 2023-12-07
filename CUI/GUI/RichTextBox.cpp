@@ -8,7 +8,7 @@ RichTextBox::RichTextBox(std::wstring text, int x, int y, int width, int height)
 	this->Text = text;
 	this->Location = POINT{ x,y };
 	this->Size = SIZE{ width,height };
-	this->BackColor = D2D1_COLOR_F{ 0.75f , 0.75f , 0.75f , 0.75f };
+	this->BackColor = Colors::LightGray;
 	AllowMultiLine = true;
 }
 void RichTextBox::DrawScroll()
@@ -333,7 +333,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->OffsetY -= 10;
 				if (this->OffsetY < 0)this->OffsetY = 0;
-				this->SingleUpdate();
+				this->PostRender();
 			}
 		}
 		else
@@ -346,7 +346,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->OffsetY += 10;
 				if (this->OffsetY > textSize.height - render_height)this->OffsetY = textSize.height - render_height;
-				this->SingleUpdate();
+				this->PostRender();
 			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, GET_WHEEL_DELTA_WPARAM(wParam));
@@ -364,7 +364,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			if (textSize.height > render_height)render_width -= 8.0f;
 			SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
 			UpdateScroll();
-			this->SingleUpdate();
+			this->PostRender();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, HIWORD(wParam));
 		this->OnMouseMove(this, event_obj);
@@ -380,7 +380,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				auto lse = this->ParentForm->Selected;
 				this->ParentForm->Selected = this;
-				if (lse) lse->SingleUpdate();
+				if (lse) lse->PostRender();
 			}
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
 			float render_width = this->Width - (TextMargin * 2.0f);
@@ -390,7 +390,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP://mouse up
@@ -407,7 +407,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click
@@ -415,7 +415,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		this->ParentForm->Selected = this;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDoubleClick(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_KEYDOWN://keyboard down
@@ -558,7 +558,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_CHAR:
@@ -637,7 +637,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			}
 			this->InputBack();
 		}
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_IME_COMPOSITION://imm action
@@ -666,7 +666,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			this->InputText(tmp.data());
 			ImmReleaseContext(this->ParentForm->Handle, hIMC);
 			UpdateScroll();
-			this->SingleUpdate();
+			this->PostRender();
 		}
 	}
 	break;
@@ -674,7 +674,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 	{
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	}

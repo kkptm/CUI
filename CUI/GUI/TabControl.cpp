@@ -86,7 +86,7 @@ bool TabControl::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int 
 		{
 			auto se = this->ParentForm->Selected;
 			this->ParentForm->Selected = this;
-			se->SingleUpdate();
+			se->PostRender();
 		}
 	}
 	if (this->Count > 0)
@@ -165,7 +165,7 @@ bool TabControl::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int 
 							this->operator[](i)->Visable = true;
 						}
 					}
-					this->SingleUpdate();
+					this->PostRender();
 				}
 			}
 		}

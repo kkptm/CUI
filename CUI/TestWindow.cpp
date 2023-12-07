@@ -1,6 +1,7 @@
 #include "TestWindow.h"
 #include "Utils/Utils.h"
 #include "imgs.h"
+#include "GUI/ProcessSelectWindow.h"
 TestWindow::TestWindow() : Form(L"TestWindow", { 0,0 }, { 1240,600 })
 {
     this->Init();
@@ -19,23 +20,23 @@ TestWindow::~TestWindow()
 void label1_OnMouseWheel(void* sender, MouseEventArgs e)
 {
     ((Label*)sender)->Text = StringHelper::Format(L"MouseWheel Delta=[%d]", e.Delta);
-    ((Label*)sender)->SingleUpdate();
+    ((Label*)sender)->PostRender();
 }
 void button1_OnMouseClick(void* sender, MouseEventArgs e)
 {
     auto btn = ((Button*)sender);
     btn->Text = StringHelper::Format(L"独立Tag计数[%d]", btn->Tag++);
-    btn->SingleUpdate();
+    btn->PostRender();
 }
 void radiobox1_OnChecked(void* sender)
 {
     ((TestWindow*)((Control*)sender)->ParentForm)->radiobox2->Checked = false;
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox2->SingleUpdate();
+    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox2->PostRender();
 }
 void radiobox2_OnChecked(void* sender)
 {
     ((TestWindow*)((Control*)sender)->ParentForm)->radiobox1->Checked = false;
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox1->SingleUpdate();
+    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox1->PostRender();
 }
 void bt2_OnMouseClick(void* sender, MouseEventArgs e)
 {
@@ -60,13 +61,13 @@ void bt2_OnMouseClick(void* sender, MouseEventArgs e)
         {
             auto bytes = File::ReadAllBytes(ofd.SelectedPath[0]);
             picturebox1->Image = form->Image = form->Render->ToBitmapFromSvg((char*)bytes.data());
-			picturebox1->SingleUpdate();
+			picturebox1->PostRender();
 		}
         else
         {
             auto bytes = File::ReadAllBytes(ofd.SelectedPath[0]);
             picturebox1->Image = form->Image = form->Render->CreateBitmap(bytes.data(), bytes.size());
-			picturebox1->SingleUpdate();
+			picturebox1->PostRender();
 		}
     }
 }
@@ -82,7 +83,14 @@ void sw2_OnMouseClick(void* sender, MouseEventArgs e)
 }
 void iconButton_OnMouseClick(void* sender, MouseEventArgs e)
 {
-    MessageBox::Show("图标按钮被单击", "模式对话框提示", MB_OK);
+    ProcessSelectWindow* psfm = new ProcessSelectWindow();
+    psfm->ShowDialog();
+    auto h = psfm->SelectedProcessId;
+    delete psfm;
+    if ((int)h >= 0)
+    {
+        MessageBox::Show(std::to_string((int)h), "模式对话框提示", MB_OK);
+    }
 }
 void TestWindow::Init()
 {
@@ -151,12 +159,12 @@ void TestWindow::Init()
         if (file.Extension() == ".svg" || file.Extension() == ".SVG")
         {
             ((Control*)sender)->Image = ((Control*)sender)->Render->ToBitmapFromSvg((char*)File::ReadAllBytes(Convert::wstring_to_string(files[0]).c_str()).data());
-            ((Control*)sender)->SingleUpdate();
+            ((Control*)sender)->PostRender();
         }
         else
         {
             ((Control*)sender)->Image = ((Control*)sender)->Render->CreateBitmap(files[0].c_str());
-            ((Control*)sender)->SingleUpdate();
+            ((Control*)sender)->PostRender();
         }
     };
     panel1->AddControl(new Label(L"Progress Bar", 10, picturebox1->Bottom + 5));
@@ -170,10 +178,10 @@ void TestWindow::Init()
     gridview1->Colunms.Add({ L"text",100 });
     gridview1->Colunms.Add({ L"check",60,ColumnType::Check });
     gridview1->Colunms.Add({ L"text",100 });
-    for (int i = 0; i < 40; i++)
+    for (int i = 0; i < 100; i++)
     {
         GridViewRow row;
-        row.Cells = { bmps[i % 10] ,i % 2 == 0,std::to_wstring(rand()) ,i % 3 == 0 ,std::to_wstring(rand()) };
+        row.Cells = { bmps[i % 10] ,i % 2 == 0,std::to_wstring(Random::Nest()) ,i % 3 == 0 ,std::to_wstring(Random::Nest()) };
         gridview1->Rows.Add(row);
     }
     sw1 = tabControl1->get(1)->AddControl(new Switch(gridview1->Right + 5, 10));

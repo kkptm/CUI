@@ -180,7 +180,9 @@
     <ClInclude Include="GUI\RoundTextBox.h" />
     <ClInclude Include="GUI\Switch.h" />
     <ClInclude Include="GUI\TabControl.h" />
+    <ClInclude Include="GUI\Taskbar.h" />
     <ClInclude Include="GUI\TextBox.h" />
+    <ClInclude Include="GUI\TreeView.h" />
     <ClInclude Include="imgs.h" />
     <ClInclude Include="TestWindow.h" />
     <ClInclude Include="Utils\Convert.h" />
@@ -230,7 +232,9 @@
     <ClCompile Include="GUI\RoundTextBox.cpp" />
     <ClCompile Include="GUI\Switch.cpp" />
     <ClCompile Include="GUI\TabControl.cpp" />
+    <ClCompile Include="GUI\Taskbar.cpp" />
     <ClCompile Include="GUI\TextBox.cpp" />
+    <ClCompile Include="GUI\TreeView.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TestWindow.cpp" />
     <ClCompile Include="Utils\Convert.cpp" />

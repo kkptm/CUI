@@ -6,7 +6,8 @@ Button::Button(std::wstring text, int x, int y, int width, int height)
 	this->Text = text;
 	this->Location = POINT{ x,y };
 	this->Size = SIZE{ width,height };
-	this->BackColor = D2D1_COLOR_F{ 0.75f , 0.75f , 0.75f , 0.75f };
+	this->BackColor = Colors::Snow3;
+	this->BolderColor = Colors::Snow4;
 }
 void Button::Update()
 {
@@ -47,7 +48,7 @@ void Button::Update()
 		d2d->DrawString(this->Text, abslocation.x + drawLeft, abslocation.y + drawTop, this->ForeColor, this->Font);
 		d2d->DrawRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f),
 			size.cx - this->Boder, size.cy - this->Boder,
-			this->BolderColor, this->Boder, this->Image ? 0.0f : this->Height * 0.25f);
+			this->BolderColor, this->Boder, this->Image ? 0.0f : this->Height * this->Round);
 	}
 	if (!this->Enable)
 	{
@@ -101,12 +102,12 @@ bool Button::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 			this->ParentForm->Selected = this;
 			if (lastSelected && lastSelected != this)
 			{
-				lastSelected->SingleUpdate();
+				lastSelected->PostRender();
 			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP://mouse up
@@ -121,7 +122,7 @@ bool Button::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 		this->ParentForm->Selected = NULL;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click
@@ -130,7 +131,7 @@ bool Button::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof,
 		this->ParentForm->Selected = this;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDoubleClick(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_KEYDOWN://keyboard down

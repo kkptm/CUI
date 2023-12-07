@@ -171,6 +171,12 @@
     <ClInclude Include="GUI\ProcessSelectWindow.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\TreeView.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Taskbar.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -303,6 +309,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GUI\ProcessSelectWindow.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\TreeView.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Taskbar.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>

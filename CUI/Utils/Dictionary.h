@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include "defines.h"
-
+#include <optional>
 template <class _Kty, class _Vty>
 class Dictionary : public std::unordered_map<_Kty, _Vty>
 {
@@ -36,12 +36,12 @@ public:
 
     void Add(_Kty key, _Vty value)
     {
-        this->insert({ key, value });
+        (*this)[key] = value;
     }
 
-    void Remove(_Kty key)
+    bool Remove(_Kty key)
     {
-        this->erase(key);
+        return this->erase(key) > 0;
     }
 
     void Clear()
@@ -72,5 +72,16 @@ public:
             values.push_back(pair.second);
         }
         return values;
+    }
+    std::optional<_Vty> GetValue(_Kty key) const
+    {
+        if (ContainsKey(key))
+        {
+            return (*this).at(key);
+        }
+        else
+        {
+            return std::nullopt;
+        }
     }
 };

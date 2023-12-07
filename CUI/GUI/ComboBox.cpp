@@ -127,7 +127,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		{
 			auto se = this->ParentForm->Selected;
 			this->ParentForm->Selected = this;
-			se->SingleUpdate();
+			se->PostRender();
 		}
 	}
 	switch (message)
@@ -159,7 +159,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 				if (this->ExpandScroll > 0)
 				{
 					this->ExpandScroll -= 1;
-					this->SingleUpdate();
+					this->PostRender();
 				}
 			}
 			else
@@ -167,7 +167,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 				if (this->ExpandScroll < this->values.Count - this->ExpandCount)
 				{
 					this->ExpandScroll += 1;
-					this->SingleUpdate();
+					this->PostRender();
 				}
 			}
 		}
@@ -179,7 +179,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 				{
 					this->SelectedIndex -= 1;
 					this->Text = this->values[this->SelectedIndex];
-					this->SingleUpdate();
+					this->PostRender();
 				}
 			}
 			else
@@ -188,7 +188,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 				{
 					this->SelectedIndex += 1;
 					this->Text = this->values[this->SelectedIndex];
-					this->SingleUpdate();
+					this->PostRender();
 				}
 			}
 		}
@@ -218,7 +218,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 					}
 				}
 			}
-			if (need_update)this->SingleUpdate();
+			if (need_update)this->PostRender();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, HIWORD(wParam));
 		this->OnMouseMove(this, event_obj);
@@ -250,7 +250,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 					{
 						this->Expand = !this->Expand;
 						this->ParentForm->Update();
-						this->SingleUpdate();
+						this->PostRender();
 						if (this->Expand)
 						{
 							this->ParentForm->ForeGroundControls.Add(this);
@@ -262,7 +262,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 						this->ParentForm->Selected = NULL;
 						MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 						this->OnMouseUp(this, event_obj);
-						this->SingleUpdate();
+						this->PostRender();
 						break;
 					}
 					else if (this->Expand)
@@ -278,7 +278,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 								this->Text = this->values[this->SelectedIndex];
 								this->Expand = false;
 								this->ParentForm->Update();
-								this->SingleUpdate();
+								this->PostRender();
 							}
 						}
 					}
@@ -288,7 +288,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		this->ParentForm->Selected = NULL;
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click

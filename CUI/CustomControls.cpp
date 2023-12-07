@@ -50,7 +50,7 @@ void CustomTextBox1::Update()
 				{
 					for (auto sr : selRange)
 					{
-						d2d->FillRect(sr.left + abslocation.x + TextMargin - OffsetX, (sr.top + abslocation.y) - OffsetY, sr.width, sr.height, this->SelectedBackColor);
+						d2d->FillRect(sr.left + abslocation.x + TextMargin - OffsetX, (sr.top + abslocation.y) + OffsetY, sr.width, sr.height, this->SelectedBackColor);
 					}
 				}
 				else

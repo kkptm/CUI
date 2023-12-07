@@ -41,3 +41,4 @@ std::vector<void*> FindAllPattern(void* _begin, const char* sPattern, int search
 void PrintHex(void* ptr, int count, int splitLine);
 void PrintHex(void* ptr, int count);
 INT64 GetTick();
+void MakePermute(std::vector<int> nums, std::vector<std::vector<int>>& result, int start = 0);

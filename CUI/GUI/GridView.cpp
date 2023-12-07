@@ -488,6 +488,24 @@ void GridView::Update()
 				}
 
 			};
+		this->get(0)->OnKeyDown += [](void* sender, KeyEventArgs e)
+			{
+				GridView* gd = (GridView*)((Control*)sender)->Parent;
+				if (e.KeyData == Keys::Return)
+				{
+					if (gd->SelectedRowIndex < gd->Rows.Count - 1)
+					{
+						TextBox* tb = (TextBox*)sender;
+						gd->ChangeEditionSelected(gd->SelectedColunmIndex, gd->SelectedRowIndex + 1);
+						tb->SelectionStart = 0;
+						tb->SelectionEnd = tb->Text.length();
+						if (tb->Bottom > gd->Height)
+						{
+							gd->ScrollRowPosition += 1;
+						}
+					}
+				}
+			};
 	}
 	TextBox* c = (TextBox*)this->get(0);
 	if (this->UpdateEdit() && (isSelected || this->ParentForm->Selected ==c))
@@ -568,17 +586,48 @@ void GridView::AutoSizeColumn(int col)
 		}
 	}
 }
+
+void GridView::ChangeEditionSelected(int col,int row)
+{
+	if (this->get(0)->Visable)
+	{
+		int oldx = this->get(0)->Tag >> 32;
+		int oldy = this->get(0)->Tag & 0xffffffff;
+		if (oldx >= 0 && oldy >= 0)
+		{
+			std::wstring str = this->get(0)->Text.c_str();
+			this->Rows[oldy].Cells[oldx] = str;
+		}
+	}
+	if (this->Colunms[col].Type == ColumnType::Text && this->Colunms[col].CanEdit)
+	{
+		TextBox* tb = (TextBox*)this->get(0);
+		tb->Visable = true;
+		tb->Tag = (ULONG64)col << 32 | (ULONG64)row;
+		tb->Text = this->Rows[row].Cells[col];
+		tb->SelectionStart = 0;
+		this->ParentForm->Selected = tb;
+	}
+	this->SelectedColunmIndex = col;
+	this->SelectedRowIndex = row;
+	this->SelectionChanged(this);
+}
 bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof)
 {
 	if (!this->Enable || !this->Visable) return true;
+	bool HitEdit = false;
+	POINT input_location = { 0,0 };
 	TextBox* c = (TextBox*)this->get(0);
-	auto location = c->Location;
-	auto size = c->ActualSize();
-	bool HitEdit = 
-		(xof >= location.x &&
-		yof >= location.y &&
-		xof <= (location.x + size.cx) &&
-		yof <= (location.y + size.cy)) || c->Visable;
+	if (c)
+	{
+		input_location = c->Location;
+		auto size = c->ActualSize();
+		HitEdit =
+			(xof >= input_location.x &&
+				yof >= input_location.y &&
+				xof <= (input_location.x + size.cx) &&
+				yof <= (input_location.y + size.cy)) || c->Visable;
+	}
 	switch (message)
 	{
 	case WM_DROPFILES:
@@ -638,7 +687,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		this->OnMouseWheel(this, event_obj);
 		if (need_update)
 		{
-			this->SingleUpdate();
+			this->PostRender();
 		}
 	}
 	break;
@@ -666,7 +715,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		this->OnMouseMove(this, event_obj);
 		if (need_update)
 		{
-			this->SingleUpdate();
+			this->PostRender();
 		}
 	}
 	break;
@@ -680,7 +729,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 			this->ParentForm->Selected = this;
 			if (lastSelected && lastSelected != this)
 			{
-				lastSelected->SingleUpdate();
+				lastSelected->PostRender();
 			}
 			if (xof < this->Width - 8)
 			{
@@ -730,7 +779,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP://mouse up
@@ -745,14 +794,14 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK://mouse double click
 	{
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDoubleClick(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_KEYDOWN://keyboard down
@@ -785,7 +834,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 			this->ScrollRowPosition += 1;
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_KEYUP://keyboard up
@@ -793,12 +842,12 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
 		this->OnKeyUp(this, event_obj);
 		if (HitEdit)
-			c->ProcessMessage(message, wParam, lParam, xof - location.x, yof - location.y);
+			c->ProcessMessage(message, wParam, lParam, xof - input_location.x, yof - input_location.y);
 	}
 	break;
 	}
 	if (HitEdit)
-		c->ProcessMessage(message, wParam, lParam, xof - location.x, yof - location.y);
+		c->ProcessMessage(message, wParam, lParam, xof - input_location.x, yof - input_location.y);
 	return true;
 }
 

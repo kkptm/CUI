@@ -32,8 +32,12 @@ Control::~Control()
 }
 UIClass Control::Type() { return UIClass::UI_Base; }
 
+void Control::setTextPrivate(std::wstring s)
+{
+	this->_text = s;
+}
 void Control::Update() {}
-void Control::SingleUpdate()
+void Control::PostRender()
 {
 	if(this->ParentForm) this->ParentForm->ControlChanged = true;
 }
@@ -47,6 +51,8 @@ Control* Control::operator[](int index)
 }
 Control* Control::get(int index)
 {
+	if (this->Children.Count == 0)
+		return NULL;
 	return this->Children[index];
 }
 void Control::RemoveControl(Control* c)
@@ -247,7 +253,7 @@ bool Control::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		{
 			auto se = this->ParentForm->Selected;
 			this->ParentForm->Selected = this;
-			se->SingleUpdate();
+			se->PostRender();
 		}
 	}
 	switch (message)
@@ -292,7 +298,7 @@ bool Control::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONUP:
@@ -301,7 +307,7 @@ bool Control::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 	{
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
-		this->SingleUpdate();
+		this->PostRender();
 	}
 	break;
 	case WM_LBUTTONDBLCLK:
