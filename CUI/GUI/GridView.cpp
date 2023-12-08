@@ -748,14 +748,16 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 							if (this->get(0)->Visable)
 							{
 								int oldx = this->get(0)->Tag >> 32;
-								int oldy = this->get(0)->Tag & 0xffffffff;
+								int oldy = this->get(0)->Tag & 0xFFFFFFFF;
 								if (oldx >= 0 && oldy >= 0)
 								{
 									std::wstring str = this->get(0)->Text.c_str();
 									this->Rows[oldy].Cells[oldx] = str;
 								}
 							}
-							if (this->Colunms[undermouseindex.x].Type == ColumnType::Text && this->Colunms[undermouseindex.x].CanEdit)
+							if (this->Colunms[undermouseindex.x].Type == ColumnType::Text && this->Colunms[undermouseindex.x].CanEdit &&
+								undermouseindex.x >= 0 && undermouseindex.y >= 0
+								)
 							{
 								TextBox* tb = (TextBox*)this->get(0);
 								tb->Visable = true;

@@ -111,7 +111,6 @@ SET_CPP(Form, bool, Visable)
 {
     ShowWindow(this->Handle, value ? SW_SHOW : SW_HIDE);
 }
-#include "../Utils/Dialog.h"
 Form::Form(std::wstring text, POINT _location, SIZE _size)
 {
     this->_text = text;
@@ -159,7 +158,7 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     float xtmp = this->Size.cx - (this->HeadHeight * 3);
     _minBox = (Button*)this->AddControl(new Button(L"―", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
-    _maxBox = (Button*)this->AddControl(new Button(L"❐", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
+    _maxBox = (Button*)this->AddControl(new Button(L"⬜", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
     _closeBox = (Button*)this->AddControl(new Button(L"✕", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     _minBox->OnMouseClick += [](void* sender, MouseEventArgs)
@@ -171,9 +170,15 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
         {
             ((Button*)sender)->ParentForm->Handle;
             if (IsZoomed(((Button*)sender)->ParentForm->Handle))
+            {
+                ((Button*)sender)->Text = L"⬜";
                 ShowWindow(((Button*)sender)->ParentForm->Handle, SW_RESTORE);
+            }
             else
+            {
+                ((Button*)sender)->Text = L"❐";
                 ShowWindow(((Button*)sender)->ParentForm->Handle, SW_MAXIMIZE);
+            }
         };
     _closeBox->OnMouseClick += [](void* sender, MouseEventArgs)
         {
@@ -182,7 +187,6 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     _minBox->Boder = 0.0f; _minBox->Round = 0.0f; _minBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _maxBox->Boder = 0.0f; _maxBox->Round = 0.0f; _maxBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _closeBox->Boder = 0.0f; _closeBox->Round = 0.0f; _closeBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
-
 }
 
 void Form::updateHead()
@@ -303,18 +307,25 @@ bool Form::Update(bool force)
             float headTextTop = (this->HeadHeight - this->Render->DefaultFontObject->FontHeight) * 0.5f;
             if (headTextTop < 0.0f)
                 headTextTop = 0.0f;
+            this->Render->PushDrawRect(0, 0, this->Size.cx, this->HeadHeight);
             if (this->CenterTitle)
             {
                 auto tSize = this->Render->DefaultFontObject->GetTextSize(this->Text);
-                float textRangeWidth = this->Size.cx - (this->HeadHeight * 3);
+                float textRangeWidth = this->Size.cx;
+                if (tSize.width > (this->Size.cx - (this->HeadHeight * 3)))
+                {
+                    textRangeWidth -= this->HeadHeight * 3;
+                }
                 float headTextLeft = (textRangeWidth - tSize.width) * 0.5f;
                 if (headTextLeft < 0.0f)
                     headTextLeft = 0.0f;
-
                 this->Render->DrawString(this->Text, headTextLeft, headTextTop, this->ForeColor);
             }
             else
+            {
                 this->Render->DrawString(this->Text, 5.0f, headTextTop, this->ForeColor);
+            }
+            this->Render->PopDrawRect();
         }
         for (int i = 0; i < this->Controls.Count; i++)
         {
@@ -476,6 +487,11 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
                     break;
                 }
             }
+        }
+        else if (WM_LBUTTONDBLCLK == message)
+        {
+            if(mouse.y<this->HeadHeight)
+                this->_maxBox->OnMouseClick(this->_maxBox, MouseEventArgs{});
         }
         bool is_First = true;
     reExc1:
