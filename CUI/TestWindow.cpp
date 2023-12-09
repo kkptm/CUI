@@ -149,6 +149,7 @@ void TestWindow::Init()
 
 
     TreeView* tree = tabControl1->get(0)->AddControl(new TreeView(420, 10, 120, 230));
+    tree->BackColor = D2D1_COLOR_F{1,1,1,0.25f };
     for (int i = 0; i < 10; i++)
     {
         auto sub = new TreeNode(StringHelper::Format(L"item%d", i));

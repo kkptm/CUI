@@ -72,7 +72,7 @@ static TreeNode* findNode(float posX, float posY, float w, float h, float itemHe
 			if (posY >= currTop && posY <= currBottom)
 			{
 				float exLeft = (sunLevel * itemHeight) + 3.5f;
-				if (posX >= exLeft && posX <= (exLeft + itemHeight))
+				if (posX >= exLeft && posX <= (exLeft + (itemHeight * 0.6f)) && c->Children.Count > 0)
 				{
 					isHitEx = true;
 				}
@@ -190,7 +190,6 @@ void TreeView::Update()
 			renderNodes(this,d2d, abslocation.x, abslocation.y, size.cx, size.cy, font->FontHeight, ScrollOffset, curr, 0, this->Root->Children);
 			this->MaxRenderItems = curr;
 			this->DrawScroll();
-			printf("%d\n",curr);
 
 		}
 		if (!this->Enable)
@@ -212,7 +211,7 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	case WM_DROPFILES:
 	{
 		HDROP hDropInfo = HDROP(wParam);
-		UINT uFileNum = DragQueryFile(hDropInfo, 0xffffffff, NULL, 0);
+		UINT uFileNum = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, 0);
 		TCHAR strFileName[MAX_PATH];
 		List<std::wstring> files;
 		for (int i = 0; i < uFileNum; i++)
@@ -331,10 +330,14 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		auto node = findNode(xof, yof, size.cx, size.cy, font->FontHeight, ScrollOffset, curr, 0, this->Root->Children, isHit);
 		if (node)
 		{
-			node->Expand = !node->Expand;
-			bool isChanged = this->SelectedNode != node;
-			this->SelectedNode = node;
-			if (isChanged)this->SelectionChanged(this);
+			if(node->Children.Count > 0)
+				node->Expand = !node->Expand;
+			if (!isHit)
+			{
+				bool isChanged = this->SelectedNode != node;
+				this->SelectedNode = node;
+				if (isChanged)this->SelectionChanged(this);
+			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDoubleClick(this, event_obj);

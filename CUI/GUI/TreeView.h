@@ -13,6 +13,8 @@ public:
 };
 class TreeView : public Control
 {
+private:
+	bool InScroll = false;
 public:
 	virtual UIClass Type();
 	TreeNode* Root;
