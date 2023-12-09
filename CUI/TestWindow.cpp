@@ -152,11 +152,11 @@ void TestWindow::Init()
     tree->BackColor = D2D1_COLOR_F{1,1,1,0.25f };
     for (int i = 0; i < 10; i++)
     {
-        auto sub = new TreeNode(StringHelper::Format(L"item%d", i));
+        auto sub = new TreeNode(StringHelper::Format(L"item%d", i), bmps[0]);
         tree->Root->Children.Add(sub);
         for (int j = 0; j < 3; j++)
         {
-            auto ssub = new TreeNode(StringHelper::Format(L"item%d-%d", i,j));
+            auto ssub = new TreeNode(StringHelper::Format(L"item%d-%d", i,j), bmps[1]);
             sub->Children.Add(ssub);
         }
         sub->Expand = true;

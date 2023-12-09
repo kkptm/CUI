@@ -6,7 +6,7 @@ public:
 	class ID2D1Bitmap* Image = NULL;
 	std::wstring Text;
 	List<TreeNode*> Children;
-	bool Expand = false;;
+	bool Expand = false;
 	TreeNode(std::wstring text, ID2D1Bitmap* image = NULL);
 	~TreeNode();
 	int UnfoldedCount();

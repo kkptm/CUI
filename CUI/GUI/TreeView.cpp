@@ -11,7 +11,6 @@ static void renderNodes(TreeView* tree, Graphics* d2d, float x, float y, float w
 		if (renderTop >= 0.0f && renderTop < h)
 		{
 			float renderLeft = baseLeft;
-
 			float exTop = renderTop + (itemHeight * 0.2f) + y;
 			auto foreColor = (c == tree->SelectedNode) ? Colors::White : tree->ForeColor;
 			if (c == tree->SelectedNode)
@@ -43,10 +42,20 @@ static void renderNodes(TreeView* tree, Graphics* d2d, float x, float y, float w
 						foreColor);
 				}
 
+				if (c->Image)
+				{
+					d2d->DrawBitmap(c->Image, renderLeft + (itemHeight * 0.8f), renderTop + y, itemHeight, itemHeight);
+					renderLeft += itemHeight;
+				}
 				d2d->DrawString(c->Text, renderLeft + (itemHeight * 0.8f), renderTop + y, foreColor);
 			}
 			else
 			{
+				if (c->Image)
+				{
+					d2d->DrawBitmap(c->Image, renderLeft, renderTop + y, itemHeight, itemHeight);
+					renderLeft += itemHeight;
+				}
 				d2d->DrawString(c->Text, renderLeft, renderTop + y, foreColor, tree->Font ? tree->Font : d2d->DefaultFontObject);
 			}
 		}
