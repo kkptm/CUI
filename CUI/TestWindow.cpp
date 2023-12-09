@@ -142,9 +142,25 @@ void TestWindow::Init()
     tabControl1->get(0)->AddControl(new Label(L"基本容器", 10, 10))->Font = new Font(L"Arial", 12);
 
     bt2 = tabControl1->get(0)->AddControl(new Button(L"打开图片", 80, 10, 120, 24));
+
     bt2->OnMouseClick += bt2_OnMouseClick;
 
     panel1 = tabControl1->get(0)->AddControl(new Panel(10, 40, 400, 200));
+
+
+    TreeView* tree = tabControl1->get(0)->AddControl(new TreeView(420, 10, 120, 230));
+    for (int i = 0; i < 10; i++)
+    {
+        auto sub = new TreeNode(StringHelper::Format(L"item%d", i));
+        tree->Root->Children.Add(sub);
+        for (int j = 0; j < 3; j++)
+        {
+            auto ssub = new TreeNode(StringHelper::Format(L"item%d-%d", i,j));
+            sub->Children.Add(ssub);
+        }
+        sub->Expand = true;
+    }
+
     panel1->AddControl(new Label(L"图片框(支持拖拽)", 10, 10));
     picturebox1 = panel1->AddControl(new PictureBox(120, 10, 260, 120));
     picturebox1->Image = this->Image;

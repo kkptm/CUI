@@ -16,6 +16,7 @@
 #include "Switch.h"
 #include "TabControl.h"
 #include "TextBox.h"
+#include "TreeView.h"
 #include "Taskbar.h"
 typedef Event<void(*)(void* sender, int Id, int info)> CommandEvent;
 typedef Event<void(*)(void*)> FormClosingEvent;
