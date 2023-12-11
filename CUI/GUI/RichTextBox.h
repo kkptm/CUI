@@ -5,6 +5,7 @@ class RichTextBox : public Control
 {
 private:
 	POINT selectedPos = {0,0};
+	bool isDraggingScroll;
 public:
 	virtual UIClass Type();
 	bool InScroll = false;
@@ -24,6 +25,7 @@ public:
 	RichTextBox(std::wstring text, int x, int y, int width = 120, int height = 24);
 private:
 	void DrawScroll();
+	void UpdateScrollDrag(float posY);
 	void SetScrollByPos(float yof);
 	void InputText(std::wstring input);
 	void InputBack();

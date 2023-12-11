@@ -12,10 +12,10 @@ static void renderNodes(TreeView* tree, Graphics* d2d, float x, float y, float w
 		{
 			float renderLeft = baseLeft;
 			float exTop = renderTop + (itemHeight * 0.2f) + y;
-			auto foreColor = (c == tree->SelectedNode) ? Colors::White : tree->ForeColor;
+			auto foreColor = (c == tree->SelectedNode) ? tree->SelectedForeColor : tree->ForeColor;
 			if (c == tree->SelectedNode)
 			{
-				d2d->FillRect(x, renderTop + y, w, itemHeight, Colors::Blue);
+				d2d->FillRect(x, renderTop + y, w, itemHeight, tree->SelectedBackColor);
 			}
 			if (c->Children.Count > 0)
 			{
@@ -205,6 +205,9 @@ void TreeView::Update()
 			int curr = 0;
 			renderNodes(this,d2d, abslocation.x, abslocation.y, size.cx, size.cy, font->FontHeight, ScrollIndex, curr, 0, this->Root->Children);
 			this->MaxRenderItems = curr;
+			int maxScroll = this->MaxRenderItems - (this->Height / (this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight)) + 1;
+			if (maxScroll < 0)maxScroll = 0;
+			if(this->ScrollIndex > maxScroll) this->ScrollIndex = maxScroll;
 			this->DrawScroll();
 
 		}

@@ -148,7 +148,7 @@ void TestWindow::Init()
     panel1 = tabControl1->get(0)->AddControl(new Panel(10, 40, 400, 200));
 
 
-    TreeView* tree = tabControl1->get(0)->AddControl(new TreeView(420, 10, 120, 230));
+    TreeView* tree = tabControl1->get(0)->AddControl(new TreeView(420, 10, 200, 230));
     tree->BackColor = D2D1_COLOR_F{1,1,1,0.25f };
     for (int i = 0; i < 10; i++)
     {
@@ -158,6 +158,11 @@ void TestWindow::Init()
         {
             auto ssub = new TreeNode(StringHelper::Format(L"item%d-%d", i,j), bmps[1]);
             sub->Children.Add(ssub);
+            for (int n = 0; n < 2; n++)
+            {
+				auto sssub = new TreeNode(StringHelper::Format(L"item%d-%d-%d", i, j,n), bmps[2]);
+				ssub->Children.Add(sssub);
+			}
         }
         sub->Expand = true;
     }

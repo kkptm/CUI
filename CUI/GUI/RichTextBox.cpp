@@ -39,6 +39,30 @@ void RichTextBox::DrawScroll()
 		d2d->FillRoundRect(abslocation.x + (this->Width - 8.0f), abslocation.y + scroll_block_top, 8.0f, scroll_block_height, this->ScrollForeColor, 4.0f);
 	}
 }
+void RichTextBox::UpdateScrollDrag(float posY) {
+	if (!isDraggingScroll) return;
+
+	float _render_height = this->Height - (TextMargin * 2.0f);
+	int maxScroll = textSize.height - _render_height;
+
+	float scrollBlockHeight = (_render_height / textSize.height) * _render_height;
+	if (scrollBlockHeight < this->Height * 0.1)scrollBlockHeight = this->Height * 0.1;
+
+	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	int renderItemCount = this->Height / fontHeight;
+
+	float scrollTop = scrollBlockHeight * 0.5f;
+	float scrollHeight = this->Height - scrollBlockHeight;
+	float chrckPos = posY - scrollTop;
+	float per = chrckPos / scrollHeight;
+	int newScroll = per * maxScroll;
+	{
+		this->OffsetY = newScroll;
+		if (this->OffsetY < 0) this->OffsetY = 0;
+		if (this->OffsetY > maxScroll + 1) this->OffsetY = maxScroll + 1;
+		PostRender();
+	}
+}
 void RichTextBox::SetScrollByPos(float yof)
 {
 	auto d2d = this->Render;
@@ -356,7 +380,10 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 	case WM_MOUSEMOVE://mouse move
 	{
 		this->ParentForm->UnderMouse = this;
-		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
+		if (isDraggingScroll) {
+			UpdateScrollDrag(yof);
+		}
+		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this && !isDraggingScroll)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
 			float render_width = this->Width - (TextMargin * 2.0f);
@@ -382,11 +409,17 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 				this->ParentForm->Selected = this;
 				if (lse) lse->PostRender();
 			}
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			float render_width = this->Width - (TextMargin * 2.0f);
-			float render_height = this->Height - (TextMargin * 2.0f);
-			if (textSize.height > render_height)render_width -= 8.0f;
-			this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+			if (xof >= Width - 8 && xof <= Width) {
+				isDraggingScroll = true;
+			}
+			else
+			{
+				auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+				float render_width = this->Width - (TextMargin * 2.0f);
+				float render_height = this->Height - (TextMargin * 2.0f);
+				if (textSize.height > render_height)render_width -= 8.0f;
+				this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseDown(this, event_obj);
@@ -397,7 +430,10 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 	case WM_RBUTTONUP:
 	case WM_MBUTTONUP:
 	{
-		if (this->ParentForm->Selected == this)
+		if (isDraggingScroll) {
+			isDraggingScroll = false;
+		}
+		else if (this->ParentForm->Selected == this)
 		{
 			float render_width = this->Width - (TextMargin * 2.0f);
 			float render_height = this->Height - (TextMargin * 2.0f);

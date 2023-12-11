@@ -15,6 +15,8 @@ class TreeView : public Control
 {
 private:
 	bool isDraggingScroll;
+	void UpdateScrollDrag(float posY);
+	void DrawScroll();
 public:
 	virtual UIClass Type();
 	TreeNode* Root;
@@ -23,12 +25,12 @@ public:
 	int ScrollIndex = 0;
 	D2D1_COLOR_F ScrollBackColor = Colors::LightGray;
 	D2D1_COLOR_F ScrollForeColor = Colors::DimGrey;
+	D2D1_COLOR_F SelectedBackColor = Colors::Blue;
+	D2D1_COLOR_F SelectedForeColor = Colors::White;
 	ScrollChangedEvent ScrollChanged;
 	SelectionChangedEvent SelectionChanged;
 	TreeView(int x, int y, int width = 120, int height = 24);
 	~TreeView();
-	void UpdateScrollDrag(float posY);
-	void DrawScroll();
 	void Update() override;
 	bool ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof) override;
 };
