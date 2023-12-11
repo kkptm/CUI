@@ -859,6 +859,14 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, flo
         textLayout->Release();
     }
 }
+void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, float w, float h, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)
+{
+    if (textLayout)
+    {
+        textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
+        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
+    }
+}
 void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack)
 {
     if (textLayout)

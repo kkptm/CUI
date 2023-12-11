@@ -133,6 +133,9 @@ void TestWindow::Init()
     radiobox1->OnChecked += radiobox1_OnChecked;
     radiobox2->OnChecked += radiobox2_OnChecked;
     textbox2 = this->AddControl(new RichTextBox(L"Multiline text\nMultiline text\nMultiline text\nMultiline text\nMultiline text", 260, button1->Top, 600, 60));
+    textbox2->BackColor = D2D1_COLOR_F{ 1,1,1,0.25f };
+    textbox2->FocusedColor = D2D1_COLOR_F{ 1,1,1,0.5f };
+
     textbox2->AllowMultiLine = true;
     tabControl1 = this->AddControl(new TabControl(10, combobox1->Bottom + 5, 1200, 300));
     tabControl1->BackColor = D2D1_COLOR_F{ 1,1,1,0.0 };

@@ -98,6 +98,7 @@ public:
 	DropFileEvent OnDropFile;
 	class Form* ParentForm;
 	class Control* Parent;
+	bool TextChanged = true;
 	bool Enable;
 	bool Visable;
 	bool Checked;

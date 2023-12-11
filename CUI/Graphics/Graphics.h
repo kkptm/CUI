@@ -96,6 +96,7 @@ public:
     void DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack = Colors::Opacity, Font* font = nullptr);
     void DrawStringLayout(std::wstring str, float x, float y, float w, float h, D2D1_COLOR_F color, Font* font = nullptr);
     void DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, Font* font = nullptr);
+    void DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, float w, float h, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack = Colors::Opacity, Font* font = nullptr);
     void FillTriangle(D2D1_TRIANGLE triangle, D2D1_COLOR_F color);
     void DrawTriangle(D2D1_TRIANGLE triangle, D2D1_COLOR_F color, float width);
     void FillPolygon(std::initializer_list<D2D1_POINT_2F> points, D2D1_COLOR_F color);

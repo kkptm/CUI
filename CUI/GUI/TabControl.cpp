@@ -4,15 +4,15 @@
 #include "Form.h"
 #pragma comment(lib, "Imm32.lib")
 
-	UIClass TabPage::Type() { return UIClass::UI_TabPage; }
-	TabPage::TabPage()
-	{
-		this->Text = L"Page";
-	}
-	TabPage::TabPage(std::wstring text)
-	{
-		this->Text = text;
-	}
+UIClass TabPage::Type() { return UIClass::UI_TabPage; }
+TabPage::TabPage()
+{
+	this->Text = L"Page";
+}
+TabPage::TabPage(std::wstring text)
+{
+	this->Text = text;
+}
 
 UIClass TabControl::Type() { return UIClass::UI_TabControl; }
 TabControl::TabControl(int x, int y, int width, int height)
@@ -24,7 +24,6 @@ TabControl::TabControl(int x, int y, int width, int height)
 TabPage* TabControl::AddPage(std::wstring name)
 {
 	auto result = (TabPage*)this->AddControl(new TabPage(name));
-	result->BackColor = this->BackColor;
 	return result;
 }
 void TabControl::Update()
@@ -44,7 +43,7 @@ void TabControl::Update()
 		{
 			this->RenderImage();
 		}
-		d2d->DrawRect(abslocation.x, abslocation.y, size.cx, TitleHeight, this->BolderColor, this->Boder);
+		//d2d->DrawRect(abslocation.x, abslocation.y, size.cx, TitleHeight, this->BolderColor, this->Boder);
 		if (this->Count > 0)
 		{
 			for (int i = 0; i < this->Count; i++)

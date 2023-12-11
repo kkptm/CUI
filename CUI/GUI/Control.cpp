@@ -159,7 +159,10 @@ GET_CPP(Control, std::wstring, Text)
 SET_CPP(Control, std::wstring, Text)
 {
 	if (value != _text)
+	{
+		this->TextChanged = true;
 		this->OnTextChanged(this, _text, value);
+	}
 	_text = value;
 }
 GET_CPP(Control, D2D1_COLOR_F, BolderColor)

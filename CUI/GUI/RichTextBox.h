@@ -6,6 +6,7 @@ class RichTextBox : public Control
 private:
 	POINT selectedPos = {0,0};
 	bool isDraggingScroll;
+	IDWriteTextLayout* layOutCache = NULL;
 public:
 	virtual UIClass Type();
 	bool InScroll = false;
@@ -31,6 +32,7 @@ private:
 	void InputBack();
 	void InputDelete();
 	void UpdateScroll(bool arrival = false);
+	void UpdateLayout();
 public:
 	void AppendText(std::wstring str);
 	void AppendLine(std::wstring str);

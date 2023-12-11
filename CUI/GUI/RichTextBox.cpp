@@ -10,6 +10,26 @@ RichTextBox::RichTextBox(std::wstring text, int x, int y, int width, int height)
 	this->Size = SIZE{ width,height };
 	this->BackColor = Colors::LightGray;
 	AllowMultiLine = true;
+	UpdateLayout();
+}
+
+void RichTextBox::UpdateLayout()
+{
+	if (this->TextChanged)
+	{
+
+		if (this->layOutCache)this->layOutCache->Release();
+		auto d2d = this->Render;
+		if (d2d)
+		{
+			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			this->layOutCache = d2d->CreateStringLayout(this->Text, font);
+			if (this->layOutCache)
+			{
+				TextChanged = false;
+			}
+		}
+	}
 }
 void RichTextBox::DrawScroll()
 {
@@ -140,6 +160,7 @@ void RichTextBox::InputText(std::wstring input)
 		}
 		this->Text = std::wstring(tmp.Pointer());
 	}
+	this->TextChanged = true;
 }
 void RichTextBox::InputBack()
 {
@@ -168,6 +189,7 @@ void RichTextBox::InputBack()
 			this->Text = tmp.data();
 		}
 	}
+	this->TextChanged = true;
 }
 void RichTextBox::InputDelete()
 {
@@ -196,6 +218,7 @@ void RichTextBox::InputDelete()
 			this->Text = tmp.data();
 		}
 	}
+	this->TextChanged = true;
 }
 void RichTextBox::UpdateScroll(bool arrival)
 {
@@ -217,11 +240,13 @@ void RichTextBox::AppendText(std::wstring str)
 {
 	this->SelectionStart = this->SelectionEnd = this->Text.size();
 	this->InputText(str);
+	this->TextChanged = true;
 }
 void RichTextBox::AppendLine(std::wstring str)
 {
 	this->SelectionStart = this->SelectionEnd = this->Text.size();
 	this->InputText(str + L"\r");
+	this->TextChanged = true;
 }
 std::wstring RichTextBox::GetSelectedString()
 {
@@ -266,6 +291,7 @@ void RichTextBox::Update()
 		if (this->Text.size() > 0)
 		{
 			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			UpdateLayout();
 			if (isSelected)
 			{
 				int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
@@ -290,7 +316,7 @@ void RichTextBox::Update()
 				selectedPos.y -= this->OffsetY;
 				selectedPos.y += this->TextMargin;
 				selectedPos.x += this->TextMargin;
-				d2d->DrawStringLayout(this->Text,
+				d2d->DrawStringLayout(this->layOutCache,
 					(float)abslocation.x + TextMargin, ((float)abslocation.y + TextMargin) - this->OffsetY,
 					render_width, render_height,
 					this->ForeColor,
@@ -300,7 +326,7 @@ void RichTextBox::Update()
 			}
 			else
 			{
-				d2d->DrawStringLayout(this->Text,
+				d2d->DrawStringLayout(this->layOutCache,
 					(float)abslocation.x + TextMargin, ((float)abslocation.y + TextMargin) - this->OffsetY,
 					render_width, render_height,
 					this->ForeColor,
