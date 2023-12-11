@@ -1,5 +1,4 @@
 ﻿#include "Form.h"
-static ITaskbarList* pTaskbarList = NULL;
 GET_CPP(Form, POINT, Location)
 {
     if (this->Handle)
@@ -197,15 +196,6 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     _minBox->Boder = 0.0f; _minBox->Round = 0.0f; _minBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _maxBox->Boder = 0.0f; _maxBox->Round = 0.0f; _maxBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _closeBox->Boder = 0.0f; _closeBox->Round = 0.0f; _closeBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
-    if (!pTaskbarList)
-    {
-        HRESULT hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,
-            IID_ITaskbarList, (LPVOID*)&pTaskbarList);
-        if (FAILED(hr)) {
-            pTaskbarList = NULL;
-            return;
-        }
-    }
 }
 
 void Form::updateHead()

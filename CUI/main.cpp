@@ -8,7 +8,7 @@ int main()
     TestWindow* mainForm = new TestWindow();
     //mainForm->ShowInTaskBar = false;
     mainForm->Text = L"test window";
-    mainForm->Icon = (HICON)::LoadImageA(NULL, "app.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    mainForm->Icon = (HICON)::LoadImageA(NULL, "app.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
     mainForm->Show();
     Taskbar* bar = new Taskbar(mainForm->Handle);
     while (1)
