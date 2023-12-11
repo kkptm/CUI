@@ -4,7 +4,8 @@ void ProcessSelectWindow::_searchBox_OnTextChanged(void* sender, const std::wstr
 {
 	TextBox* _tx = (TextBox*)sender;
 	ProcessSelectWindow* window = (ProcessSelectWindow*)_tx->ParentForm;
-	window->_table->Clear();
+	window->_table->Clear(); 
+	window->_table->SelectedRowIndex = -1;
 	std::vector<Process> processes = Process::GetProcesses();
 	for (auto p : processes)
 	{
@@ -17,13 +18,12 @@ void ProcessSelectWindow::_searchBox_OnTextChanged(void* sender, const std::wstr
 			window->_table->Rows.Add(row);
 		}
 	}
-
 }
 void ProcessSelectWindow::_selectButton_OnMouseClick(void* sender, MouseEventArgs e)
 {
 	Button* _btn = (Button*)sender;
 	ProcessSelectWindow* window = (ProcessSelectWindow*)_btn->ParentForm;
-	if (window->_table->SelectedRowIndex >= 0)
+	if (window->_table->SelectedRowIndex >= 0 && window->_table->SelectedRowIndex < window->_table->Rows.Count)
 	{
 		window->Close();
 		window->SelectedProcessId = (HANDLE)window->_table->SelectedRow().Cells[1].Tag;

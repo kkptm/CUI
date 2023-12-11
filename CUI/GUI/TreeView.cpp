@@ -146,33 +146,40 @@ TreeView::~TreeView()
 {
 	delete this->Root;
 }
-void TreeView::DrawScroll()
-{
-	auto d2d = this->Render;
-	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
-	auto size = this->ActualSize();
-	if (this->MaxRenderItems > 0)
+
+void TreeView::UpdateScrollDrag(float posY) {
+	if (!isDraggingScroll) return;
+	int maxScroll = MaxRenderItems - (this->Height / (this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight));
+	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	int renderItemCount = this->Height / fontHeight;
+	float scrollBlockHeight = (renderItemCount / (float)this->MaxRenderItems) * this->Height;
+
+	float scrollTop = scrollBlockHeight * 0.5f;
+	float scrollHeight = this->Height - scrollBlockHeight;
+	float chrckPos = posY - scrollTop;
+	float per = chrckPos / scrollHeight;
+	int newScroll = per * maxScroll;
 	{
-		float _render_width = this->Width - 8;
-		float _render_height = this->Height;
-		float font_height = font->FontHeight;
-		float render_items_height = _render_height;
-		int render_items_count = render_items_height / font_height;
-		if (render_items_count < this->MaxRenderItems)
-		{
-			int render_count = (_render_height / font_height) + 1;
-			int max_scroll = this->MaxRenderItems - render_count;
-			float scroll_block_height = ((float)render_count / (float)this->MaxRenderItems) * (float)this->Height;
-			if (scroll_block_height < this->Height * 0.1)scroll_block_height = this->Height * 0.1;
-			float scroll_block_move_space = this->Height - scroll_block_height;
-			float yt = scroll_block_height * 0.5f;
-			float yb = this->Height - (scroll_block_height * 0.5f);
-			float per = (float)this->ScrollOffset / (float)max_scroll;
-			float scroll_tmp_y = per * scroll_block_move_space;
-			float scroll_block_top = scroll_tmp_y;
-			d2d->FillRoundRect(abslocation.x + (this->Width - 8.0f), abslocation.y, 8.0f, this->Height, this->ScrollBackColor, 4.0f);
-			d2d->FillRoundRect(abslocation.x + (this->Width - 8.0f), abslocation.y + scroll_block_top, 8.0f, scroll_block_height, this->ScrollForeColor, 4.0f);
+		ScrollIndex = newScroll;
+		if (ScrollIndex < 0) ScrollIndex = 0;
+		if (ScrollIndex > maxScroll + 1) ScrollIndex = maxScroll + 1;
+		PostRender();
+	}
+}
+void TreeView::DrawScroll() {
+	float width = this->Width - 8.0f;
+	float height = this->Height;
+	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	if (this->MaxRenderItems > 0) {
+		int renderItemCount = height / fontHeight;
+		if (renderItemCount < this->MaxRenderItems) {
+			int maxScroll = this->MaxRenderItems - renderItemCount;
+			float scrollBlockHeight = (renderItemCount / (float)this->MaxRenderItems) * height;
+			if (scrollBlockHeight < height * 0.1f) scrollBlockHeight = height * 0.1f;
+			float scrollPer = (float)this->ScrollIndex / (float)maxScroll;
+			float scrollBlockTop = scrollPer * (height - scrollBlockHeight);
+			this->Render->FillRoundRect(this->AbsLocation.x + width, this->AbsLocation.y, 8.0f, height, this->ScrollBackColor, 4.0f);
+			this->Render->FillRoundRect(this->AbsLocation.x + width, this->AbsLocation.y + scrollBlockTop, 8.0f, scrollBlockHeight, this->ScrollForeColor, 4.0f);
 		}
 	}
 }
@@ -196,7 +203,7 @@ void TreeView::Update()
 		//draw entities
 		{
 			int curr = 0;
-			renderNodes(this,d2d, abslocation.x, abslocation.y, size.cx, size.cy, font->FontHeight, ScrollOffset, curr, 0, this->Root->Children);
+			renderNodes(this,d2d, abslocation.x, abslocation.y, size.cx, size.cy, font->FontHeight, ScrollIndex, curr, 0, this->Root->Children);
 			this->MaxRenderItems = curr;
 			this->DrawScroll();
 
@@ -243,21 +250,21 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 			auto d2d = this->Render;
 			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
 			float font_height = font->FontHeight;
-			int pre_render_item_count = (this->MaxRenderItems - this->ScrollOffset) - 1;
+			int pre_render_item_count = (this->MaxRenderItems - this->ScrollIndex) - 1;
 			float pre_render_items_height = (pre_render_item_count * font_height);
 			if (pre_render_items_height + font_height >= this->Height)
 			{
 				need_update = true;
-				this->ScrollOffset += 1;
+				this->ScrollIndex += 1;
 				this->ScrollChanged(this);
 			}
 		}
 		else
 		{
-			if (this->ScrollOffset > 0)
+			if (this->ScrollIndex > 0)
 			{
 				need_update = true;
-				this->ScrollOffset -= 1;
+				this->ScrollIndex -= 1;
 				this->ScrollChanged(this);
 			}
 		}
@@ -268,6 +275,9 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	case WM_MOUSEMOVE://mouse move
 	{
 		this->ParentForm->UnderMouse = this;
+		if (isDraggingScroll) {
+			UpdateScrollDrag(yof);
+		}
 		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
@@ -289,23 +299,29 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 				this->ParentForm->Selected = this;
 				if (lse) lse->PostRender();
 			}
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto abslocation = this->AbsLocation;
-			auto size = this->ActualSize();
-			int curr = 0;
-			bool isHit = false;
-			auto node = findNode(xof, yof, size.cx, size.cy, font->FontHeight, ScrollOffset, curr, 0, this->Root->Children, isHit);
-			if (node)
+			if (xof >= Width - 8 && xof <= Width) {
+				isDraggingScroll = true;
+			}
+			else
 			{
-				if (isHit)
+				auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+				auto abslocation = this->AbsLocation;
+				auto size = this->ActualSize();
+				int curr = 0;
+				bool isHit = false;
+				auto node = findNode(xof, yof, size.cx, size.cy, font->FontHeight, ScrollIndex, curr, 0, this->Root->Children, isHit);
+				if (node)
 				{
-					node->Expand = !node->Expand;
-				}
-				else
-				{
-					bool isChanged = this->SelectedNode != node;
-					this->SelectedNode = node;
-					if(isChanged)this->SelectionChanged(this);
+					if (isHit)
+					{
+						node->Expand = !node->Expand;
+					}
+					else
+					{
+						bool isChanged = this->SelectedNode != node;
+						this->SelectedNode = node;
+						if (isChanged)this->SelectionChanged(this);
+					}
 				}
 			}
 		}
@@ -318,10 +334,16 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	case WM_RBUTTONUP:
 	case WM_MBUTTONUP:
 	{
-		if (WM_LBUTTONUP == message && this->ParentForm->Selected == this)
+		if (WM_LBUTTONUP == message)
 		{
-			MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
-			this->OnMouseClick(this, event_obj);
+			if (isDraggingScroll) {
+				isDraggingScroll = false;
+			}
+			if (this->ParentForm->Selected == this)
+			{
+				MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
+				this->OnMouseClick(this, event_obj);
+			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
@@ -336,7 +358,7 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		auto size = this->ActualSize();
 		int curr = 0;
 		bool isHit = false;
-		auto node = findNode(xof, yof, size.cx, size.cy, font->FontHeight, ScrollOffset, curr, 0, this->Root->Children, isHit);
+		auto node = findNode(xof, yof, size.cx, size.cy, font->FontHeight, ScrollIndex, curr, 0, this->Root->Children, isHit);
 		if (node)
 		{
 			if(node->Children.Count > 0)

@@ -49,7 +49,7 @@ typedef Event<void(*)(void*, MouseEventArgs)> MouseLeavedEvent;
 typedef Event<void(*)(void*, KeyEventArgs)> KeyUpEvent;
 typedef Event<void(*)(void*, KeyEventArgs)> KeyDownEvent;
 typedef Event<void(*)(void*)> PaintEvent;
-typedef Event<void(*)(void*, int c, int r, bool v)> GridViewCheckStateChangedEvent;
+typedef Event<void(*)(void*, int column, int row, bool value)> GridViewCheckStateChangedEvent;
 typedef Event<void(*)(void*)> CloseEvent;
 typedef Event<void(*)(void*)> MovedEvent;
 typedef Event<void(*)(void*)> SizeChangedEvent;
@@ -61,6 +61,7 @@ typedef Event<void(*)(void*)> LostFocusEvent;
 typedef Event<void(*)(void*, List<std::wstring>)> DropFileEvent;
 typedef Event<void(*)(void*)> SelectionChangedEvent;
 
+#define defthis(x) decltype(this) _this = (decltype(this))((class Control*)x)->ParentForm
 class Control
 {
 private:
@@ -115,15 +116,12 @@ public:
 	Control* get(int index);
 
 	template<typename T>
-	T AddControl(T c)
-	{
-		if (c->Parent)
-		{
+	T AddControl(T c) {
+		if (c->Parent) {
 			throw std::exception("该控件已属于其他容器!");
 			return NULL;
 		}
-		if (this->Children.Contains(c))
-		{
+		if (this->Children.Contains(c)) {
 			return c;
 		}
 		c->Parent = this;
