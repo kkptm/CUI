@@ -1,5 +1,5 @@
 # CUI
-CUI : a GUI framework for c++ (Commercially available without any copyright restrictions)
+The goal of this repository is to implement a framework that supports rapid development of GUI applications(Commercially available without any copyright restrictions)
 
 Use it like C#
 
