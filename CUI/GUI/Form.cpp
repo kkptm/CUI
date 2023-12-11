@@ -1,5 +1,5 @@
 ﻿#include "Form.h"
-
+static ITaskbarList* pTaskbarList = NULL;
 GET_CPP(Form, POINT, Location)
 {
     if (this->Handle)
@@ -65,21 +65,6 @@ GET_CPP(Form, std::wstring, Text) {
 SET_CPP(Form, std::wstring, Text) {
     _text = value;
 }
-GET_CPP(Form, bool, ShowInTaskBar)
-{
-    return (GetWindowLong(this->Handle, GWL_EXSTYLE) & WS_EX_APPWINDOW) != 0;
-}
-SET_CPP(Form, bool, ShowInTaskBar)
-{
-    if (value)
-    {
-        SetWindowLong(this->Handle, GWL_EXSTYLE, GetWindowLong(this->Handle, GWL_EXSTYLE) | WS_EX_APPWINDOW);
-    }
-    else
-    {
-        SetWindowLong(this->Handle, GWL_EXSTYLE, GetWindowLong(this->Handle, GWL_EXSTYLE) & ~WS_EX_APPWINDOW);
-    }
-}
 GET_CPP(Form, bool, TopMost)
 {
     return (GetWindowLong(this->Handle, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0;
@@ -110,6 +95,31 @@ GET_CPP(Form, bool, Visable)
 SET_CPP(Form, bool, Visable)
 {
     ShowWindow(this->Handle, value ? SW_SHOW : SW_HIDE);
+}
+
+GET_CPP(Form, bool, ShowInTaskBar)
+{
+    return this->_showInTaskBar;
+}
+SET_CPP(Form, bool, ShowInTaskBar)
+{
+    this->_showInTaskBar = value;
+    if (this->Handle)
+    {
+        LONG_PTR exStyle = GetWindowLongPtr(this->Handle, GWL_EXSTYLE);
+
+        if (value)
+        {
+            exStyle &= ~WS_EX_TOOLWINDOW;
+            exStyle |= WS_EX_APPWINDOW;
+        }
+        else
+        {
+            exStyle |= WS_EX_TOOLWINDOW;
+            exStyle &= ~WS_EX_APPWINDOW;
+        }
+        SetWindowLongPtr(this->Handle, GWL_EXSTYLE, exStyle);
+    }
 }
 Form::Form(std::wstring text, POINT _location, SIZE _size)
 {
@@ -187,6 +197,15 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     _minBox->Boder = 0.0f; _minBox->Round = 0.0f; _minBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _maxBox->Boder = 0.0f; _maxBox->Round = 0.0f; _maxBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
     _closeBox->Boder = 0.0f; _closeBox->Round = 0.0f; _closeBox->BackColor = D2D1_COLOR_F{ 0.0f,0.0f,0.0f,0.0f };
+    if (!pTaskbarList)
+    {
+        HRESULT hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,
+            IID_ITaskbarList, (LPVOID*)&pTaskbarList);
+        if (FAILED(hr)) {
+            pTaskbarList = NULL;
+            return;
+        }
+    }
 }
 
 void Form::updateHead()

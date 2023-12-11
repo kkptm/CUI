@@ -32,6 +32,7 @@ private:
     Button* _maxBox;
     Button* _closeBox;
     void updateHead();
+    bool _showInTaskBar = true;
 public:
     MouseWheelEvent OnMouseWheel;
     MouseMoveEvent OnMouseMove;
@@ -80,6 +81,11 @@ public:
     PROPERTY(POINT, Location);
     GET(POINT, Location);
     SET(POINT, Location);
+
+    PROPERTY(bool, ShowInTaskBar);
+    GET(bool, ShowInTaskBar);
+    SET(bool, ShowInTaskBar);
+
     PROPERTY(SIZE, Size);
     GET(SIZE, Size);
     SET(SIZE, Size);
@@ -88,9 +94,6 @@ public:
     PROPERTY(std::wstring, Text);
     GET(std::wstring, Text);
     SET(std::wstring, Text);
-    PROPERTY(bool, ShowInTaskBar);
-    GET(bool, ShowInTaskBar);
-    SET(bool, ShowInTaskBar);
     PROPERTY(bool, TopMost);
     GET(bool, TopMost);
     SET(bool, TopMost);
