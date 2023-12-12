@@ -6,6 +6,8 @@ class ComboBox : public Control
 #define COMBO_MIN_SCROLL_BLOCK 16
 private:
 	int _underMouseIndex = -1;
+	bool isDraggingScroll = false;
+	void UpdateScrollDrag(float posY);
 public:
 	virtual UIClass Type();
 	D2D1_COLOR_F UnderMouseBackColor = Colors::SkyBlue;
@@ -13,8 +15,8 @@ public:
 	D2D1_COLOR_F ScrollBackColor = Colors::LightGray;
 	D2D1_COLOR_F ScrollForeColor = Colors::DimGrey;
 	D2D1_COLOR_F ButtonBackColor = Colors::SkyBlue;
-	UINT32 ExpandCount = 4;
-	UINT32 ExpandScroll = 0;
+	int ExpandCount = 4;
+	int ExpandScroll = 0;
 	bool Expand = false;
 	int SelectedIndex = 0;
 	List<std::wstring> values;

@@ -4,6 +4,10 @@
 CustomTextBox1::CustomTextBox1(std::wstring text, int x, int y, int width, int height) :TextBox(text, x, y, width, height)
 {
 	this->TextMargin = this->Height * 0.5f;
+	Stops.push_back({ 0.0f, D2D1::ColorF(227.0f / 255.0f, 9.0f / 255.0f, 64.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 0.33f, D2D1::ColorF(231.0f / 255.0f, 215.0f / 255.0f, 2.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 0.66f, D2D1::ColorF(15.0f / 255.0f, 168.0f / 255.0f, 149.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 1.0f, D2D1::ColorF(19.0f / 255.0f, 115.0f / 255.0f, 232.0f / 255.0f, 1.0f) });
 }
 void CustomTextBox1::Update()
 {
@@ -26,15 +30,8 @@ void CustomTextBox1::Update()
 		{
 			this->RenderImage();
 		}
-		D2D1_GRADIENT_STOP stops[] =
-		{
-			{ 0.0f, D2D1::ColorF(227.0f / 255.0f, 9.0f / 255.0f, 64.0f / 255.0f, 1.0f) },
-			{ 0.33f, D2D1::ColorF(231.0f / 255.0f, 215.0f / 255.0f, 2.0f / 255.0f, 1.0f) },
-			{ 0.66f, D2D1::ColorF(15.0f / 255.0f, 168.0f / 255.0f, 149.0f / 255.0f, 1.0f) },
-			{ 1.0f, D2D1::ColorF(19.0f / 255.0f, 115.0f / 255.0f, 232.0f / 255.0f, 1.0f) }
-		};
 		d2d->PushDrawRect(absRect.left + this->TextMargin, absRect.top, (absRect.right - absRect.left) - (this->TextMargin * 2.0f), (absRect.bottom - absRect.top));
-		auto brush = d2d->CreateLinearGradientBrush(stops, _countof(stops));
+		auto brush = d2d->CreateLinearGradientBrush(this->Stops.data(), this->Stops.size());
 		brush->SetStartPoint(D2D1::Point2F(this->Left, this->Top));
 		brush->SetEndPoint(D2D1::Point2F(this->Left + this->Width, this->Top + this->Height));
 		if (this->Text.size() > 0)
@@ -114,6 +111,10 @@ void CustomTextBox1::Update()
 }
 CustomLabel1::CustomLabel1(std::wstring text, int x, int y) :Label(text, x, y)
 {
+	Stops.push_back({ 0.0f, D2D1::ColorF(227.0f / 255.0f, 9.0f / 255.0f, 64.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 0.33f, D2D1::ColorF(231.0f / 255.0f, 215.0f / 255.0f, 2.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 0.66f, D2D1::ColorF(15.0f / 255.0f, 168.0f / 255.0f, 149.0f / 255.0f, 1.0f) });
+	Stops.push_back({ 1.0f, D2D1::ColorF(19.0f / 255.0f, 115.0f / 255.0f, 232.0f / 255.0f, 1.0f) });
 }
 void CustomLabel1::Update()
 {
@@ -129,14 +130,7 @@ void CustomLabel1::Update()
 	}
 	d2d->PushDrawRect(absRect.left, absRect.top, FLT_MAX, FLT_MAX);
 	{
-		D2D1_GRADIENT_STOP stops[] =
-		{
-			{ 0.0f, D2D1::ColorF(227.0f / 255.0f, 9.0f / 255.0f, 64.0f / 255.0f, 1.0f) },
-			{ 0.33f, D2D1::ColorF(231.0f / 255.0f, 215.0f / 255.0f, 2.0f / 255.0f, 1.0f) },
-			{ 0.66f, D2D1::ColorF(15.0f / 255.0f, 168.0f / 255.0f, 149.0f / 255.0f, 1.0f) },
-			{ 1.0f, D2D1::ColorF(19.0f / 255.0f, 115.0f / 255.0f, 232.0f / 255.0f, 1.0f) }
-		};
-		auto brush = d2d->CreateLinearGradientBrush(stops, _countof(stops));
+		auto brush = d2d->CreateLinearGradientBrush(this->Stops.data(), this->Stops.size());
 		brush->SetStartPoint(D2D1::Point2F(this->Left, this->Top));
 		brush->SetEndPoint(D2D1::Point2F(this->Left + this->Width, this->Top + this->Height));
 		if (this->Image)

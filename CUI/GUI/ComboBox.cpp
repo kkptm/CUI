@@ -49,6 +49,35 @@ void ComboBox::DrawScroll()
 		}
 	}
 }
+void ComboBox::UpdateScrollDrag(float posY) {
+	if (!isDraggingScroll) return;
+	auto d2d = this->Render;
+	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	float font_height = font->FontHeight;
+	float dxHeight = this->ActualSize().cy - this->Height;
+	int render_count = this->ExpandCount;
+	float _render_height = this->Height * this->ExpandCount;
+	int maxScroll = this->values.Count - render_count;
+	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	float scrollBlockHeight = ((float)render_count / (float)this->values.Count) * (float)_render_height;
+	float scrollTop = scrollBlockHeight * 0.5f;
+	float scrollHeight = dxHeight - scrollBlockHeight;
+	float chrckPos = posY - scrollTop;
+	float per = chrckPos / scrollHeight;
+	int newScroll = per * maxScroll;
+	{
+		ExpandScroll = newScroll;
+		if (ExpandScroll < 0)
+		{
+			ExpandScroll = 0;
+		}
+		if (ExpandScroll > maxScroll)
+		{
+			ExpandScroll = maxScroll;
+		}
+		PostRender();
+	}
+}
 void ComboBox::Update()
 {
 	if (this->IsVisual == false)return;
@@ -135,7 +164,7 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	case WM_DROPFILES:
 	{
 		HDROP hDropInfo = HDROP(wParam);
-		UINT uFileNum = DragQueryFile(hDropInfo, 0xffffffff, NULL, 0);
+		UINT uFileNum = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, 0);
 		TCHAR strFileName[MAX_PATH];
 		List<std::wstring> files;
 		for (int i = 0; i < uFileNum; i++)
@@ -202,19 +231,27 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		if (this->Expand)
 		{
 			bool need_update = false;
-			if (xof >= 0 && yof >= this->Height)
+			if (isDraggingScroll)
 			{
-				int _yof = int((yof - this->Height) / this->Height);
-				if (_yof <= this->ExpandCount)
+				UpdateScrollDrag(yof - this->Height);
+				need_update = true;
+			}
+			else
+			{
+				if (xof >= 0 && yof >= this->Height)
 				{
-					int idx = _yof + this->ExpandScroll;
-					if (idx < this->values.Count)
+					int _yof = int((yof - this->Height) / this->Height);
+					if (_yof <= this->ExpandCount)
 					{
-						if (idx != this->_underMouseIndex)
+						int idx = _yof + this->ExpandScroll;
+						if (idx < this->values.Count)
 						{
-							need_update = true;
+							if (idx != this->_underMouseIndex)
+							{
+								need_update = true;
+							}
+							this->_underMouseIndex = idx;
 						}
-						this->_underMouseIndex = idx;
 					}
 				}
 			}
@@ -230,6 +267,9 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	{
 		if (WM_LBUTTONDOWN == message)
 		{
+			if (xof >= Width - 8 && xof <= Width) {
+				isDraggingScroll = true;
+			}
 			this->ParentForm->Selected = this;
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
@@ -242,7 +282,10 @@ bool ComboBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	{
 		if (WM_LBUTTONUP == message && this->ParentForm->Selected == this)
 		{
-			if (xof >= 0 && yof >= 0)
+			if (isDraggingScroll) {
+				isDraggingScroll = false;
+			}
+			else if (xof >= 0 && yof >= 0)
 			{
 				if (yof > 0)
 				{

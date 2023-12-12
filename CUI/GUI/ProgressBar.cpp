@@ -2,6 +2,16 @@
 #include "ProgressBar.h"
 #include "Form.h"
 UIClass ProgressBar::Type() { return UIClass::UI_ProgressBar; }
+
+GET_CPP(ProgressBar, float, PercentageValue)
+{
+	return this->_percentageValue;
+}
+SET_CPP(ProgressBar, float, PercentageValue)
+{
+	this->_percentageValue = value;
+	this->PostRender();
+}
 ProgressBar::ProgressBar(int x, int y, int width, int height)
 {
 	this->Location = POINT{ x,y };

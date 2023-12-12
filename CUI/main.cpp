@@ -15,8 +15,6 @@ int main()
     {
         Form::DoEvent();
         mainForm->progressbar1->PercentageValue = ((GetTick() % 5000000) / 5000000.0f);
-        if(mainForm->progressbar1->IsVisual)
-            mainForm->ControlChanged = true;
         bar->SetValue(mainForm->progressbar1->PercentageValue * 100, 100);
     }
     return 0;

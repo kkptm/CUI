@@ -42,6 +42,7 @@ SET_CPP(Form, SIZE, Size)
         SetWindowPos(this->Handle, NULL, 0, 0, value.cx, value.cy, SWP_NOMOVE | SWP_NOZORDER);
     }
     this->_Size_INTI = value;
+    this->ControlChanged = true;
 }
 
 GET_CPP(Form, SIZE, ClientSize)
@@ -63,6 +64,7 @@ GET_CPP(Form, std::wstring, Text) {
 }
 SET_CPP(Form, std::wstring, Text) {
     _text = value;
+    this->ControlChanged = true;
 }
 GET_CPP(Form, bool, TopMost)
 {

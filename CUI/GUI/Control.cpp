@@ -39,7 +39,7 @@ void Control::setTextPrivate(std::wstring s)
 void Control::Update() {}
 void Control::PostRender()
 {
-	if(this->ParentForm) this->ParentForm->ControlChanged = true;
+	if(this->IsVisual && this->ParentForm) this->ParentForm->ControlChanged = true;
 }
 GET_CPP(Control, int, Count)
 {
@@ -100,6 +100,7 @@ SET_CPP(Control, POINT, Location)
 {
 	this->OnMoved(this);
 	_location = value;
+	this->PostRender();
 }
 GET_CPP(Control, SIZE, Size)
 {
@@ -109,6 +110,7 @@ SET_CPP(Control, SIZE, Size)
 {
 	this->OnSizeChanged(this);
 	_size = value;
+	this->PostRender();
 }
 GET_CPP(Control, int, Left)
 {
@@ -117,6 +119,7 @@ GET_CPP(Control, int, Left)
 SET_CPP(Control, int, Left)
 {
 	this->_location = POINT{ value,this->_location.y };
+	this->PostRender();
 }
 GET_CPP(Control, int, Top)
 {
@@ -125,6 +128,7 @@ GET_CPP(Control, int, Top)
 SET_CPP(Control, int, Top)
 {
 	this->_location = POINT{ this->_location.x,value };
+	this->PostRender();
 }
 GET_CPP(Control, int, Width)
 {
@@ -134,6 +138,7 @@ SET_CPP(Control, int, Width)
 {
 	this->OnSizeChanged(this);
 	this->_size.cx = value;
+	this->PostRender();
 }
 GET_CPP(Control, int, Height)
 {
@@ -143,6 +148,7 @@ SET_CPP(Control, int, Height)
 {
 	this->OnSizeChanged(this);
 	_size.cy = value;
+	this->PostRender();
 }
 GET_CPP(Control, float, Right)
 {
@@ -162,6 +168,7 @@ SET_CPP(Control, std::wstring, Text)
 	{
 		this->TextChanged = true;
 		this->OnTextChanged(this, _text, value);
+		this->PostRender();
 	}
 	_text = value;
 }
@@ -172,6 +179,7 @@ GET_CPP(Control, D2D1_COLOR_F, BolderColor)
 SET_CPP(Control, D2D1_COLOR_F, BolderColor)
 {
 	_boldercolor = value;
+	this->PostRender();
 }
 GET_CPP(Control, D2D1_COLOR_F, BackColor)
 {
@@ -180,6 +188,7 @@ GET_CPP(Control, D2D1_COLOR_F, BackColor)
 SET_CPP(Control, D2D1_COLOR_F, BackColor)
 {
 	_backcolor = value;
+	this->PostRender();
 }
 GET_CPP(Control, D2D1_COLOR_F, ForeColor)
 {
@@ -188,6 +197,7 @@ GET_CPP(Control, D2D1_COLOR_F, ForeColor)
 SET_CPP(Control, D2D1_COLOR_F, ForeColor)
 {
 	_forecolor = value;
+	this->PostRender();
 }
 GET_CPP(Control, ID2D1Bitmap*, Image)
 {
@@ -196,6 +206,7 @@ GET_CPP(Control, ID2D1Bitmap*, Image)
 SET_CPP(Control, ID2D1Bitmap*, Image)
 {
 	_image = value;
+	this->PostRender();
 }
 void Control::RenderImage()
 {
