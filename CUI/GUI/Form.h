@@ -18,9 +18,23 @@
 #include "TextBox.h"
 #include "TreeView.h"
 #include "Taskbar.h"
-typedef Event<void(*)(void* sender, int Id, int info)> CommandEvent;
-typedef Event<void(*)(void*)> FormClosingEvent;
-typedef Event<void(*)(void*)> FormClosedEvent;
+typedef Event<void(*)(class Form* sender, int Id, int info)> CommandEvent;
+typedef Event<void(*)(class Form*)> FormClosingEvent;
+typedef Event<void(*)(class Form*)> FormClosedEvent;
+typedef Event<void(*)(class Form*, wchar_t)> FormCharInputEvent;
+typedef Event<void(*)(class Form*)> FormPaintEvent;
+typedef Event<void(*)(class Form*, MouseEventArgs)> FormMouseWheelEvent;
+typedef Event<void(*)(class Form*, MouseEventArgs)> FormMouseMoveEvent;
+typedef Event<void(*)(class Form*, MouseEventArgs)> FormMouseUpEvent;
+typedef Event<void(*)(class Form*, MouseEventArgs)> FormMouseDownEvent;
+typedef Event<void(*)(class Form*, KeyEventArgs)> FormKeyUpEvent;
+typedef Event<void(*)(class Form*, KeyEventArgs)> FormKeyDownEvent;
+typedef Event<void(*)(class Form*)> FormMovedEvent;
+typedef Event<void(*)(class Form*)> FormSizeChangedEvent;
+typedef Event<void(*)(class Form*, std::wstring, std::wstring)> FormTextChangedEvent;
+typedef Event<void(*)(class Form*)> FormGotFocusEvent;
+typedef Event<void(*)(class Form*)> FormLostFocusEvent;
+typedef Event<void(*)(class Form*, List<std::wstring>)> FormDropFileEvent;
 class Form
 {
 private:
@@ -34,27 +48,25 @@ private:
     void updateHead();
     bool _showInTaskBar = true;
 public:
-    MouseWheelEvent OnMouseWheel;
-    MouseMoveEvent OnMouseMove;
-    MouseUpEvent OnMouseUp;
-    MouseDownEvent OnMouseDown;
+    FormMouseWheelEvent OnMouseWheel;
+    FormMouseMoveEvent OnMouseMove;
+    FormMouseUpEvent OnMouseUp;
+    FormMouseDownEvent OnMouseDown;
     MouseDoubleClickEvent OnMouseDoubleClick;
     MouseClickEvent OnMouseClick;
     MouseEnterEvent OnMouseEnter;
     MouseLeavedEvent OnMouseLeaved;
-    KeyUpEvent OnKeyUp;
-    KeyDownEvent OnKeyDown;
-    PaintEvent OnPaint;
-    GridViewCheckStateChangedEvent OnGridViewCheckStateChanged;
+    FormKeyUpEvent OnKeyUp;
+    FormKeyDownEvent OnKeyDown;
+    FormPaintEvent OnPaint;
     CloseEvent OnClose;
-    MovedEvent OnMoved;
-    SizeChangedEvent OnSizeChanged;
-    ScrollChangedEvent OnScrollChanged;
-    TextChangedEvent OnTextChanged;
-    CharInputEvent OnCharInput;
-    GotFocusEvent OnGotFocus;
-    LostFocusEvent OnLostFocus;
-    DropFileEvent OnDropFile;
+    FormMovedEvent OnMoved;
+    FormSizeChangedEvent OnSizeChanged;
+    FormTextChangedEvent OnTextChanged;
+    FormCharInputEvent OnCharInput;
+    FormGotFocusEvent OnGotFocus;
+    FormLostFocusEvent OnLostFocus;
+    FormDropFileEvent OnDropFile;
     FormClosingEvent OnFormClosing;
     FormClosedEvent OnFormClosed;
     //菜单事件,id表示菜单项的id,info表示菜单项的信息

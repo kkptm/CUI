@@ -1,7 +1,7 @@
 #pragma once
 #include "Control.h"
 #pragma comment(lib, "Imm32.lib")
-typedef Event<void(*)(class Control*, int c, int r, bool v)> OnGridViewCheckStateChangedEvent;
+typedef Event<void(*)(class GridView*, int c, int r, bool v)> OnGridViewCheckStateChangedEvent;
 enum class ColumnType
 {
 	Text,

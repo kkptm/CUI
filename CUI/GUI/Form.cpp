@@ -170,12 +170,12 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
     _maxBox = (Button*)this->AddControl(new Button(L"⬜", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
     xtmp += this->HeadHeight;
     _closeBox = (Button*)this->AddControl(new Button(L"✕", xtmp, 0.0f, this->HeadHeight, this->HeadHeight));
-    _minBox->OnMouseClick += [](void* sender, MouseEventArgs)
+    _minBox->OnMouseClick += [](class Control* sender, MouseEventArgs)
         {
             ((Button*)sender)->ParentForm->Handle;
             ShowWindow(((Button*)sender)->ParentForm->Handle, SW_MINIMIZE);
         };
-    _maxBox->OnMouseClick += [](void* sender, MouseEventArgs)
+    _maxBox->OnMouseClick += [](class Control* sender, MouseEventArgs)
         {
             ((Button*)sender)->ParentForm->Handle;
             if (IsZoomed(((Button*)sender)->ParentForm->Handle))
@@ -189,7 +189,7 @@ Form::Form(std::wstring text, POINT _location, SIZE _size)
                 ShowWindow(((Button*)sender)->ParentForm->Handle, SW_MAXIMIZE);
             }
         };
-    _closeBox->OnMouseClick += [](void* sender, MouseEventArgs)
+    _closeBox->OnMouseClick += [](class Control* sender, MouseEventArgs)
         {
             ((Button*)sender)->ParentForm->Close();
         };

@@ -1,6 +1,6 @@
 #include "ProcessSelectWindow.h"
 
-void ProcessSelectWindow::_searchBox_OnTextChanged(void* sender, const std::wstring oldtext, const std::wstring text)
+void ProcessSelectWindow::_searchBox_OnTextChanged(class Control* sender, const std::wstring oldtext, const std::wstring text)
 {
 	TextBox* _tx = (TextBox*)sender;
 	ProcessSelectWindow* window = (ProcessSelectWindow*)_tx->ParentForm;
@@ -19,7 +19,7 @@ void ProcessSelectWindow::_searchBox_OnTextChanged(void* sender, const std::wstr
 		}
 	}
 }
-void ProcessSelectWindow::_selectButton_OnMouseClick(void* sender, MouseEventArgs e)
+void ProcessSelectWindow::_selectButton_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
 	Button* _btn = (Button*)sender;
 	ProcessSelectWindow* window = (ProcessSelectWindow*)_btn->ParentForm;

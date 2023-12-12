@@ -36,30 +36,30 @@ enum class UIClass : int
 	UI_CUSTOM
 };
 
-typedef Event<void(*)(void*, EventArgs)> EventHandler;
-typedef Event<void(*)(void*)> CheckedEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseWheelEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseMoveEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseUpEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseDownEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseDoubleClickEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseClickEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseEnterEvent;
-typedef Event<void(*)(void*, MouseEventArgs)> MouseLeavedEvent;
-typedef Event<void(*)(void*, KeyEventArgs)> KeyUpEvent;
-typedef Event<void(*)(void*, KeyEventArgs)> KeyDownEvent;
-typedef Event<void(*)(void*)> PaintEvent;
-typedef Event<void(*)(void*, int column, int row, bool value)> GridViewCheckStateChangedEvent;
-typedef Event<void(*)(void*)> CloseEvent;
-typedef Event<void(*)(void*)> MovedEvent;
-typedef Event<void(*)(void*)> SizeChangedEvent;
-typedef Event<void(*)(void*)> ScrollChangedEvent;
-typedef Event<void(*)(void*, std::wstring, std::wstring)> TextChangedEvent;
-typedef Event<void(*)(void*, wchar_t)> CharInputEvent;
-typedef Event<void(*)(void*)> GotFocusEvent;
-typedef Event<void(*)(void*)> LostFocusEvent;
-typedef Event<void(*)(void*, List<std::wstring>)> DropFileEvent;
-typedef Event<void(*)(void*)> SelectionChangedEvent;
+typedef Event<void(*)(class Control*, EventArgs)> EventHandler;
+typedef Event<void(*)(class Control*)> CheckedEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseWheelEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseMoveEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseUpEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseDownEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseDoubleClickEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseClickEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseEnterEvent;
+typedef Event<void(*)(class Control*, MouseEventArgs)> MouseLeavedEvent;
+typedef Event<void(*)(class Control*, KeyEventArgs)> KeyUpEvent;
+typedef Event<void(*)(class Control*, KeyEventArgs)> KeyDownEvent;
+typedef Event<void(*)(class Control*)> PaintEvent;
+typedef Event<void(*)(class Control*, int column, int row, bool value)> GridViewCheckStateChangedEvent;
+typedef Event<void(*)(class Control*)> CloseEvent;
+typedef Event<void(*)(class Control*)> MovedEvent;
+typedef Event<void(*)(class Control*)> SizeChangedEvent;
+typedef Event<void(*)(class Control*)> ScrollChangedEvent;
+typedef Event<void(*)(class Control*, std::wstring, std::wstring)> TextChangedEvent;
+typedef Event<void(*)(class Control*, wchar_t)> CharInputEvent;
+typedef Event<void(*)(class Control*)> GotFocusEvent;
+typedef Event<void(*)(class Control*)> LostFocusEvent;
+typedef Event<void(*)(class Control*, List<std::wstring>)> DropFileEvent;
+typedef Event<void(*)(class Control*)> SelectionChangedEvent;
 
 #define defthis(x) decltype(this) _this = (decltype(this))((class Control*)x)->ParentForm
 class Control

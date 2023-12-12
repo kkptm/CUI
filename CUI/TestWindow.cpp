@@ -17,30 +17,29 @@ TestWindow::~TestWindow()
         icos[i]->Release();
     }
 }
-void label1_OnMouseWheel(void* sender, MouseEventArgs e)
+void label1_OnMouseWheel(class Control* sender, MouseEventArgs e)
 {
-    ((Label*)sender)->Text = StringHelper::Format(L"MouseWheel Delta=[%d]", e.Delta);
-    ((Label*)sender)->PostRender();
+    sender->Text = StringHelper::Format(L"MouseWheel Delta=[%d]", e.Delta);
+    sender->PostRender();
 }
-void button1_OnMouseClick(void* sender, MouseEventArgs e)
+void button1_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
-    auto btn = ((Button*)sender);
-    btn->Text = StringHelper::Format(L"独立Tag计数[%d]", btn->Tag++);
-    btn->PostRender();
+    sender->Text = StringHelper::Format(L"独立Tag计数[%d]", sender->Tag++);
+    sender->PostRender();
 }
-void radiobox1_OnChecked(void* sender)
+void radiobox1_OnChecked(class Control* sender)
 {
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox2->Checked = false;
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox2->PostRender();
+    ((TestWindow*)sender->ParentForm)->radiobox2->Checked = false;
+    ((TestWindow*)sender->ParentForm)->radiobox2->PostRender();
 }
-void radiobox2_OnChecked(void* sender)
+void radiobox2_OnChecked(class Control* sender)
 {
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox1->Checked = false;
-    ((TestWindow*)((Control*)sender)->ParentForm)->radiobox1->PostRender();
+    ((TestWindow*)sender->ParentForm)->radiobox1->Checked = false;
+    ((TestWindow*)sender->ParentForm)->radiobox1->PostRender();
 }
-void bt2_OnMouseClick(void* sender, MouseEventArgs e)
+void bt2_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
-    TestWindow* form = ((TestWindow*)((Control*)sender)->ParentForm);
+    TestWindow* form = ((TestWindow*)sender->ParentForm);
     PictureBox* picturebox1 = form->picturebox1;
     OpenFileDialog ofd;
     ofd.Filter = "图片文件(*.jpg;*.png;*.bmp;*.svg)\0*.jpg;*.png;*.bmp;*.svg\0";
@@ -71,17 +70,17 @@ void bt2_OnMouseClick(void* sender, MouseEventArgs e)
 		}
     }
 }
-void sw1_OnMouseClick(void* sender, MouseEventArgs e)
+void sw1_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
     Switch* sw = (Switch*)sender;
-    ((TestWindow*)((Control*)sender)->ParentForm)->gridview1->Enable = sw->Checked;
+    ((TestWindow*)sender->ParentForm)->gridview1->Enable = sw->Checked;
 }
-void sw2_OnMouseClick(void* sender, MouseEventArgs e)
+void sw2_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
     Switch* sw = (Switch*)sender;
-    ((TestWindow*)((Control*)sender)->ParentForm)->gridview1->Visable = sw->Checked;
+    ((TestWindow*)sender->ParentForm)->gridview1->Visable = sw->Checked;
 }
-void iconButton_OnMouseClick(void* sender, MouseEventArgs e)
+void iconButton_OnMouseClick(class Control* sender, MouseEventArgs e)
 {
     ProcessSelectWindow* psfm = new ProcessSelectWindow();
     psfm->ShowDialog();
@@ -161,7 +160,7 @@ void TestWindow::Init()
         {
             auto ssub = new TreeNode(StringHelper::Format(L"item%d-%d", i,j), bmps[1]);
             sub->Children.Add(ssub);
-            for (int n = 0; n < 2; n++)
+            for (int n = 0; n < 10; n++)
             {
 				auto sssub = new TreeNode(StringHelper::Format(L"item%d-%d-%d", i, j,n), bmps[2]);
 				ssub->Children.Add(sssub);
@@ -173,23 +172,23 @@ void TestWindow::Init()
     panel1->AddControl(new Label(L"图片框(支持拖拽)", 10, 10));
     picturebox1 = panel1->AddControl(new PictureBox(120, 10, 260, 120));
     picturebox1->Image = this->Image;
-    picturebox1->OnDropFile += [](void* sender, List<std::wstring> files)
+    picturebox1->OnDropFile += [](class Control* sender, List<std::wstring> files)
     {
-        if (((Control*)sender)->Image)
+        if (sender->Image)
         {
-            ((Control*)sender)->Image->Release();
-            ((Control*)sender)->Image = NULL;
+            sender->Image->Release();
+            sender->Image = NULL;
         }
         FileInfo file(Convert::wstring_to_string(files[0]));
         if (file.Extension() == ".svg" || file.Extension() == ".SVG")
         {
-            ((Control*)sender)->Image = ((Control*)sender)->Render->ToBitmapFromSvg((char*)File::ReadAllBytes(Convert::wstring_to_string(files[0]).c_str()).data());
-            ((Control*)sender)->PostRender();
+            sender->Image = sender->Render->ToBitmapFromSvg((char*)File::ReadAllBytes(Convert::wstring_to_string(files[0]).c_str()).data());
+            sender->PostRender();
         }
         else
         {
-            ((Control*)sender)->Image = ((Control*)sender)->Render->CreateBitmap(files[0].c_str());
-            ((Control*)sender)->PostRender();
+            sender->Image = sender->Render->CreateBitmap(files[0].c_str());
+            sender->PostRender();
         }
     };
     panel1->AddControl(new Label(L"Progress Bar", 10, picturebox1->Bottom + 5));

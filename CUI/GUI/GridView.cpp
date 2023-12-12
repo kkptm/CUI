@@ -476,21 +476,21 @@ void GridView::Update()
 	{
 		this->AddControl(new TextBox(L"", 10, 10))->Visable = true;
 		this->get(0)->Tag = 0xFFFFFFFFFFFFFFFF;
-		this->get(0)->OnTextChanged += [](void* sender, std::wstring, std::wstring)
+		this->get(0)->OnTextChanged += [](class Control* sender, std::wstring, std::wstring)
 			{
-				GridView* gd = (GridView*)((Control*)sender)->Parent;
-				int xx = ((Control*)sender)->Tag >> 32;
-				int yy = ((Control*)sender)->Tag & 0xffffffff;
+				GridView* gd = (GridView*)sender->Parent;
+				int xx = sender->Tag >> 32;
+				int yy = sender->Tag & 0xffffffff;
 				if (xx >= 0 && yy >= 0)
 				{
-					std::wstring str = ((Control*)sender)->Text.c_str();
+					std::wstring str = sender->Text.c_str();
 					gd->Rows[yy].Cells[xx] = str;
 				}
 
 			};
-		this->get(0)->OnKeyDown += [](void* sender, KeyEventArgs e)
+		this->get(0)->OnKeyDown += [](class Control* sender, KeyEventArgs e)
 			{
-				GridView* gd = (GridView*)((Control*)sender)->Parent;
+				GridView* gd = (GridView*)sender->Parent;
 				if (e.KeyData == Keys::Return)
 				{
 					if (gd->SelectedRowIndex < gd->Rows.Count - 1)
