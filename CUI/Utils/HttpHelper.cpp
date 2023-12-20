@@ -214,7 +214,7 @@ std::string HttpHelper::HTTPSGET(const std::string& url)
         return "";
     }
 
-    HINTERNET hRequest = HttpOpenRequestA(hConnect, "GET", url.c_str(), NULL, NULL, NULL, INTERNET_FLAG_SECURE, 1);
+    HINTERNET hRequest = HttpOpenRequestA(hConnect, "GET", url.c_str(), HTTP_VERSIONA, "", NULL, INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID, 0);
     if (hRequest == NULL) {
         InternetCloseHandle(hConnect);
         InternetCloseHandle(hInternet);

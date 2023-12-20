@@ -13,17 +13,24 @@ RichTextBox::RichTextBox(std::wstring text, int x, int y, int width, int height)
 	UpdateLayout();
 }
 
+
 void RichTextBox::UpdateLayout()
 {
 	if (this->TextChanged)
 	{
-
 		if (this->layOutCache)this->layOutCache->Release();
 		auto d2d = this->Render;
 		if (d2d)
 		{
 			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
-			this->layOutCache = d2d->CreateStringLayout(this->Text, font);
+			float render_width = this->Width - (TextMargin * 2.0f);
+			float render_height = this->Height - (TextMargin * 2.0f);
+			if (textSize.height > render_height)
+			{
+				render_width -= 8.0f;
+			}
+			this->layOutCache = d2d->CreateStringLayout(this->Text, render_width, render_height, font);
+			textSize = font->GetTextSize(layOutCache);
 			if (this->layOutCache)
 			{
 				TextChanged = false;
@@ -224,9 +231,10 @@ void RichTextBox::UpdateScroll(bool arrival)
 {
 	float render_width = this->Width - (TextMargin * 2.0f);
 	float render_height = this->Height - (TextMargin * 2.0f);
-	if (textSize.height > render_height)render_width -= 8.0f;
+	if (textSize.height > render_height)
+		render_width -= 8.0f;
 	auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-	auto lastSelect = font->HitTestTextRange(this->Text, render_width, render_height, (UINT32)SelectionEnd, (UINT32)0)[0];
+	auto lastSelect = font->HitTestTextRange(this->layOutCache,(UINT32)SelectionEnd, (UINT32)0)[0];
 	if ((lastSelect.top + lastSelect.height) - OffsetY > render_height)
 	{
 		OffsetY = (lastSelect.top + lastSelect.height) - render_height;
@@ -266,17 +274,10 @@ std::wstring RichTextBox::GetSelectedString()
 void RichTextBox::Update()
 {
 	if (this->IsVisual == false)return;
+	this->UpdateLayout();
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	auto d2d = this->Render;
 	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
-	float render_width = this->Width - (TextMargin * 2.0f);
-	float render_height = this->Height - (TextMargin * 2.0f);
-	textSize = font->GetTextSize(this->Text, render_width, render_height);
-	if (textSize.height > render_height)
-	{
-		render_width -= 8.0f;
-		textSize = font->GetTextSize(this->Text, render_width, render_height);
-	}
 	auto abslocation = this->AbsLocation;
 	auto size = this->ActualSize();
 	auto absRect = this->AbsRect;
@@ -291,18 +292,22 @@ void RichTextBox::Update()
 		if (this->Text.size() > 0)
 		{
 			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
-			UpdateLayout();
 			if (isSelected)
 			{
 				int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
 				int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
 				int selLen = sele - sels;
-				auto selRange = font->HitTestTextRange(this->Text, render_width, render_height, (UINT32)sels, (UINT32)selLen);
+				auto selRange = font->HitTestTextRange(this->layOutCache, (UINT32)sels, (UINT32)selLen);
 				if (selLen != 0)
 				{
 					for (auto sr : selRange)
 					{
-						d2d->FillRect(sr.left + abslocation.x + TextMargin, (sr.top + abslocation.y + TextMargin) - this->OffsetY, sr.width, sr.height, this->SelectedBackColor);
+						d2d->FillRect(
+							sr.left + abslocation.x + TextMargin, 
+							(sr.top + abslocation.y + TextMargin) - this->OffsetY,
+							sr.width, 
+							sr.height, 
+							this->SelectedBackColor);
 					}
 				}
 				else
@@ -318,21 +323,17 @@ void RichTextBox::Update()
 				selectedPos.x += this->TextMargin;
 				d2d->DrawStringLayout(this->layOutCache,
 					(float)abslocation.x + TextMargin, ((float)abslocation.y + TextMargin) - this->OffsetY,
-					render_width, render_height,
 					this->ForeColor,
 					DWRITE_TEXT_RANGE{ (UINT32)sels, (UINT32)selLen },
-					this->SelectedForeColor,
-					font);
+					this->SelectedForeColor);
 			}
 			else
 			{
 				d2d->DrawStringLayout(this->layOutCache,
 					(float)abslocation.x + TextMargin, ((float)abslocation.y + TextMargin) - this->OffsetY,
-					render_width, render_height,
 					this->ForeColor,
 					DWRITE_TEXT_RANGE{ (UINT32)0, (UINT32)0 },
-					this->SelectedForeColor,
-					font);
+					this->SelectedForeColor);
 			}
 		}
 		else
@@ -412,10 +413,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this && !isDraggingScroll)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			float render_width = this->Width - (TextMargin * 2.0f);
-			float render_height = this->Height - (TextMargin * 2.0f);
-			if (textSize.height > render_height)render_width -= 8.0f;
-			SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+			SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
 			UpdateScroll();
 			this->PostRender();
 		}
@@ -441,10 +439,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			else
 			{
 				auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-				float render_width = this->Width - (TextMargin * 2.0f);
-				float render_height = this->Height - (TextMargin * 2.0f);
-				if (textSize.height > render_height)render_width -= 8.0f;
-				this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+				this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
 			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
@@ -461,11 +456,8 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		else if (this->ParentForm->Selected == this)
 		{
-			float render_width = this->Width - (TextMargin * 2.0f);
-			float render_height = this->Height - (TextMargin * 2.0f);
-			if (textSize.height > render_height)render_width -= 8.0f;
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			SelectionEnd = font->HitTestTextPosition(this->Text, render_width, render_height, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+			SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
@@ -531,8 +523,8 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		else if (wParam == VK_UP)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top - (font->FontHeight * 0.5f));
+			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
+			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top - (font->FontHeight * 0.5f));
 			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
@@ -546,8 +538,8 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		else if (wParam == VK_DOWN)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top + (font->FontHeight * 1.5f));
+			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
+			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top + (font->FontHeight * 1.5f));
 			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
@@ -560,9 +552,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		else if (wParam == VK_HOME)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, 0, hit[0].top + (font->FontHeight * 0.5f));
+			this->SelectionEnd = 0;
 			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
@@ -575,24 +565,22 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		else if (wParam == VK_END)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, FLT_MAX, hit[0].top + (font->FontHeight * 0.5f));
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
-			{
-				this->SelectionStart = this->SelectionEnd;
-			}
+			this->SelectionEnd = this->Text.size();
 			if (this->SelectionEnd > this->Text.size())
 			{
 				this->SelectionEnd = this->Text.size();
+			}
+			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			{
+				this->SelectionStart = this->SelectionEnd;
 			}
 			UpdateScroll();
 		}
 		else if (wParam == VK_PRIOR)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top - this->Height);
+			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
+			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top - this->Height);
 			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
@@ -606,8 +594,8 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		else if (wParam == VK_NEXT)
 		{
 			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
-			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
-			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top + this->Height);
+			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
+			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top + this->Height);
 			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;

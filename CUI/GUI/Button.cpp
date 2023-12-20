@@ -11,7 +11,7 @@ Button::Button(std::wstring text, int x, int y, int width, int height)
 }
 void Button::Update()
 {
-	if (this->IsVisual == false)return;
+	if (!this->IsVisual) return;
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	bool isSelected = this->ParentForm->Selected == this;
 	auto d2d = this->Render;
@@ -20,40 +20,24 @@ void Button::Update()
 	auto absRect = this->AbsRect;
 	d2d->PushDrawRect(absRect.left, absRect.top, absRect.right - absRect.left, absRect.bottom - absRect.top);
 	{
-		d2d->FillRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f), size.cx - this->Boder, size.cy - this->Boder, this->BackColor, this->Image ? 0.0f : this->Height * Round);
+		float roundVal = this->Image ? 0.0f : this->Height * Round;
+		d2d->FillRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f), size.cx - this->Boder, size.cy - this->Boder, this->BackColor, roundVal);
 		if (this->Image)
-		{
 			this->RenderImage();
-		}
-		if (isUnderMouse && isSelected)
-		{
-			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.7f }, this->Image ? 0.0f : this->Height * Round);
-		}
-		else if (isUnderMouse)
-		{
-			d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.4f }, this->Image ? 0.0f : this->Height * Round);
-		}
+		D2D1::ColorF color = isUnderMouse ? (isSelected ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.7f) : D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.4f)) : D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f);
+		d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, color, roundVal);
 		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
 		auto textSize = font->GetTextSize(this->Text);
-		float drawLeft = 0.0f;
-		float drawTop = 0.0f;
-		if (this->Width > textSize.width)
-		{
-			drawLeft = (this->Width - textSize.width) / 2.0f;
-		}
-		if (this->Height > textSize.height)
-		{
-			drawTop = (this->Height - textSize.height) / 2.0f;
-		}
+		float drawLeft = this->Width > textSize.width ? (this->Width - textSize.width) / 2.0f : 0.0f;
+		float drawTop = this->Height > textSize.height ? (this->Height - textSize.height) / 2.0f : 0.0f;
 		d2d->DrawString(this->Text, abslocation.x + drawLeft, abslocation.y + drawTop, this->ForeColor, this->Font);
 		d2d->DrawRoundRect(abslocation.x + (this->Boder * 0.5f), abslocation.y + (this->Boder * 0.5f),
 			size.cx - this->Boder, size.cy - this->Boder,
-			this->BolderColor, this->Boder, this->Image ? 0.0f : this->Height * this->Round);
+			this->BolderColor, this->Boder, roundVal);
 	}
+
 	if (!this->Enable)
-	{
 		d2d->FillRect(abslocation.x, abslocation.y, size.cx, size.cy, { 1.0f ,1.0f ,1.0f ,0.5f });
-	}
 	d2d->PopDrawRect();
 }
 bool Button::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof)

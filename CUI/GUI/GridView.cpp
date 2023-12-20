@@ -26,6 +26,14 @@ CellValue& GridViewRow::operator[](int idx)
 {
 	return Cells[idx];
 }
+
+GridViewColunm::GridViewColunm(std::wstring name, float width, ColumnType type, bool canEdit)
+{
+	Name = name;
+	Width = width;
+	Type = type;
+	CanEdit = canEdit;
+}
 UIClass GridView::Type() { return UIClass::UI_GridView; }
 GridView::GridView(int x, int y, int width, int height)
 {

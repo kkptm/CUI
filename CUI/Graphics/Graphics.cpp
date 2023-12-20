@@ -10,6 +10,10 @@ inline ID2D1SolidColorBrush* Graphics::GetBrush()
 {
     return Default_Brush;
 }
+inline ID2D1SolidColorBrush* Graphics::GetBackBrush()
+{
+    return Default_Brush_Back;
+}
 Graphics::Graphics(IDXGISurface* dxgiSurface)
 {
     _Target_Type = target_type::__surface;
@@ -26,6 +30,8 @@ Graphics::Graphics(IDXGISurface* dxgiSurface)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     WindowHandle = NULL;
 }
 Graphics::Graphics(IDXGISwapChain* swap_chain_ptr)
@@ -53,6 +59,8 @@ Graphics::Graphics(IDXGISwapChain* swap_chain_ptr)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     WindowHandle = NULL;
 }
 Graphics::Graphics(HWND hWnd)
@@ -74,6 +82,8 @@ Graphics::Graphics(HWND hWnd)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
 }
 Graphics::Graphics(int width, int height)
 {
@@ -98,6 +108,8 @@ Graphics::Graphics(int width, int height)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     WindowHandle = NULL;
 }
 Graphics::Graphics(IWICBitmap* wic)
@@ -121,6 +133,8 @@ Graphics::Graphics(IWICBitmap* wic)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     auto bbmp = this->CreateBitmap(wic);
     this->BeginRender();
     this->DrawBitmap(bbmp, 0, 0, w, h);
@@ -147,6 +161,8 @@ Graphics::Graphics(ID2D1Bitmap* bmp)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     this->BeginRender();
     this->DrawBitmap(bmp, 0, 0, size.width, size.height);
     this->EndRender();
@@ -160,6 +176,8 @@ Graphics::Graphics(ID2D1BitmapRenderTarget* target)
     _D3DCOLORVALUE color = { 0.5f,0.6f,0.7f,1.0f };
     pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush);
     this->Default_Brush->SetColor(color);
+    pRenderTarget->CreateSolidColorBrush(color, &this->Default_Brush_Back);
+    this->Default_Brush_Back->SetColor(color);
     WindowHandle = NULL;
 }
 Graphics::~Graphics()
@@ -171,6 +189,7 @@ Graphics::~Graphics()
     }
     if (this->pRenderTarget) pRenderTarget->Release();
     if (this->Default_Brush) Default_Brush->Release();
+    if (this->Default_Brush_Back) Default_Brush_Back->Release();
 }
 ID2D1SolidColorBrush* Graphics::GetColorBrush(D2D1_COLOR_F newcolor)
 {
@@ -195,6 +214,33 @@ ID2D1SolidColorBrush* Graphics::GetColorBrush(int r, int g, int b)
 ID2D1SolidColorBrush* Graphics::GetColorBrush(float r, float g, float b, float a)
 {
     auto brush = this->GetBrush();
+    D2D1_COLOR_F _newcolor = { r,g,b,a };
+    brush->SetColor(_newcolor);
+    return brush;
+}
+ID2D1SolidColorBrush* Graphics::GetBackColorBrush(D2D1_COLOR_F newcolor)
+{
+    auto brush = this->GetBackBrush();
+    brush->SetColor(newcolor);
+    return brush;
+}
+ID2D1SolidColorBrush* Graphics::GetBackColorBrush(COLORREF newcolor)
+{
+    auto brush = this->GetBackBrush();
+    D2D1_COLOR_F _newcolor = { GetRValue(newcolor) / 255.0f,GetGValue(newcolor) / 255.0f,GetBValue(newcolor) / 255.0f,1.0f };
+    brush->SetColor(_newcolor);
+    return brush;
+}
+ID2D1SolidColorBrush* Graphics::GetBackColorBrush(int r, int g, int b)
+{
+    auto brush = this->GetBackBrush();
+    D2D1_COLOR_F _newcolor = { r / 255.0f,g / 255.0f,b / 255.0f,1.0f };
+    brush->SetColor(_newcolor);
+    return brush;
+}
+ID2D1SolidColorBrush* Graphics::GetBackColorBrush(float r, float g, float b, float a)
+{
+    auto brush = this->GetBackBrush();
     D2D1_COLOR_F _newcolor = { r,g,b,a };
     brush->SetColor(_newcolor);
     return brush;
@@ -572,7 +618,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCent(IDWriteTextLayout* layout, float x, f
     D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y - (tsize.height / 2.0f) };
     if (back.a > 0.0f)
     {
-        auto brush = this->GetColorBrush(back);
+        auto brush = this->GetBackColorBrush(back);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, layout, brush);
@@ -595,7 +641,7 @@ D2D1_SIZE_F Graphics::DrawStringCent(std::string str, float x, float y, D2D1_COL
             D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y - (tsize.height / 2.0f) };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -625,7 +671,7 @@ D2D1_SIZE_F Graphics::DrawStringCent(std::wstring str, float x, float y, D2D1_CO
             D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y - (tsize.height / 2.0f) };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -646,7 +692,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCentHorizontal(IDWriteTextLayout* layout, 
     D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y };
     if (back.a > 0.0f)
     {
-        auto brush = this->GetColorBrush(back);
+        auto brush = this->GetBackColorBrush(back);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, layout, brush);
@@ -669,7 +715,7 @@ D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::string str, float x, float y
             D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -699,7 +745,7 @@ D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::wstring str, float x, float 
             D2D1_POINT_2F loc = { x - (tsize.width / 2.0f),y };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -720,7 +766,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCentVertical(IDWriteTextLayout* layout, fl
     D2D1_POINT_2F loc = { x ,y - (tsize.height / 2.0f) };
     if (back.a > 0.0f)
     {
-        auto brush = this->GetColorBrush(back);
+        auto brush = this->GetBackColorBrush(back);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, layout, brush);
         this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, layout, brush);
@@ -743,7 +789,7 @@ D2D1_SIZE_F Graphics::DrawStringCentVertical(std::string str, float x, float y, 
             D2D1_POINT_2F loc = { x ,y - (tsize.height / 2.0f) };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -773,7 +819,7 @@ D2D1_SIZE_F Graphics::DrawStringCentVertical(std::wstring str, float x, float y,
             D2D1_POINT_2F loc = { x ,y - (tsize.height / 2.0f) };
             if (back.a > 0.0f)
             {
-                auto brush = this->GetColorBrush(back);
+                auto brush = this->GetBackColorBrush(back);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y - 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x + 1,loc.y + 1 }, textLayout, brush);
                 this->pRenderTarget->DrawTextLayout({ loc.x - 1,loc.y + 1 }, textLayout, brush);
@@ -793,7 +839,7 @@ void Graphics::DrawStringLayout(std::string str, float x, float y, D2D1_COLOR_F 
     {
         if (back.a > 0.0f)
         {
-            auto brush = this->GetColorBrush(back);
+            auto brush = this->GetBackColorBrush(back);
             this->pRenderTarget->DrawTextLayout({ x - 1,y - 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y + 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y - 1 }, textLayout, brush);
@@ -810,8 +856,7 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, D2D1_COLOR_F
     {
         if (back.a > 0.0f)
         {
-            auto brush = this->GetColorBrush(back);
-            this->GetColorBrush(back);
+            auto brush = this->GetBackColorBrush(back);
             this->pRenderTarget->DrawTextLayout({ x - 1,y - 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y + 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y - 1 }, textLayout, brush);
@@ -828,8 +873,7 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, flo
     {
         if (back.a > 0.0f)
         {
-            auto brush = this->GetColorBrush(back);
-            this->GetColorBrush(back);
+            auto brush = this->GetBackColorBrush(back);
             this->pRenderTarget->DrawTextLayout({ x - 1,y - 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y + 1 }, textLayout, brush);
             this->pRenderTarget->DrawTextLayout({ x + 1,y - 1 }, textLayout, brush);
@@ -844,7 +888,7 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, D2D1_COLOR_F
     IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
     if (textLayout)
     {
-        textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
+        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
         textLayout->Release();
     }
@@ -854,7 +898,7 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, flo
     IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
     if (textLayout)
     {
-        textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
+        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
         textLayout->Release();
     }
@@ -863,16 +907,20 @@ void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y,
 {
     if (textLayout)
     {
-        textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
-        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
+        auto forec = this->GetColorBrush(color);
+        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
+        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, forec);
+        textLayout->SetDrawingEffect(forec, subRange);
     }
 }
 void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack)
 {
     if (textLayout)
     {
-        textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
-        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
+        auto forec = this->GetColorBrush(color);
+        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
+        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, forec);
+        textLayout->SetDrawingEffect(forec, subRange);
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)

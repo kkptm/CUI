@@ -66,7 +66,7 @@
     <ClInclude Include="Utils\HttpHelper.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\TcpSocket.h">
+    <ClInclude Include="Utils\Socket.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Utils\FileInfo.h">
@@ -177,6 +177,9 @@
     <ClInclude Include="GUI\Taskbar.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\Thread.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -212,7 +215,7 @@
     <ClCompile Include="Utils\HttpHelper.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\TcpSocket.cpp">
+    <ClCompile Include="Utils\Socket.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="Utils\FileInfo.cpp">
@@ -316,6 +319,9 @@
     </ClCompile>
     <ClCompile Include="GUI\Taskbar.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

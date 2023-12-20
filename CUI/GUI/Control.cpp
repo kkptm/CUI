@@ -226,9 +226,7 @@ void Control::RenderImage()
 			break;
 			case ImageSizeMode::CenterImage:
 			{
-				float xf = (asize.cx - size.width) / 2.0f;
-				float yf = (asize.cy - size.height) / 2.0f;
-				this->Render->DrawBitmap(this->_image, absLocation.x + xf, absLocation.y + yf, size.width, size.height);
+				this->Render->DrawBitmap(this->_image, absLocation.x + ((asize.cx - size.width) / 2.0f), absLocation.y + ((asize.cy - size.height) / 2.0f), size.width, size.height);
 			}
 			break;
 			case ImageSizeMode::StretchIamge:
@@ -238,13 +236,10 @@ void Control::RenderImage()
 			break;
 			case ImageSizeMode::Zoom:
 			{
-				float xp = asize.cx / size.width;
-				float yp = asize.cy / size.height;
+				float xp = asize.cx / size.width, yp = asize.cy / size.height;
 				float tp = xp < yp ? xp : yp;
-				float tw = size.width * tp;
-				float th = size.height * tp;
-				float xf = (asize.cx - tw) / 2.0f;
-				float yf = (asize.cy - th) / 2.0f;
+				float tw = size.width * tp, th = size.height * tp;
+				float xf = (asize.cx - tw) / 2.0f, yf = (asize.cy - th) / 2.0f;
 				this->Render->DrawBitmap(this->_image, absLocation.x + xf, absLocation.y + yf, tw, th);
 			}
 			break;

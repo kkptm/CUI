@@ -21,3 +21,16 @@ public:
 	void Close();
 	bool IsConnected();
 };
+class UDPSocket {
+public:
+	SOCKET Handle;
+
+	UDPSocket();
+	~UDPSocket();
+
+	bool Bind(int port);
+	void Unbind();
+	int SendTo(const char* data, int length, const char* ip, int port);
+	int ReceiveFrom(char* buffer, int length, std::string& fromIP, int& fromPort);
+	void Close();
+};

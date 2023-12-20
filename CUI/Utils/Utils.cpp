@@ -265,3 +265,35 @@ void MakePermute(std::vector<int> nums, std::vector<std::vector<int>>& result, i
 		std::swap(nums[start], nums[i]);
 	}
 }
+
+std::string GetLastErrorMessage()
+{
+	DWORD err = GetLastError();
+	LPVOID errorMsgBuffer;
+	DWORD size = FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		nullptr,
+		err,
+		0,
+		(LPWSTR)&errorMsgBuffer,
+		0,
+		nullptr
+	);
+	std::string errorMessage;
+	if (size != 0)
+	{
+		int bufferSize = WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)errorMsgBuffer, -1, nullptr, 0, nullptr, nullptr);
+		if (bufferSize > 0)
+		{
+			std::string narrowErrorMsg(bufferSize, 0);
+			WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)errorMsgBuffer, -1, &narrowErrorMsg[0], bufferSize, nullptr, nullptr);
+			errorMessage = narrowErrorMsg;
+		}
+		LocalFree(errorMsgBuffer);
+	}
+	else
+	{
+		errorMessage = "Î´ÖªµÄ´íÎó";
+	}
+	return errorMessage;
+}

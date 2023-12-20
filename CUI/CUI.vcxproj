@@ -104,6 +104,7 @@
       <PrecompiledHeaderOutputFile />
       <EnableModules>false</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,6 +148,7 @@
       <PrecompiledHeaderOutputFile />
       <EnableModules>false</EnableModules>
       <BuildStlModules>true</BuildStlModules>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -203,7 +205,8 @@
     <ClInclude Include="Utils\Registry.h" />
     <ClInclude Include="Utils\StopWatch.h" />
     <ClInclude Include="Utils\StringHelper.h" />
-    <ClInclude Include="Utils\TcpSocket.h" />
+    <ClInclude Include="Utils\Socket.h" />
+    <ClInclude Include="Utils\Thread.h" />
     <ClInclude Include="Utils\TimeSpan.h" />
     <ClInclude Include="Utils\Tuple.h" />
     <ClInclude Include="Utils\Utils.h" />
@@ -252,7 +255,8 @@
     <ClCompile Include="Utils\Registry.cpp" />
     <ClCompile Include="Utils\StopWatch.cpp" />
     <ClCompile Include="Utils\StringHelper.cpp" />
-    <ClCompile Include="Utils\TcpSocket.cpp" />
+    <ClCompile Include="Utils\Socket.cpp" />
+    <ClCompile Include="Utils\Thread.cpp" />
     <ClCompile Include="Utils\TimeSpan.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>

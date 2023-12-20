@@ -98,6 +98,21 @@ D2D1_SIZE_F Font::GetTextSize(std::wstring str, float w, float h)
     }
     return { 0,0 };
 }
+D2D1_SIZE_F Font::GetTextSize(IDWriteTextLayout* textLayout)
+{
+    D2D1_SIZE_F minSize = { 0,0 };
+    if (textLayout)
+    {
+        DWRITE_TEXT_METRICS metrics;
+        HRESULT hr = textLayout->GetMetrics(&metrics);
+        if (SUCCEEDED(hr))
+        {
+            minSize = D2D1::Size((float)ceil(metrics.widthIncludingTrailingWhitespace), (float)ceil(metrics.height));
+            return minSize;
+        }
+    }
+    return { 0,0 };
+}
 D2D1_SIZE_F Font::GetTextSize(std::string str, float w, float h)
 {
     if (str.size() == 0)return { 0,0 };

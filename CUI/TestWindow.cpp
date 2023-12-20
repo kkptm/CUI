@@ -119,6 +119,7 @@ void TestWindow::Init()
     button1->OnMouseClick += button1_OnMouseClick;
     textbox0 = this->AddControl(new TextBox(L"TextBox", 10, this->LastChild()->Bottom + 5, 120, 20));
     textbox1 = this->AddControl(new CustomTextBox1(L"Custom TextBox", 10, this->LastChild()->Bottom + 5, 120, 20));
+    textbox3 = this->AddControl(new RoundTextBox(L"RoundTextBox", 10, this->LastChild()->Bottom + 5, 120, 20));
     pwdbox1 = this->AddControl(new PasswordBox(L"pwd", 10, this->LastChild()->Bottom + 5, 120, 20));
     combobox1 = this->AddControl(new ComboBox(L"item1", 10, this->LastChild()->Bottom + 5, 120, 24));
     for (int i = 0; i < 10; i++)
@@ -131,7 +132,11 @@ void TestWindow::Init()
     radiobox2 = this->AddControl(new RadioBox(L"RadioBox2", combobox1->Right + 5, this->LastChild()->Bottom + 5));
     radiobox1->OnChecked += radiobox1_OnChecked;
     radiobox2->OnChecked += radiobox2_OnChecked;
-    textbox2 = this->AddControl(new RichTextBox(L"Multiline text\nMultiline text\nMultiline text\nMultiline text\nMultiline text", 260, button1->Top, 600, 60));
+
+    auto u8str = HttpHelper::HttpGet("http://tool.oschina.net");
+    auto str = Convert::Utf8ToAnsi(u8str);
+    auto wstr = Convert::string_to_wstring(str);
+    textbox2 = this->AddControl(new RichTextBox(wstr, 260, button1->Top, 800, 60));
     textbox2->BackColor = D2D1_COLOR_F{ 1,1,1,0.25f };
     textbox2->FocusedColor = D2D1_COLOR_F{ 1,1,1,0.5f };
 
@@ -197,11 +202,11 @@ void TestWindow::Init()
     gridview1->HeadFont = new Font(L"Arial", 24);
     gridview1->BackColor = D2D1_COLOR_F{ 0,0,0,0 };
     gridview1->Font = new Font(L"Arial", 20);
-    gridview1->Colunms.Add({ L"",40,ColumnType::Image });
-    gridview1->Colunms.Add({ L"check",60,ColumnType::Check });
-    gridview1->Colunms.Add({ L"text",100 });
-    gridview1->Colunms.Add({ L"check",60,ColumnType::Check });
-    gridview1->Colunms.Add({ L"text",100 });
+    gridview1->Colunms.Add(GridViewColunm(L"Image", 80, ColumnType::Image));
+    gridview1->Colunms.Add(GridViewColunm(L"Check", 80, ColumnType::Check));
+    gridview1->Colunms.Add(GridViewColunm(L"Text", 100, ColumnType::Text, false));
+    gridview1->Colunms.Add(GridViewColunm(L"Check", 80, ColumnType::Check));
+    gridview1->Colunms.Add(GridViewColunm(L"Edit", 100, ColumnType::Text, true));
     for (int i = 0; i < 100; i++)
     {
         GridViewRow row;

@@ -15,13 +15,13 @@
 #include "FileInfo.h"
 #include "DateTime.h"
 #include "Registry.h"
-#include "TcpSocket.h"
+#include "Socket.h"
 #include "FileStream.h"
 #include "Dictionary.h"
 #include "HttpHelper.h"
 #include "Environment.h"
 #include "StringHelper.h"
-
+#include "Thread.h"
 
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
@@ -42,3 +42,5 @@ void PrintHex(void* ptr, int count, int splitLine);
 void PrintHex(void* ptr, int count);
 INT64 GetTick();
 void MakePermute(std::vector<int> nums, std::vector<std::vector<int>>& result, int start = 0);
+
+std::string GetLastErrorMessage();

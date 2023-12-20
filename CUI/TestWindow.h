@@ -12,6 +12,7 @@ public:
     Button* button1;
     TextBox* textbox0;
     CustomTextBox1* textbox1;
+    RoundTextBox* textbox3;
     PasswordBox* pwdbox1;
     RichTextBox* textbox2;
     ComboBox* combobox1;

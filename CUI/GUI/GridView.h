@@ -15,6 +15,7 @@ public:
 	float Width = 120;
 	ColumnType Type = ColumnType::Text;
 	bool CanEdit = true;
+	GridViewColunm(std::wstring name = L"", float width = 120.0F, ColumnType type = ColumnType::Text, bool canEdit = false);
 };
 class CellValue : public std::wstring
 {

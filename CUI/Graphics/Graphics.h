@@ -17,7 +17,9 @@ private:
     int brush_get_index = 0;
     ID2D1RenderTarget* pRenderTarget = nullptr;
     ID2D1SolidColorBrush* Default_Brush = NULL;
+    ID2D1SolidColorBrush* Default_Brush_Back = NULL;
     inline ID2D1SolidColorBrush* GetBrush();
+    inline ID2D1SolidColorBrush* GetBackBrush();
 public:
     HWND WindowHandle;
     Font* DefaultFontObject = nullptr;
@@ -33,6 +35,10 @@ public:
     ID2D1SolidColorBrush* GetColorBrush(COLORREF newcolor);
     ID2D1SolidColorBrush* GetColorBrush(int r, int g, int b);
     ID2D1SolidColorBrush* GetColorBrush(float r, float g, float b, float a);
+    ID2D1SolidColorBrush* GetBackColorBrush(D2D1_COLOR_F newcolor);
+    ID2D1SolidColorBrush* GetBackColorBrush(COLORREF newcolor);
+    ID2D1SolidColorBrush* GetBackColorBrush(int r, int g, int b);
+    ID2D1SolidColorBrush* GetBackColorBrush(float r, float g, float b, float a);
     ID2D1LinearGradientBrush* CreateLinearGradientBrush(D2D1_GRADIENT_STOP* stops, unsigned int stopcount);
     ID2D1RadialGradientBrush* CreateRadialGradientBrush(D2D1_GRADIENT_STOP* stops, unsigned int stopcount, D2D1_POINT_2F center);
     ID2D1SolidColorBrush* CreateSolidColorBrush(D2D1_COLOR_F color);

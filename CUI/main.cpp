@@ -1,10 +1,10 @@
 #include "TestWindow.h"
 #include "GUI//ProcessSelectWindow.h"
-#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
+#include "Utils/StopWatch.h"
+//#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
 
 int main()
 {
-
     TestWindow* mainForm = new TestWindow();
     //mainForm->ShowInTaskBar = false;
     mainForm->Text = L"test window";

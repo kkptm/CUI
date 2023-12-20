@@ -1,19 +1,22 @@
-#include "TcpSocket.h"
+#include "Socket.h"
 #include <cstring>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
+static WSADATA wsaData = { 0 };
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4018)
 TCPSocket::TCPSocket() :Handle(NULL) {
-	WSADATA wsaData;
-	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (result != NO_ERROR) {
-		std::ostringstream oss;
-		oss << "WSAStartup failed with error: " << result;
-		throw std::runtime_error(oss.str());
+	if (wsaData.wVersion == 0)
+	{
+		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+		if (result != NO_ERROR) {
+			std::ostringstream oss;
+			oss << "WSAStartup failed with error: " << result;
+			throw std::runtime_error(oss.str());
+		}
 	}
 	Handle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (Handle == INVALID_SOCKET) {
@@ -28,7 +31,6 @@ TCPSocket::~TCPSocket() {
 	if (result == SOCKET_ERROR) {
 		std::cerr << "Socket closing failed with error: " << WSAGetLastError() << std::endl;
 	}
-	WSACleanup();
 }
 bool TCPSocket::Connect(const char* ip, int port) {
 	sockaddr_in address_;
@@ -122,4 +124,79 @@ bool TCPSocket::IsConnected() {
 	}
 
 	return false;
+}
+
+
+UDPSocket::UDPSocket() : Handle(INVALID_SOCKET) {
+	if (wsaData.wVersion == 0) {
+		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+		if (result != NO_ERROR) {
+			throw std::runtime_error("WSAStartup failed");
+		}
+	}
+
+	Handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (Handle == INVALID_SOCKET) {
+		throw std::runtime_error("Socket creation failed");
+	}
+}
+
+UDPSocket::~UDPSocket() {
+	Close();
+}
+
+bool UDPSocket::Bind(int port)
+
+{
+	sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(port);
+
+	int result = ::bind(Handle, (sockaddr*)&address, sizeof(address));
+	if (result == SOCKET_ERROR) {
+		std::cerr << "Bind failed with error: " << WSAGetLastError() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+void UDPSocket::Unbind() {
+	::bind(Handle, nullptr, 0);
+}
+
+int UDPSocket::SendTo(const char* data, int length, const char* ip, int port) {
+	sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = inet_addr(ip);
+	address.sin_port = htons(port);
+
+	int result = ::sendto(Handle, data, length, 0, (sockaddr*)&address, sizeof(address));
+	if (result == SOCKET_ERROR) {
+		std::cerr << "SendTo failed with error: " << WSAGetLastError() << std::endl;
+		return -1;
+	}
+	return result;
+}
+
+int UDPSocket::ReceiveFrom(char* buffer, int length, std::string& fromIP, int& fromPort) {
+	sockaddr_in fromAddr;
+	int fromAddrLen = sizeof(fromAddr);
+
+	int result = ::recvfrom(Handle, buffer, length, 0, (sockaddr*)&fromAddr, &fromAddrLen);
+	if (result == SOCKET_ERROR) {
+		std::cerr << "ReceiveFrom failed with error: " << WSAGetLastError() << std::endl;
+		return -1;
+	}
+
+	fromIP = inet_ntoa(fromAddr.sin_addr);
+	fromPort = ntohs(fromAddr.sin_port);
+	return result;
+}
+
+void UDPSocket::Close() {
+	if (Handle != INVALID_SOCKET) {
+		closesocket(Handle);
+		Handle = INVALID_SOCKET;
+	}
 }
