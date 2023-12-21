@@ -32,7 +32,7 @@ void TabControl::Update()
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	bool isSelected = this->ParentForm->Selected == this;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto abslocation = this->AbsLocation;
 	auto size = this->ActualSize();
 	auto absRect = this->AbsRect;

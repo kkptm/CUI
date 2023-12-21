@@ -12,7 +12,6 @@ Control::Control()
 	Checked(false),
 	ParentForm(nullptr),
 	Parent(nullptr),
-	Font(nullptr),
 	Tag(NULL),
 	SizeMode(ImageSizeMode::Zoom),
 	_image(NULL),
@@ -21,7 +20,7 @@ Control::Control()
 }
 Control::~Control()
 {
-	if (this->Font)
+	if (this->Font && this->Font != this->Render->DefaultFontObject)
 	{
 		delete this->Font;
 	}
@@ -41,6 +40,18 @@ void Control::PostRender()
 {
 	if(this->IsVisual && this->ParentForm) this->ParentForm->ControlChanged = true;
 }
+
+GET_CPP(Control, class Font*, Font)
+{
+	if (this->_font)
+		return this->_font;
+	return this->Render->DefaultFontObject;
+}
+SET_CPP(Control, class Font*, Font)
+{
+	this->_font = value;
+}
+
 GET_CPP(Control, int, Count)
 {
 	return this->Children.Count;

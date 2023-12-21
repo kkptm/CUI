@@ -131,7 +131,7 @@ void TextBox::InputDelete()
 void TextBox::UpdateScroll(bool arrival)
 {
 	float render_width = this->Width - (TextMargin * 2.0f);
-	auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+	auto font = this->Font;
 	auto lastSelect = font->HitTestTextRange(this->Text, FLT_MAX, FLT_MAX, (UINT32)SelectionEnd, (UINT32)0)[0];
 	if ((lastSelect.left + lastSelect.width) - OffsetX > render_width)
 	{
@@ -162,7 +162,7 @@ void TextBox::Update()
 	if (this->IsVisual == false)return;
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	float render_height = this->Height - (TextMargin * 2.0f);
 	textSize = font->GetTextSize(this->Text, FLT_MAX, render_height);
 	float OffsetY = (this->Height - textSize.height) * 0.5f;
@@ -180,7 +180,7 @@ void TextBox::Update()
 		}
 		if (this->Text.size() > 0)
 		{
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			if (isSelected)
 			{
 				int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
@@ -200,10 +200,11 @@ void TextBox::Update()
 				}
 				else
 				{
-					d2d->DrawLine(
-						{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y) - OffsetY },
-						{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y + selRange[0].height) + OffsetY },
-						Colors::Black);
+					//if ((GetTickCount64() / 1000) % 2 == 0)
+						d2d->DrawLine(
+							{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y) - OffsetY },
+							{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y + selRange[0].height) + OffsetY },
+							Colors::Black);
 				}
 				d2d->DrawStringLayout(this->Text,
 					(float)abslocation.x + TextMargin - OffsetX, 
@@ -277,9 +278,9 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 	case WM_MOUSEMOVE://mouse move
 	{
 		this->ParentForm->UnderMouse = this;
-		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
+		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			float render_height = this->Height - (TextMargin * 2.0f);
 			SelectionEnd = font->HitTestTextPosition(this->Text, FLT_MAX, render_height, (xof - TextMargin) + this->OffsetX, yof - TextMargin);
 			UpdateScroll();
@@ -301,7 +302,7 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 				this->ParentForm->Selected = this;
 				if (lse) lse->PostRender();
 			}
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			float render_height = this->Height - (TextMargin * 2.0f);
 			this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->Text, FLT_MAX, render_height, (xof - TextMargin) + this->OffsetX, yof - TextMargin);
 		}
@@ -317,7 +318,7 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		if (this->ParentForm->Selected == this)
 		{
 			float render_height = this->Height - (TextMargin * 2.0f);
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			SelectionEnd = font->HitTestTextPosition(this->Text, FLT_MAX, render_height, (xof - TextMargin) + this->OffsetX, yof - TextMargin);
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
@@ -352,7 +353,7 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 			if (this->SelectionEnd < this->Text.size())
 			{
 				this->SelectionEnd = this->SelectionEnd + 1;
-				if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+				if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 				{
 					this->SelectionStart = this->SelectionEnd;
 				}
@@ -368,7 +369,7 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 			if (this->SelectionEnd > 0)
 			{
 				this->SelectionEnd = this->SelectionEnd - 1;
-				if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+				if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 				{
 					this->SelectionStart = this->SelectionEnd;
 				}
@@ -381,10 +382,10 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		}
 		else if (wParam == VK_HOME)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->Text, 0, hit[0].top + (font->FontHeight * 0.5f));
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -396,10 +397,10 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		}
 		else if (wParam == VK_END)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->Text, FLT_MAX, hit[0].top + (font->FontHeight * 0.5f));
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -411,10 +412,10 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		}
 		else if (wParam == VK_PRIOR)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top - this->Height);
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -426,10 +427,10 @@ bool TextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof
 		}
 		else if (wParam == VK_NEXT)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->Text, FLT_MAX, this->Height, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->Text, hit[0].left, hit[0].top + this->Height);
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}

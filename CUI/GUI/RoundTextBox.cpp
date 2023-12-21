@@ -13,7 +13,7 @@ void RoundTextBox::Update()
 
 	bool isUnderMouse = ParentForm->UnderMouse == this;
 	auto d2d = Render;
-	auto font = Font ? Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	float render_height = Height - (TextMargin * 2.0f);
 	textSize = font->GetTextSize(Text, FLT_MAX, render_height);
 	float OffsetY = max((Height - textSize.height) * 0.5f, 0.0f);

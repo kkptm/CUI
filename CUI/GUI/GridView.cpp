@@ -73,7 +73,7 @@ POINT GridView::GetGridViewUnderMouseItem(int x, int y, GridView* ct)
 	float _render_width = ct->Width - 8;
 	float _render_height = ct->Height;
 	if (x > _render_width || y > _render_height)return { -1,-1 };
-	auto font = ct->Font ? ct->Font : Render->DefaultFontObject;
+	auto font = ct->Font;
 	auto head_font = HeadFont ? HeadFont : font;
 	float font_height = font->FontHeight;
 	float row_height = font_height + 2.0f;
@@ -123,7 +123,7 @@ D2D1_RECT_F GridView::GetGridViewScrollBlockRect(GridView* ct)
 	auto size = ct->Size;
 	float _render_width = ct->Width - 8;
 	float _render_height = ct->Height;
-	auto font = ct->Font ? ct->Font : Render->DefaultFontObject;
+	auto font = ct->Font;
 	auto head_font = HeadFont ? HeadFont : font;
 	float font_height = font->FontHeight;
 	float row_height = font_height + 2.0f;
@@ -146,13 +146,13 @@ D2D1_RECT_F GridView::GetGridViewScrollBlockRect(GridView* ct)
 int GridView::GetGridViewRenderRowCount(GridView* ct)
 {
 	float _render_height = ct->Height;
-	float font_height = (ct->Font ? ct->Font : Render->DefaultFontObject)->FontHeight;
+	float font_height = (ct->Font)->FontHeight;
 	float row_height = font_height + 2.0f;
 	if (RowHeight != 0.0f)
 	{
 		row_height = RowHeight;
 	}
-	auto font = ct->Font ? ct->Font : Render->DefaultFontObject;
+	auto font = ct->Font;
 	auto head_font = HeadFont ? HeadFont : font;
 	float head_font_height = head_font->FontHeight;
 	float head_height = ct->HeadHeight == 0.0f ? head_font_height : ct->HeadHeight;
@@ -164,7 +164,7 @@ void GridView::DrawScroll()
 {
 	auto d2d = this->Render;
 	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto size = this->ActualSize();
 	if (this->Rows.Count > 0)
 	{
@@ -202,7 +202,7 @@ void GridView::SetScrollByPos(float yof)
 {
 	auto d2d = this->Render;
 	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto size = this->ActualSize();
 	int render_count = GetGridViewRenderRowCount(this);
 	int max_scroll = this->Rows.Count - render_count;
@@ -251,7 +251,7 @@ void GridView::Update()
 		{
 			this->RenderImage();
 		}
-		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+		auto font = this->Font;
 		auto head_font = HeadFont ? HeadFont : font;
 		{
 			float _render_width = this->Width - 8;
@@ -535,7 +535,7 @@ bool GridView::UpdateEdit()
 			int topIndex = this->ScrollRowPosition;
 			int drawIndex = this->SelectedRowIndex - topIndex;
 			auto d2d = this->Render;
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			float font_height = font->FontHeight;
 			float row_height = font_height + 2.0f;
 
@@ -564,7 +564,7 @@ void GridView::AutoSizeColumn(int col)
 {
 	if (this->Colunms.Count > col)
 	{
-		auto font = this->Font ? this->Font : Render->DefaultFontObject;
+		auto font = this->Font;
 		float font_height = font->FontHeight;
 		float row_height = font_height + 2.0f;
 		if (RowHeight != 0.0f)
@@ -662,7 +662,7 @@ bool GridView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
 		{
 			auto d2d = this->Render;
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			float font_height = font->FontHeight;
 			float row_height = font_height + 2.0f;
 			if (RowHeight != 0.0f)

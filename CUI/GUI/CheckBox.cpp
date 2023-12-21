@@ -12,7 +12,7 @@ CheckBox::CheckBox(std::wstring text, int x, int y)
 SIZE CheckBox::ActualSize()
 {
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto text_size = font->GetTextSize(this->Text);
 	return SIZE{ (int)text_size.width + int(text_size.height + 2),(int)text_size.height };
 }
@@ -37,7 +37,7 @@ void CheckBox::Update()
 		{
 			col = UnderMouseColor;
 		}
-		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+		auto font = this->Font;
 		auto textSize = font->GetTextSize(this->Text);
 		d2d->DrawString(this->Text, abslocation.x + textSize.height + 2, abslocation.y, col);
 		d2d->DrawRect(

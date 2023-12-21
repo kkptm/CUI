@@ -14,7 +14,7 @@ void CustomTextBox1::Update()
 	if (this->IsVisual == false)return;
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	float render_height = this->Height - (TextMargin * 2.0f);
 	textSize = font->GetTextSize(this->Text, FLT_MAX, render_height);
 	float OffsetY = (this->Height - textSize.height) * 0.5f;
@@ -36,7 +36,7 @@ void CustomTextBox1::Update()
 		brush->SetEndPoint(D2D1::Point2F(this->Left + this->Width, this->Top + this->Height));
 		if (this->Text.size() > 0)
 		{
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			if (isSelected)
 			{
 				int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
@@ -52,10 +52,11 @@ void CustomTextBox1::Update()
 				}
 				else
 				{
-					d2d->DrawLine(
-						{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y) - OffsetY },
-						{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y + selRange[0].height) + OffsetY },
-						Colors::Black);
+					//if ((GetTickCount64() / 1000) % 2 == 0)
+						d2d->DrawLine(
+							{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y) - OffsetY },
+							{ selRange[0].left + abslocation.x + TextMargin - OffsetX,(selRange[0].top + abslocation.y + selRange[0].height) + OffsetY },
+							Colors::Black);
 				}
 				d2d->DrawStringLayout(this->Text,
 					(float)abslocation.x + TextMargin - OffsetX, ((float)abslocation.y) + OffsetY,

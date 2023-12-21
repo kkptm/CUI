@@ -24,7 +24,7 @@ void ComboBox::DrawScroll()
 {
 	auto d2d = this->Render;
 	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto size = this->ActualSize();
 	if (this->values.Count > 0)
 	{
@@ -52,13 +52,13 @@ void ComboBox::DrawScroll()
 void ComboBox::UpdateScrollDrag(float posY) {
 	if (!isDraggingScroll) return;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	float font_height = font->FontHeight;
 	float dxHeight = this->ActualSize().cy - this->Height;
 	int render_count = this->ExpandCount;
 	float _render_height = this->Height * this->ExpandCount;
 	int maxScroll = this->values.Count - render_count;
-	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	float fontHeight = this->Font->FontHeight;
 	float scrollBlockHeight = ((float)render_count / (float)this->values.Count) * (float)_render_height;
 	float scrollTop = scrollBlockHeight * 0.5f;
 	float scrollHeight = dxHeight - scrollBlockHeight;
@@ -98,7 +98,7 @@ void ComboBox::Update()
 		{
 			this->RenderImage();
 		}
-		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+		auto font = this->Font;
 		auto textSize = font->GetTextSize(this->Text);
 		float drawLeft = 0.0f;
 		float drawTop = 0.0f;

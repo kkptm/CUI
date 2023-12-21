@@ -136,11 +136,12 @@ void TestWindow::Init()
     auto u8str = HttpHelper::HttpGet("http://tool.oschina.net");
     auto str = Convert::Utf8ToAnsi(u8str);
     auto wstr = Convert::string_to_wstring(str);
-    textbox2 = this->AddControl(new RichTextBox(wstr, 260, button1->Top, 800, 60));
+    textbox2 = this->AddControl(new RichTextBox(wstr, 260, button1->Top, 800, 160));
     textbox2->BackColor = D2D1_COLOR_F{ 1,1,1,0.25f };
     textbox2->FocusedColor = D2D1_COLOR_F{ 1,1,1,0.5f };
 
     textbox2->AllowMultiLine = true;
+    textbox2->ScrollToEnd();
     tabControl1 = this->AddControl(new TabControl(10, combobox1->Bottom + 5, 1200, 300));
     tabControl1->BackColor = D2D1_COLOR_F{ 1,1,1,0.0 };
     tabControl1->AddPage(L"Page 1")->BackColor = D2D1_COLOR_F{ 1,1,1,0.3 };
@@ -156,6 +157,7 @@ void TestWindow::Init()
 
 
     TreeView* tree = tabControl1->get(0)->AddControl(new TreeView(420, 10, 200, 230));
+    tree->Font = new Font(L"ËÎÌו",24);
     tree->BackColor = D2D1_COLOR_F{1,1,1,0.25f };
     for (int i = 0; i < 10; i++)
     {

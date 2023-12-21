@@ -164,7 +164,6 @@ bool UDPSocket::Bind(int port)
 void UDPSocket::Unbind() {
 	::bind(Handle, nullptr, 0);
 }
-
 int UDPSocket::SendTo(const char* data, int length, const char* ip, int port) {
 	sockaddr_in address;
 	address.sin_family = AF_INET;

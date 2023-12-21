@@ -903,24 +903,14 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, flo
         textLayout->Release();
     }
 }
-void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, float w, float h, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)
-{
-    if (textLayout)
-    {
-        auto forec = this->GetColorBrush(color);
-        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
-        this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, forec);
-        textLayout->SetDrawingEffect(forec, subRange);
-    }
-}
 void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack)
 {
     if (textLayout)
     {
         auto forec = this->GetColorBrush(color);
-        textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
+        //textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, forec);
-        textLayout->SetDrawingEffect(forec, subRange);
+        //textLayout->SetDrawingEffect(forec, subRange);
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)

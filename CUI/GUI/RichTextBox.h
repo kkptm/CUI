@@ -7,6 +7,7 @@ private:
 	POINT selectedPos = {0,0};
 	bool isDraggingScroll;
 	IDWriteTextLayout* layOutCache = NULL;
+	std::vector<DWRITE_HIT_TEST_METRICS> selRange;
 public:
 	virtual UIClass Type();
 	bool InScroll = false;
@@ -33,10 +34,12 @@ private:
 	void InputDelete();
 	void UpdateScroll(bool arrival = false);
 	void UpdateLayout();
+	void UpdateSelRange();
 public:
 	void AppendText(std::wstring str);
 	void AppendLine(std::wstring str);
 	std::wstring GetSelectedString();
 	void Update() override;
 	bool ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, int yof) override;
+	void ScrollToEnd();
 };

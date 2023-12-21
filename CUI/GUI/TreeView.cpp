@@ -47,7 +47,7 @@ static void renderNodes(TreeView* tree, Graphics* d2d, float x, float y, float w
 					d2d->DrawBitmap(c->Image, renderLeft + (itemHeight * 0.8f), renderTop + y, itemHeight, itemHeight);
 					renderLeft += itemHeight;
 				}
-				d2d->DrawString(c->Text, renderLeft + (itemHeight * 0.8f), renderTop + y, foreColor);
+				d2d->DrawString(c->Text, renderLeft + (itemHeight * 0.8f), renderTop + y, foreColor, tree->Font);
 			}
 			else
 			{
@@ -56,7 +56,7 @@ static void renderNodes(TreeView* tree, Graphics* d2d, float x, float y, float w
 					d2d->DrawBitmap(c->Image, renderLeft, renderTop + y, itemHeight, itemHeight);
 					renderLeft += itemHeight;
 				}
-				d2d->DrawString(c->Text, renderLeft, renderTop + y, foreColor, tree->Font ? tree->Font : d2d->DefaultFontObject);
+				d2d->DrawString(c->Text, renderLeft, renderTop + y, foreColor, tree->Font);
 			}
 		}
 
@@ -149,8 +149,8 @@ TreeView::~TreeView()
 
 void TreeView::UpdateScrollDrag(float posY) {
 	if (!isDraggingScroll) return;
-	int maxScroll = MaxRenderItems - (this->Height / (this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight));
-	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	int maxScroll = MaxRenderItems - (this->Height / (this->Font->FontHeight));
+	float fontHeight = this->Font->FontHeight;
 	int renderItemCount = this->Height / fontHeight;
 	float scrollBlockHeight = (renderItemCount / (float)this->MaxRenderItems) * this->Height;
 
@@ -169,7 +169,7 @@ void TreeView::UpdateScrollDrag(float posY) {
 void TreeView::DrawScroll() {
 	float width = this->Width - 8.0f;
 	float height = this->Height;
-	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	float fontHeight = this->Font->FontHeight;
 	if (this->MaxRenderItems > 0) {
 		int renderItemCount = height / fontHeight;
 		if (renderItemCount < this->MaxRenderItems) {
@@ -188,7 +188,7 @@ void TreeView::Update()
 	if (this->IsVisual == false)return;
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto abslocation = this->AbsLocation;
 	auto size = this->ActualSize();
 	auto absRect = this->AbsRect;
@@ -205,7 +205,7 @@ void TreeView::Update()
 			int curr = 0;
 			renderNodes(this,d2d, abslocation.x, abslocation.y, size.cx, size.cy, font->FontHeight, ScrollIndex, curr, 0, this->Root->Children);
 			this->MaxRenderItems = curr;
-			int maxScroll = this->MaxRenderItems - (this->Height / (this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight)) + 1;
+			int maxScroll = this->MaxRenderItems - (this->Height / (this->Font->FontHeight)) + 1;
 			if (maxScroll < 0)maxScroll = 0;
 			if(this->ScrollIndex > maxScroll) this->ScrollIndex = maxScroll;
 			this->DrawScroll();
@@ -251,7 +251,7 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
 		{
 			auto d2d = this->Render;
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			float font_height = font->FontHeight;
 			int pre_render_item_count = (this->MaxRenderItems - this->ScrollIndex) - 1;
 			float pre_render_items_height = (pre_render_item_count * font_height);
@@ -281,9 +281,9 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 		if (isDraggingScroll) {
 			UpdateScrollDrag(yof);
 		}
-		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
+		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			this->PostRender();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, HIWORD(wParam));
@@ -307,7 +307,7 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 			}
 			else
 			{
-				auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+				auto font = this->Font;
 				auto abslocation = this->AbsLocation;
 				auto size = this->ActualSize();
 				int curr = 0;
@@ -356,7 +356,7 @@ bool TreeView::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xo
 	case WM_LBUTTONDBLCLK://mouse double click
 	{
 		this->ParentForm->Selected = this;
-		auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+		auto font = this->Font;
 		auto abslocation = this->AbsLocation;
 		auto size = this->ActualSize();
 		int curr = 0;

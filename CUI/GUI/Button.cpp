@@ -26,7 +26,7 @@ void Button::Update()
 			this->RenderImage();
 		D2D1::ColorF color = isUnderMouse ? (isSelected ? D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.7f) : D2D1::ColorF(1.0f, 1.0f, 1.0f, 0.4f)) : D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f);
 		d2d->FillRoundRect(abslocation.x, abslocation.y, size.cx, size.cy, color, roundVal);
-		auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+		auto font = this->Font;
 		auto textSize = font->GetTextSize(this->Text);
 		float drawLeft = this->Width > textSize.width ? (this->Width - textSize.width) / 2.0f : 0.0f;
 		float drawTop = this->Height > textSize.height ? (this->Height - textSize.height) / 2.0f : 0.0f;

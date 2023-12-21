@@ -13,7 +13,15 @@ RichTextBox::RichTextBox(std::wstring text, int x, int y, int width, int height)
 	UpdateLayout();
 }
 
-
+void RichTextBox::UpdateSelRange()
+{
+	auto d2d = this->Render;
+	auto font = this->Font;
+	int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
+	int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
+	int selLen = sele - sels;
+	selRange = font->HitTestTextRange(this->layOutCache, (UINT32)sels, (UINT32)selLen);
+}
 void RichTextBox::UpdateLayout()
 {
 	if (this->TextChanged)
@@ -22,7 +30,7 @@ void RichTextBox::UpdateLayout()
 		auto d2d = this->Render;
 		if (d2d)
 		{
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			float render_width = this->Width - (TextMargin * 2.0f);
 			float render_height = this->Height - (TextMargin * 2.0f);
 			if (textSize.height > render_height)
@@ -42,7 +50,7 @@ void RichTextBox::DrawScroll()
 {
 	auto d2d = this->Render;
 	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto size = this->ActualSize();
 	float _render_width = this->Width - (TextMargin * 2.0f);
 	float _render_height = this->Height - (TextMargin * 2.0f);
@@ -66,6 +74,18 @@ void RichTextBox::DrawScroll()
 		d2d->FillRoundRect(abslocation.x + (this->Width - 8.0f), abslocation.y + scroll_block_top, 8.0f, scroll_block_height, this->ScrollForeColor, 4.0f);
 	}
 }
+
+void RichTextBox::ScrollToEnd()
+{
+	if (!this->layOutCache)
+		this->UpdateLayout();
+	float _render_height = this->Height - (TextMargin * 2.0f);
+	int max_scroll = textSize.height - _render_height;
+	this->OffsetY = max_scroll;
+	if (this->OffsetY < 0)this->OffsetY = 0;
+	this->SelectionEnd = this->SelectionStart = this->Text.size();
+	this->PostRender();
+}
 void RichTextBox::UpdateScrollDrag(float posY) {
 	if (!isDraggingScroll) return;
 
@@ -75,7 +95,7 @@ void RichTextBox::UpdateScrollDrag(float posY) {
 	float scrollBlockHeight = (_render_height / textSize.height) * _render_height;
 	if (scrollBlockHeight < this->Height * 0.1)scrollBlockHeight = this->Height * 0.1;
 
-	float fontHeight = this->Font ? this->Font->FontHeight : this->Render->DefaultFontObject->FontHeight;
+	float fontHeight = this->Font->FontHeight;
 	int renderItemCount = this->Height / fontHeight;
 
 	float scrollTop = scrollBlockHeight * 0.5f;
@@ -94,7 +114,7 @@ void RichTextBox::SetScrollByPos(float yof)
 {
 	auto d2d = this->Render;
 	auto abslocation = this->AbsLocation;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto size = this->ActualSize();
 	float _render_width = this->Width - (TextMargin * 2.0f);
 	float _render_height = this->Height - (TextMargin * 2.0f);
@@ -177,10 +197,7 @@ void RichTextBox::InputBack()
 	if (selLen > 0)
 	{
 		List<wchar_t> tmp = List<wchar_t>((wchar_t*)this->Text.c_str(), this->Text.size());
-		for (int i = 0; i < selLen; i++)
-		{
-			tmp.RemoveAt(sels);
-		}
+		tmp.RemoveAt(sels, selLen);
 		tmp.Add(L'\0');
 		this->SelectionStart = this->SelectionEnd = sels;
 		this->Text = tmp.data();
@@ -206,10 +223,7 @@ void RichTextBox::InputDelete()
 	if (selLen > 0)
 	{
 		List<wchar_t> tmp = List<wchar_t>((wchar_t*)this->Text.c_str(), this->Text.size());
-		for (int i = 0; i < selLen; i++)
-		{
-			tmp.RemoveAt(sels);
-		}
+		tmp.RemoveAt(sels, selLen);
 		tmp.Add(L'\0');
 		this->SelectionStart = this->SelectionEnd = sels;
 		this->Text = tmp.data();
@@ -233,7 +247,7 @@ void RichTextBox::UpdateScroll(bool arrival)
 	float render_height = this->Height - (TextMargin * 2.0f);
 	if (textSize.height > render_height)
 		render_width -= 8.0f;
-	auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+	auto font = this->Font;
 	auto lastSelect = font->HitTestTextRange(this->layOutCache,(UINT32)SelectionEnd, (UINT32)0)[0];
 	if ((lastSelect.top + lastSelect.height) - OffsetY > render_height)
 	{
@@ -277,7 +291,7 @@ void RichTextBox::Update()
 	this->UpdateLayout();
 	bool isUnderMouse = this->ParentForm->UnderMouse == this;
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto abslocation = this->AbsLocation;
 	auto size = this->ActualSize();
 	auto absRect = this->AbsRect;
@@ -291,13 +305,14 @@ void RichTextBox::Update()
 		}
 		if (this->Text.size() > 0)
 		{
-			auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+			auto font = this->Font;
 			if (isSelected)
 			{
 				int sels = SelectionStart <= SelectionEnd ? SelectionStart : SelectionEnd;
 				int sele = SelectionEnd >= SelectionStart ? SelectionEnd : SelectionStart;
 				int selLen = sele - sels;
-				auto selRange = font->HitTestTextRange(this->layOutCache, (UINT32)sels, (UINT32)selLen);
+				if(selRange.size()==0)
+					UpdateSelRange();
 				if (selLen != 0)
 				{
 					for (auto sr : selRange)
@@ -312,10 +327,11 @@ void RichTextBox::Update()
 				}
 				else
 				{
-					d2d->DrawLine(
-						{ selRange[0].left + abslocation.x + TextMargin,(selRange[0].top + abslocation.y + TextMargin) - this->OffsetY },
-						{ selRange[0].left + abslocation.x + TextMargin,(selRange[0].top + abslocation.y + selRange[0].height + TextMargin) - this->OffsetY },
-						Colors::Black);
+					//if((GetTickCount64()/1000) % 2 ==0)
+						d2d->DrawLine(
+							{ selRange[0].left + abslocation.x + TextMargin,(selRange[0].top + abslocation.y + TextMargin) - this->OffsetY },
+							{ selRange[0].left + abslocation.x + TextMargin,(selRange[0].top + abslocation.y + selRange[0].height + TextMargin) - this->OffsetY },
+							Colors::Black);
 				}
 				selectedPos = { (int)selRange[0].left , (int)selRange[0].top};
 				selectedPos.y -= this->OffsetY;
@@ -389,7 +405,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		else
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			float render_width = this->Width - (TextMargin * 2.0f);
 			float render_height = this->Height - (TextMargin * 2.0f);
 			if (textSize.height > render_height)render_width -= 8.0f;
@@ -410,12 +426,13 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		if (isDraggingScroll) {
 			UpdateScrollDrag(yof);
 		}
-		if ((GetKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this && !isDraggingScroll)
+		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) && this->ParentForm->Selected == this && !isDraggingScroll)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
 			UpdateScroll();
 			this->PostRender();
+			UpdateSelRange();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(MouseButtons::None, 0, xof, yof, HIWORD(wParam));
 		this->OnMouseMove(this, event_obj);
@@ -438,8 +455,9 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			}
 			else
 			{
-				auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+				auto font = this->Font;
 				this->SelectionStart = this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+				UpdateSelRange();
 			}
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
@@ -456,8 +474,9 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 		}
 		else if (this->ParentForm->Selected == this)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			SelectionEnd = font->HitTestTextPosition(this->layOutCache, xof - TextMargin, (yof + this->OffsetY) - TextMargin);
+			UpdateSelRange();
 		}
 		MouseEventArgs event_obj = MouseEventArgs(FromParamToMouseButtons(message), 0, xof, yof, HIWORD(wParam));
 		this->OnMouseUp(this, event_obj);
@@ -493,7 +512,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			if (this->SelectionEnd < this->Text.size())
 			{
 				this->SelectionEnd = this->SelectionEnd + 1;
-				if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+				if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 				{
 					this->SelectionStart = this->SelectionEnd;
 				}
@@ -501,6 +520,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 				{
 					this->SelectionEnd = this->Text.size();
 				}
+				UpdateSelRange();
 				UpdateScroll();
 			}
 		}
@@ -509,7 +529,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			if (this->SelectionEnd > 0)
 			{
 				this->SelectionEnd = this->SelectionEnd - 1;
-				if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+				if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 				{
 					this->SelectionStart = this->SelectionEnd;
 				}
@@ -517,15 +537,16 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 				{
 					this->SelectionEnd = 0;
 				}
+				UpdateSelRange();
 				UpdateScroll();
 			}
 		}
 		else if (wParam == VK_UP)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top - (font->FontHeight * 0.5f));
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -533,14 +554,15 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = 0;
 			}
+			UpdateSelRange();
 			UpdateScroll();
 		}
 		else if (wParam == VK_DOWN)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top + (font->FontHeight * 1.5f));
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -548,12 +570,13 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = this->Text.size();
 			}
+			UpdateSelRange();
 			UpdateScroll();
 		}
 		else if (wParam == VK_HOME)
 		{
 			this->SelectionEnd = 0;
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -561,6 +584,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = 0;
 			}
+			UpdateSelRange();
 			UpdateScroll();
 		}
 		else if (wParam == VK_END)
@@ -570,18 +594,19 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = this->Text.size();
 			}
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
+			UpdateSelRange();
 			UpdateScroll();
 		}
 		else if (wParam == VK_PRIOR)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top - this->Height);
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -589,14 +614,15 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = 0;
 			}
+			UpdateSelRange();
 			UpdateScroll(true);
 		}
 		else if (wParam == VK_NEXT)
 		{
-			auto font = this->Font ? this->Font : this->Render->DefaultFontObject;
+			auto font = this->Font;
 			auto hit = font->HitTestTextRange(this->layOutCache, (UINT32)this->SelectionEnd, (UINT32)0);
 			this->SelectionEnd = font->HitTestTextPosition(this->layOutCache, hit[0].left, hit[0].top + this->Height);
-			if ((GetKeyState(VK_SHIFT) & 0x8000) == false)
+			if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) == false)
 			{
 				this->SelectionStart = this->SelectionEnd;
 			}
@@ -604,6 +630,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			{
 				this->SelectionEnd = this->Text.size();
 			}
+			UpdateSelRange();
 			UpdateScroll(true);
 		}
 		KeyEventArgs event_obj = KeyEventArgs((Keys)(wParam | 0));
@@ -631,6 +658,7 @@ bool RichTextBox::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int
 			this->SelectionStart = 0;
 			this->SelectionEnd = this->Text.size();
 			UpdateScroll();
+			UpdateSelRange();
 		}
 		else if (ch == 8)//back
 		{

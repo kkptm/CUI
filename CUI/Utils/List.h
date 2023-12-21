@@ -158,6 +158,16 @@ public:
 			this->erase(this->begin() + index);
 		}
 	}
+	void RemoveAt(int index,uint32_t num)
+	{
+		if (index + num >= this->size())
+		{
+			this->resize(index);
+			return;
+		}
+		memcpy(this->data()+index,this->data()+index+num,num*sizeof(T));
+		this->resize(this->size()-num);
+	}
 	int IndexOf(T value)
 	{
 		for (int i = 0; i < this->Count; i++)

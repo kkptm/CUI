@@ -304,7 +304,6 @@ bool Form::Update(bool force)
 {
     if (ControlChanged && IsWindow(this->Handle))
     {
-        this->OnPaint(this);
         auto now = GetTickCount64();
         this->Render->BeginRender(this->BackColor);
         this->Render->Resize();
@@ -352,10 +351,19 @@ bool Form::Update(bool force)
         {
             fc->Update();
         }
+        this->OnPaint(this);
         this->Render->EndRender();
         this->ControlChanged = false;
         return true;
     }
+    //用于实时刷新某些控件,不论是否存在用户操作
+    //else
+    //{
+    //    if (this->Selected && this->Selected->Type() >= UIClass::UI_TextBox && this->Selected->Type() <= UIClass::UI_PasswordBox)
+    //    {
+    //        ControlChanged = true;
+    //    }
+    //}
     return false;;
 }
 bool Form::ForceUpdate()
@@ -401,7 +409,7 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
                     rect.right - rect.left, rect.bottom - rect.top, FALSE);
             }
         }
-        if (this->Selected && (GetKeyState(VK_LBUTTON) & 0x8000))
+        if (this->Selected && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
         {
             if (this->Selected->IsVisual)
             {
@@ -600,7 +608,6 @@ bool Form::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam, int xof, i
     break;
     case WM_PAINT:
     {
-        this->OnPaint(this);
         this->ControlChanged = true;
     }
     break;

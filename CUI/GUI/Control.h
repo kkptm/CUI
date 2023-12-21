@@ -73,6 +73,7 @@ private:
 	class ID2D1Bitmap* _image = NULL;
 	std::wstring _text;
 	List<Control*> Children;
+	Font* _font = NULL;
 public:
 	CheckedEvent OnChecked;
 	MouseWheelEvent OnMouseWheel;
@@ -104,13 +105,15 @@ public:
 	bool Checked;
 	UINT64 Tag;
 	ImageSizeMode SizeMode = ImageSizeMode::Zoom;
-	Font* Font;
 	Graphics* Render;
 	Control();
 	~Control();
 	virtual UIClass Type();
 	virtual void Update();
 	virtual void PostRender();
+	PROPERTY(class Font*, Font);
+	GET(class Font*, Font);
+	SET(class Font*, Font);
 	READONLY_PROPERTY(int, Count);
 	GET(int, Count);
 	Control* operator[](int index);

@@ -12,7 +12,7 @@ Label::Label(std::wstring text, int x, int y)
 SIZE Label::ActualSize()
 {
 	auto d2d = this->Render;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	auto text_size = font->GetTextSize(this->Text);
 	return SIZE{ (int)text_size.width,(int)text_size.height };
 }
@@ -23,7 +23,7 @@ void Label::Update()
 	auto abslocation = this->AbsLocation;
 	auto size = this->ActualSize();
 	auto absRect = this->AbsRect;
-	auto font = this->Font ? this->Font : d2d->DefaultFontObject;
+	auto font = this->Font;
 	if (last_width > size.cx)
 	{
 		absRect.right += last_width - size.cx;

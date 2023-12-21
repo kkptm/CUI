@@ -4,7 +4,6 @@
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4018)
-
 Font::Font(std::wstring fontFamilyName, float _fontsize)
 {
     this->_fontSize = _fontsize;
