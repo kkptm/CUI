@@ -7,13 +7,17 @@
 enum class DataPachKey : BYTE
 {
     FileStart = 0x81,
-    FileEnd = 0x82,
+    FileEnd = 0x98,
     IdStart = 0xC7,
     IdEnd = 0xC8,
     ValueStart = 0x55,
     ValueEnd = 0x56,
+    ValueStart_Small = 0x57,
+    ValueStart_Small_X = 0x58,
     ChildStart = 0xD4,
     ChildEnd = 0xD5,
+    ChildStart_Small = 0xD6,
+    ChildStart_Small_X = 0xD7,
 };
 
 DataPack& DataPack::operator[](int index)
@@ -92,24 +96,24 @@ void DataPack::RemoveAt(int index)
 DataPack::DataPack() :Id(""), Value(std::vector<BYTE>()) {}
 DataPack::DataPack(const BYTE* data, int data_len)
 {
-    if (data_len < 6)
+    int index = 0;
+    int bufferSize = 0;
+    if (data_len < 4)//´íÎóµÄ¸ñÊ½
+        return;
+    if (data[0] == (BYTE)DataPachKey::FileStart)
     {
-        //throw std::runtime_error("Invalid data format");
+        bufferSize = *(int*)&data[1];
+        index = 5;
+    }
+    else//´íÎóµÄÍ·²¿
+    {
         return;
     }
-    if (data[0] != (BYTE)DataPachKey::FileStart)
+    if (data[bufferSize - 1] != (BYTE)DataPachKey::FileEnd)//´íÎóµÄ½áÊø·û
     {
-        //throw std::runtime_error("Invalid data Start");
         return;
     }
-    int totalLen = *(int*)&data[1];
-    if (data[totalLen - 1] != (BYTE)DataPachKey::FileEnd)
-    {
-        //throw std::runtime_error("Invalid data End");
-        return;
-    }
-    int index = 5;
-    while (index < data_len - 1)
+    while (index < bufferSize - 1)
     {
         DataPachKey key = (DataPachKey)data[index];
         switch (key)
@@ -117,8 +121,10 @@ DataPack::DataPack(const BYTE* data, int data_len)
         case DataPachKey::IdStart:
         {
             index += 1;
-            int idLen = *(int*)&data[index];
-            index += 4;
+            uint16_t idLen = *(uint16_t*)&data[index];
+            index += 2;
+            if (data[index + idLen] != (BYTE)DataPachKey::IdEnd)//´íÎóµÄ½áÊø·û
+				return;
             this->Id.assign((char*)&data[index], idLen);
             index += idLen + 1;
             break;
@@ -128,6 +134,30 @@ DataPack::DataPack(const BYTE* data, int data_len)
             index += 1;
             int valueLen = *(int*)&data[index];
             index += 4;
+            if (data[index + valueLen] != (BYTE)DataPachKey::ValueEnd)//´íÎóµÄ½áÊø·û
+                return;
+            this->Value.assign(&data[index], &data[index + valueLen]);
+            index += valueLen + 1;
+            break;
+        }
+        case DataPachKey::ValueStart_Small:
+        {
+            index += 1;
+            uint16_t valueLen = *(uint16_t*)&data[index];
+            index += 2;
+            if (data[index + valueLen] != (BYTE)DataPachKey::ValueEnd)//´íÎóµÄ½áÊø·û
+                return;
+            this->Value.assign(&data[index], &data[index + valueLen]);
+            index += valueLen + 1;
+            break;
+        }
+        case DataPachKey::ValueStart_Small_X:
+        {
+            index += 1;
+            BYTE valueLen = *(BYTE*)&data[index];
+            index += 1;
+            if (data[index + valueLen] != (BYTE)DataPachKey::ValueEnd)//´íÎóµÄ½áÊø·û
+                return;
             this->Value.assign(&data[index], &data[index + valueLen]);
             index += valueLen + 1;
             break;
@@ -137,6 +167,32 @@ DataPack::DataPack(const BYTE* data, int data_len)
             index += 1;
             int childLen = *(int*)&data[index];
             index += 4;
+            if (data[index + childLen] != (BYTE)DataPachKey::ChildEnd)//´íÎóµÄ½áÊø·û
+                return;
+            DataPack childPack(&data[index], childLen);
+            this->Child.push_back(childPack);
+            index += childLen + 1;
+            break;
+        }
+        case DataPachKey::ChildStart_Small:
+        {
+            index += 1;
+            uint16_t childLen = *(uint16_t*)&data[index];
+            index += 2;
+            if (data[index + childLen] != (BYTE)DataPachKey::ChildEnd)//´íÎóµÄ½áÊø·û
+                return;
+            DataPack childPack(&data[index], childLen);
+            this->Child.push_back(childPack);
+            index += childLen + 1;
+            break;
+        }
+        case DataPachKey::ChildStart_Small_X:
+        {
+            index += 1;
+            BYTE childLen = *(BYTE*)&data[index];
+            index += 1;
+            if (data[index + childLen] != (BYTE)DataPachKey::ChildEnd)//´íÎóµÄ½áÊø·û
+                return;
             DataPack childPack(&data[index], childLen);
             this->Child.push_back(childPack);
             index += childLen + 1;
@@ -213,21 +269,57 @@ std::vector<BYTE> DataPack::GetBytes()
     list.resize(6);
     list[0] = (BYTE)DataPachKey::FileStart;
     list[5] = (BYTE)DataPachKey::IdStart;
-    int idlen = this->Id.size();
-    list.insert(list.end(), (BYTE*)&idlen, (BYTE*)&idlen + 4);
+    uint16_t idlen = this->Id.size();
+    list.insert(list.end(), (BYTE*)&idlen, (BYTE*)&idlen + 2);
     list.insert(list.end(), this->Id.c_str(), this->Id.c_str() + this->Id.size());
     list.push_back((BYTE)DataPachKey::IdEnd);
-    list.push_back((BYTE)DataPachKey::ValueStart);
-    int vvlen = this->Value.size();
-    list.insert(list.end(), (BYTE*)&vvlen, (BYTE*)&vvlen + 4);
+    if (this->Value.size() > UINT16_MAX)
+    {
+        list.push_back((BYTE)DataPachKey::ValueStart);
+        int vvlen = this->Value.size();
+        list.insert(list.end(), (BYTE*)&vvlen, (BYTE*)&vvlen + 4);
+    }
+    else
+    {
+        if (this->Value.size() > UINT8_MAX)
+        {
+            list.push_back((BYTE)DataPachKey::ValueStart_Small);
+            uint16_t vvlen = this->Value.size();
+            list.insert(list.end(), (BYTE*)&vvlen, (BYTE*)&vvlen + 2);
+        }
+        else
+        {
+            list.push_back((BYTE)DataPachKey::ValueStart_Small_X);
+            BYTE vvlen = this->Value.size();
+            list.insert(list.end(), (BYTE*)&vvlen, (BYTE*)&vvlen + 1);
+        }
+    }
     list.insert(list.end(), this->Value.data(), this->Value.data() + this->Value.size());
     list.push_back((BYTE)DataPachKey::ValueEnd);
     for (auto sub : this->Child)
     {
         auto dta = sub.GetBytes();
-        list.push_back((BYTE)DataPachKey::ChildStart);
-        int childLen = dta.size();
-        list.insert(list.end(), (BYTE*)&childLen, (BYTE*)&childLen + 4);
+        if (dta.size() > UINT16_MAX)
+        {
+            list.push_back((BYTE)DataPachKey::ChildStart);
+            int childLen = dta.size();
+            list.insert(list.end(), (BYTE*)&childLen, (BYTE*)&childLen + 4);
+        }
+        else
+        {
+            if (dta.size() > UINT8_MAX)
+            {
+                list.push_back((BYTE)DataPachKey::ChildStart_Small);
+                uint16_t childLen = dta.size();
+                list.insert(list.end(), (BYTE*)&childLen, (BYTE*)&childLen + 2);
+            }
+            else
+            {
+                list.push_back((BYTE)DataPachKey::ChildStart_Small_X);
+                BYTE childLen = dta.size();
+                list.insert(list.end(), (BYTE*)&childLen, (BYTE*)&childLen + 1);
+            }
+        }
         list.insert(list.end(), dta.data(), dta.data() + dta.size());
         list.push_back((BYTE)DataPachKey::ChildEnd);
     }

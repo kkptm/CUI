@@ -54,9 +54,12 @@ int main()
         DataPack pk = tmp;
         pk["child_test"] = tmp;
         pk["child_test"]["child_child_test"] = tmp;
-        auto unpack = pk.convert<pack>();
-        auto unpack_child = pk["child_test"].convert<pack>();
-        auto unpack_child_child = pk["child_test"]["child_child_test"].convert<pack>();
+        auto bytes = pk.GetBytes();//268
+        auto unpackedobj = DataPack(bytes);
+        auto unpack = unpackedobj.convert<pack>();
+        auto unpack_child = unpackedobj["child_test"].convert<pack>();
+        auto unpack_child_child = unpackedobj["child_test"]["child_child_test"].convert<pack>();
+        Sleep(0);
     }
     int index = 0;
     TestWindow* mainForm = new TestWindow();
