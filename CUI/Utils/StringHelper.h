@@ -7,8 +7,10 @@ class StringHelper
 public:
 	static std::vector<std::string> Split(std::string str, std::string separator);
 	static std::vector<std::string> Split(std::string str, std::initializer_list<std::string> separators);
+	static std::vector<std::string> Split(std::string str, std::initializer_list<char> separators);
 	static std::vector<std::wstring> Split(std::wstring str, std::wstring separator);
 	static std::vector<std::wstring> Split(std::wstring str, std::initializer_list<std::wstring> separators);
+	static std::vector<std::wstring> Split(std::wstring str, std::initializer_list<wchar_t> separators);
 	static std::string Replace(std::string str, std::string oldstr, std::string newstr);
 	static std::wstring Replace(std::wstring str, std::wstring oldstr, std::wstring newstr);
 	static std::string ToUpper(std::string str);

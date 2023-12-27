@@ -1,6 +1,21 @@
 #include "Thread.h"
 
-Thread::Thread(LPVOID func,
+Thread::Thread(LPVOID func) {
+        m_func = func;
+        threadParam1 = NULL;
+        threadParam2 = NULL;
+        threadParam3 = NULL;
+        threadParam4 = NULL;
+        threadParam5 = NULL;
+        threadParam6 = NULL;
+        threadParam7 = NULL;
+        threadParam8 = NULL;
+        isRunning = false;
+    }
+Thread::~Thread() {
+    CloseHandle(hThread);
+}
+void Thread::Start(
     LPVOID param1,
     LPVOID param2,
     LPVOID param3,
@@ -9,21 +24,14 @@ Thread::Thread(LPVOID func,
     LPVOID param6,
     LPVOID param7,
     LPVOID param8) {
-        m_func = func;
-        threadParam1 = param1;
-        threadParam2 = param2;
-        threadParam3 = param3;
-        threadParam4 = param4;
-        threadParam5 = param5;
-        threadParam6 = param6;
-        threadParam7 = param7;
-        threadParam8 = param8;
-        isRunning = false;
-    }
-Thread::~Thread() {
-    CloseHandle(hThread);
-}
-void Thread::Start() {
+    threadParam1 = param1;
+    threadParam2 = param2;
+    threadParam3 = param3;
+    threadParam4 = param4;
+    threadParam5 = param5;
+    threadParam6 = param6;
+    threadParam7 = param7;
+    threadParam8 = param8;
     isRunning = true;
     hThread = CreateThread(NULL, 0, [](LPVOID param)->DWORD
         {

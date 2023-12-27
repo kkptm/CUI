@@ -133,7 +133,7 @@ void TestWindow::Init()
     radiobox1->OnChecked += radiobox1_OnChecked;
     radiobox2->OnChecked += radiobox2_OnChecked;
 
-    auto u8str = HttpHelper::HttpGet("http://tool.oschina.net");
+    auto u8str = HttpHelper::HTTPSGET("https://tool.oschina.net/commons?type=3");
     auto str = Convert::Utf8ToAnsi(u8str);
     auto wstr = Convert::string_to_wstring(str);
     textbox2 = this->AddControl(new RichTextBox(wstr, 260, button1->Top, 800, 160));

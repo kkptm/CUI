@@ -20,17 +20,17 @@ private:
     bool isRunning;
     ULONG64 result;
 public:
-    Thread(LPVOID func, 
-        LPVOID param1 = NULL, 
+    Thread(LPVOID func);
+    ~Thread();
+    void Start(
+        LPVOID param1 = NULL,
         LPVOID param2 = NULL,
         LPVOID param3 = NULL,
-        LPVOID param4 = NULL, 
-        LPVOID param5 = NULL, 
+        LPVOID param4 = NULL,
+        LPVOID param5 = NULL,
         LPVOID param6 = NULL,
-        LPVOID param7 = NULL, 
-        LPVOID param8 = NULL );
-    ~Thread();
-    void Start();
+        LPVOID param7 = NULL,
+        LPVOID param8 = NULL);
     void Join();
     DWORD GetThreadID();
     HANDLE GetHandle();

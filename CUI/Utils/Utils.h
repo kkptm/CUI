@@ -4,6 +4,7 @@
 #include <string>
 
 #include "defines.h"
+#include "StringBuilder.h"
 #include "List.h"
 #include "File.h"
 #include "Guid.h"
@@ -22,6 +23,7 @@
 #include "Environment.h"
 #include "StringHelper.h"
 #include "Thread.h"
+#include "DataPack.h"
 
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING

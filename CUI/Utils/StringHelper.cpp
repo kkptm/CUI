@@ -62,6 +62,34 @@ std::vector<std::string> StringHelper::Split(std::string str, std::initializer_l
 
     return result;
 }
+std::vector<std::string> StringHelper::Split(std::string str, std::initializer_list<char> separators)
+{
+    std::vector<std::string> result = std::vector<std::string>();
+    int lastIndex = 0;
+
+    for (int i = 0; i < str.size(); i++)
+    {
+        for (auto separator : separators)
+        {
+            if (str[i] == separator)
+            {
+                if (lastIndex != i)
+                {
+                    result.push_back(std::string(&str[lastIndex], i - lastIndex));
+                }
+                lastIndex = i + 1;
+                break;
+            }
+        }
+    }
+
+    if (lastIndex < str.size())
+    {
+        result.push_back(std::string(&str[lastIndex], str.size() - lastIndex));
+    }
+
+    return result;
+}
 std::vector<std::wstring> StringHelper::Split(std::wstring str, std::wstring separator)
 {
     std::vector<std::wstring> result = std::vector<std::wstring>();
@@ -118,6 +146,34 @@ std::vector<std::wstring> StringHelper::Split(std::wstring str, std::initializer
 
     return result;
 }
+std::vector<std::wstring> StringHelper::Split(std::wstring str, std::initializer_list<wchar_t> separators)
+{
+    std::vector<std::wstring> result = std::vector<std::wstring>();
+    int lastIndex = 0;
+
+    for (int i = 0; i < str.size(); i++)
+    {
+        for (auto separator : separators)
+        {
+            if (str[i] == separator)
+            {
+                if (lastIndex != i)
+                {
+                    result.push_back(std::wstring(&str[lastIndex], i - lastIndex));
+                }
+                lastIndex = i + 1;
+                break;
+            }
+        }
+    }
+
+    if (lastIndex < str.size())
+    {
+        result.push_back(std::wstring(&str[lastIndex], str.size() - lastIndex));
+    }
+
+    return result;
+}
 std::string StringHelper::Replace(std::string str, std::string oldstr, std::string newstr) {
     std::string result;
     size_t pos = 0;
@@ -139,7 +195,7 @@ std::wstring StringHelper::Replace(std::wstring str, std::wstring oldstr, std::w
     size_t pos = 0;
     size_t prev_pos = 0;
     size_t old_len = oldstr.length();
-    
+
     while ((pos = str.find(oldstr, pos)) != std::string::npos) {
         result += str.substr(prev_pos, pos - prev_pos);
         result += newstr;
@@ -157,7 +213,7 @@ std::string StringHelper::ToUpper(std::string str) {
     return result;
 }
 std::wstring StringHelper::ToUpper(std::wstring str) {
-    std::wstring result(str.size(),L'\0');
+    std::wstring result(str.size(), L'\0');
     for (int i = 0; i < str.size(); i++)
         result[i] = towupper(str[i]);
     return result;
@@ -175,108 +231,108 @@ std::wstring StringHelper::ToLower(std::wstring str) {
     return result;
 }
 bool StringHelper::StartsWith(std::string str, std::string prefix) {
-	return str.substr(0, prefix.size()) == prefix;
+    return str.substr(0, prefix.size()) == prefix;
 }
 bool StringHelper::StartsWith(std::wstring str, std::wstring prefix) {
-	return str.substr(0, prefix.size()) == prefix;
+    return str.substr(0, prefix.size()) == prefix;
 }
 bool StringHelper::EndsWith(std::string str, std::string suffix) {
-	return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
+    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
 }
 bool StringHelper::EndsWith(std::wstring str, std::wstring suffix) {
-	return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
+    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
 }
 std::string StringHelper::Trim(std::string str) {
-	std::string result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (start < str.size() && str[start] == ' ') start++;
-	while (end >= 0 && str[end] == ' ') end--;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::string result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (start < str.size() && str[start] == ' ') start++;
+    while (end >= 0 && str[end] == ' ') end--;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 std::wstring StringHelper::Trim(std::wstring str) {
-	std::wstring result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (start < str.size() && str[start] == ' ') start++;
-	while (end >= 0 && str[end] == ' ') end--;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::wstring result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (start < str.size() && str[start] == ' ') start++;
+    while (end >= 0 && str[end] == ' ') end--;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 
 std::string StringHelper::TrimLeft(std::string str)
 {
-	std::string result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (start < str.size() && str[start] == ' ') start++;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::string result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (start < str.size() && str[start] == ' ') start++;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 std::wstring StringHelper::TrimLeft(std::wstring str)
 {
-	std::wstring result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (start < str.size() && str[start] == ' ') start++;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::wstring result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (start < str.size() && str[start] == ' ') start++;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 std::string StringHelper::TrimRight(std::string str)
 {
-	std::string result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (end >= 0 && str[end] == ' ') end--;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::string result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (end >= 0 && str[end] == ' ') end--;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 std::wstring StringHelper::TrimRight(std::wstring str)
 {
-	std::wstring result;
-	int start = 0;
-	int end = str.size() - 1;
-	while (end >= 0 && str[end] == ' ') end--;
-	if (start <= end) {
-		result = str.substr(start, end - start + 1);
-	}
-	return result;
+    std::wstring result;
+    int start = 0;
+    int end = str.size() - 1;
+    while (end >= 0 && str[end] == ' ') end--;
+    if (start <= end) {
+        result = str.substr(start, end - start + 1);
+    }
+    return result;
 }
 
 int StringHelper::IndexOf(std::string str, std::string substr)
 {
-	return str.find(substr);
+    return str.find(substr);
 }
 int StringHelper::IndexOf(std::wstring str, std::wstring substr)
 {
-	return str.find(substr);
+    return str.find(substr);
 }
 int StringHelper::LastIndexOf(std::string str, std::string substr)
 {
-	return str.rfind(substr);
+    return str.rfind(substr);
 }
 int StringHelper::LastIndexOf(std::wstring str, std::wstring substr)
 {
-	return str.rfind(substr);
+    return str.rfind(substr);
 }
 bool StringHelper::Contains(std::string str, std::string substr)
 {
-	return str.find(substr) != std::string::npos;
+    return str.find(substr) != std::string::npos;
 }
 bool StringHelper::Contains(std::wstring str, std::wstring substr)
 {
-	return str.find(substr) != std::wstring::npos;
+    return str.find(substr) != std::wstring::npos;
 }
 int StringHelper::GetHashCode(std::string str)
 {
@@ -318,46 +374,46 @@ int StringHelper::GetHashCode(std::wstring str)
 }
 std::string StringHelper::Insert(std::string str, int index, std::string substr)
 {
-	return str.insert(index, substr);
+    return str.insert(index, substr);
 }
 std::wstring StringHelper::Insert(std::wstring str, int index, std::wstring substr)
 {
-	return str.insert(index, substr);
+    return str.insert(index, substr);
 }
 std::string StringHelper::Remove(std::string str, int index, int count)
 {
-	return str.erase(index, count);
+    return str.erase(index, count);
 }
 std::wstring StringHelper::Remove(std::wstring str, int index, int count)
 {
-	return str.erase(index, count);
+    return str.erase(index, count);
 }
 
 std::string StringHelper::Join(std::vector<std::string> strs, std::string separator)
 {
-	std::string result;
+    std::string result;
     for (int i = 0; i < strs.size(); i++)
     {
-		result += strs[i];
+        result += strs[i];
         if (i != strs.size() - 1)
         {
-			result += separator;
-		}
-	}
-	return result;
+            result += separator;
+        }
+    }
+    return result;
 }
 std::wstring StringHelper::Join(std::vector<std::wstring> strs, std::wstring separator)
 {
-	std::wstring result;
+    std::wstring result;
     for (int i = 0; i < strs.size(); i++)
     {
-		result += strs[i];
+        result += strs[i];
         if (i != strs.size() - 1)
         {
-			result += separator;
-		}
-	}
-	return result;
+            result += separator;
+        }
+    }
+    return result;
 }
 
 

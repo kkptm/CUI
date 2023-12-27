@@ -180,6 +180,12 @@
     <ClInclude Include="Utils\Thread.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\DataPack.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\StringBuilder.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -321,6 +327,12 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="Utils\Thread.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\DataPack.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\StringBuilder.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
