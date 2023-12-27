@@ -25,7 +25,7 @@ public:
     template<typename T>
     void operator=(std::vector<T> data)
     {
-        this->Value.resize(data.size());
+        this->Value.resize(data.size() * sizeof(T));
         memcpy(this->Value.data(), data.data(), data.size() * sizeof(T));
     }
     template<typename T>
@@ -52,7 +52,7 @@ public:
     {
         this->Id = "";
         this->Value.resize(sizeof(T));
-        memcpy(this->Value.data(),&data,sizeof(T));
+        memcpy(this->Value.data(), &data, sizeof(T));
     }
     template<typename T>
     DataPack(std::string id, T data)
@@ -73,6 +73,7 @@ public:
     DataPack(std::string id, wchar_t* data);
     DataPack(std::string id, const wchar_t* data);
 
+    void Add(DataPack val);
     template<typename T>
     DataPack& Add(std::string key, T val)
     {

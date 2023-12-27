@@ -54,7 +54,7 @@ int main()
         DataPack pk = tmp;
         pk["child_test"] = tmp;
         pk["child_test"]["child_child_test"] = tmp;
-        auto bytes = pk.GetBytes();//268
+        auto bytes = pk.GetBytes();
         auto unpackedobj = DataPack(bytes);
         auto unpack = unpackedobj.convert<pack>();
         auto unpack_child = unpackedobj["child_test"].convert<pack>();

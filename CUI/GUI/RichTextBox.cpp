@@ -187,6 +187,7 @@ void RichTextBox::InputText(std::wstring input)
 		}
 		this->Text = std::wstring(tmp.Pointer());
 	}
+	UpdateSelRange();
 	this->TextChanged = true;
 }
 void RichTextBox::InputBack()
@@ -213,6 +214,7 @@ void RichTextBox::InputBack()
 			this->Text = tmp.data();
 		}
 	}
+	UpdateSelRange();
 	this->TextChanged = true;
 }
 void RichTextBox::InputDelete()
@@ -239,6 +241,7 @@ void RichTextBox::InputDelete()
 			this->Text = tmp.data();
 		}
 	}
+	UpdateSelRange();
 	this->TextChanged = true;
 }
 void RichTextBox::UpdateScroll(bool arrival)
