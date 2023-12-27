@@ -24,6 +24,7 @@
 #include "StringHelper.h"
 #include "Thread.h"
 #include "DataPack.h"
+#include "Clipboard.h"
 
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING

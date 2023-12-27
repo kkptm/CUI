@@ -18,6 +18,7 @@
 #include "TextBox.h"
 #include "TreeView.h"
 #include "Taskbar.h"
+#include "NotifyIcon.h"
 typedef Event<void(*)(class Form* sender, int Id, int info)> CommandEvent;
 typedef Event<void(*)(class Form*)> FormClosingEvent;
 typedef Event<void(*)(class Form*)> FormClosedEvent;

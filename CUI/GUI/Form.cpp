@@ -1,4 +1,5 @@
 ﻿#include "Form.h"
+#include "NotifyIcon.h"
 GET_CPP(Form, POINT, Location)
 {
     if (this->Handle)
@@ -753,6 +754,23 @@ LRESULT CALLBACK Form::WINMSG_PROCESS(HWND hWnd, UINT message, WPARAM wParam, LP
             if (Application::Forms.Count() == 0)
             {
                 exit(0);
+            }
+        }
+        else if (message == (WM_USER + 1))
+        {
+            if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
+            {
+                if (NotifyIcon::Instance)
+                {
+                    POINT const pt = { LOWORD(wParam), HIWORD(wParam) };
+                    NotifyIcon::Instance->OnNotifyIconMouseDown(NotifyIcon::Instance, MouseEventArgs(
+                        lParam == WM_LBUTTONDOWN ? MouseButtons::Left : MouseButtons::Right,
+                        0,
+                        pt.x,
+                        pt.y,
+                        0
+                    ));
+                }
             }
         }
     }

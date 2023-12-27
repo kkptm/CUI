@@ -1,8 +1,7 @@
-#include "TestWindow.h"
+ï»¿#include "TestWindow.h"
 #include "GUI//ProcessSelectWindow.h"
 #include "Utils/StopWatch.h"
 #pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
-
 struct subpack
 {
     const char sname[16];
@@ -20,6 +19,13 @@ struct pack
 };
 int main()
 {
+    Clipboard::Clear();
+    Clipboard::SetFiles({ R"(C:\Windows\Win.ini)" ,R"(C:\Windows\system.ini)" });
+    auto clipBoardFiles= Clipboard::GetFiles();
+    Clipboard::SetImage(Graphics::CopyFromScreen(0,0,500,500));
+    HBITMAP clipBoardBitmap = Clipboard::GetImage();
+    Clipboard::SetText("123AAA456BBB789CCC");
+    auto clipBoardText = Clipboard::GetText();
     StringBuilder sb;
     for (int i = 0; i < 10; i++)
     {
@@ -35,7 +41,7 @@ int main()
     sb.AppendLine(0.789f);
     sb.Lenght -= 5;
     auto str = sb.ToWString();
-    //ÐòÁÐ»¯²âÊÔ
+    //åºåˆ—åŒ–æµ‹è¯•
     {
         pack tmp =
         {
@@ -66,7 +72,7 @@ int main()
     //mainForm->ShowInTaskBar = false;
     mainForm->Text = L"test window";
     mainForm->Icon = (HICON)::LoadImageA(NULL, "app.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
-    //¶¥²ãäÖÈ¾²âÊÔ
+    //é¡¶å±‚æ¸²æŸ“æµ‹è¯•
     mainForm->OnPaint += [](Form* sender)
         {
             auto pbx = ((TestWindow*)sender)->picturebox1;
@@ -87,6 +93,18 @@ int main()
             //sender->Render->FillRect(sender->Size.cx * 0.4f, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 0.0f,0.0f,1.0f,0.1f });
         };
     mainForm->Show();
+    NotifyIcon notifyIcon;
+    notifyIcon.InitNotifyIcon(mainForm->Handle, 1000);
+    notifyIcon.SetToolTip("CorePrintX");
+    notifyIcon.SetIcon(mainForm->Icon);
+    notifyIcon.ShowNotifyIcon();
+    notifyIcon.OnNotifyIconMouseDown += [](class NotifyIcon* nicon, MouseEventArgs args)
+        {
+            if(args.Buttons == MouseButtons::Left)
+                ShowWindow(nicon->hWnd, SW_SHOWNORMAL);
+            else if (args.Buttons == MouseButtons::Right)
+                ShowWindow(nicon->hWnd, SW_HIDE);
+        };
     Taskbar* bar = new Taskbar(mainForm->Handle);
     while (1)
     {

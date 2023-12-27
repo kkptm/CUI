@@ -41,6 +41,7 @@ public:
 	static std::wstring Remove(std::wstring str, int index, int count);
 	static std::string Join(std::vector<std::string> strs, std::string separator);
 	static std::wstring Join(std::vector<std::wstring> strs, std::wstring separator);
+
 	template <class... _Types>
 	static inline std::wstring Format(const wchar_t* fmt, _Types&&... _Args)
 	{

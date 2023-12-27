@@ -186,6 +186,12 @@
     <ClInclude Include="Utils\StringBuilder.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\Clipboard.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\NotifyIcon.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -334,6 +340,12 @@
     </ClCompile>
     <ClCompile Include="Utils\StringBuilder.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Clipboard.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\NotifyIcon.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
