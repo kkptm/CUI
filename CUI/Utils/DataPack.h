@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include <string>
 #include <vector>
-#include "defines.h"
 class DataPack
 {
 public:
@@ -11,9 +10,9 @@ public:
     std::vector<DataPack> Child = std::vector<DataPack>();
     DataPack& operator[](int index);
     DataPack& operator[](std::string id);
-    PROPERTY(int, Count);
-    GET(int, Count);
-    SET(int, Count);
+    __declspec(property (put = SetCount, get = GetCount)) int Count;
+    int GetCount();
+    void SetCount(int value);
     void operator=(const std::initializer_list<BYTE> data);
     void operator=(const std::initializer_list<BYTE>* data);
     template<typename T>
@@ -62,6 +61,7 @@ public:
         memcpy(this->Value.data(), &data, sizeof(T));
     }
     DataPack();
+    DataPack(const char* key);
     DataPack(const BYTE* data, int data_len);
     DataPack(std::string id, BYTE* data, int len);
     DataPack(std::vector<BYTE> data);

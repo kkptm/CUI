@@ -1485,12 +1485,14 @@ SIZE Graphics::GetScreenSize(int index)
     auto callback = [](HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
         {
             std::vector<SIZE>* tmp = (std::vector<SIZE>*)dwData;
-            MONITORINFO info;
-            info.cbSize = sizeof(info);
-            if (GetMonitorInfoW(hMonitor, &info))
-            {
-                tmp->push_back({ info.rcMonitor.right - info.rcMonitor.left,info.rcMonitor.bottom - info.rcMonitor.top });
-            }
+            MONITORINFOEX miex{};
+            miex.cbSize = sizeof(miex);
+            GetMonitorInfo(hMonitor, &miex);
+            DEVMODE dm{};
+            dm.dmSize = sizeof(dm);
+            dm.dmDriverExtra = 0;
+            EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &dm);
+            tmp->push_back(SIZE{ (int)dm.dmPelsWidth,(int)dm.dmPelsHeight });
             return TRUE;
         };
     EnumDisplayMonitors(NULL, NULL, (MONITORENUMPROC)callback, (LPARAM)&sizes);

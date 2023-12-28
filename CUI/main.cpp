@@ -79,7 +79,7 @@ int main()
             if (pbx->IsVisual)
             {
 
-                auto size = sender->Render->GetScreenSize();
+                auto size = sender->Render->GetScreenSize(0);
                 auto hBitmap = sender->Render->CopyFromScreen(0, 0, size.cx, size.cy);
                 auto bmp = sender->Render->CreateBitmap(hBitmap);
 
@@ -95,7 +95,7 @@ int main()
     mainForm->Show();
     NotifyIcon notifyIcon;
     notifyIcon.InitNotifyIcon(mainForm->Handle, 1000);
-    notifyIcon.SetToolTip("CorePrintX");
+    notifyIcon.SetToolTip("CUI_TestDemo");
     notifyIcon.SetIcon(mainForm->Icon);
     notifyIcon.ShowNotifyIcon();
     notifyIcon.OnNotifyIconMouseDown += [](class NotifyIcon* nicon, MouseEventArgs args)

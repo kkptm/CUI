@@ -36,11 +36,11 @@ DataPack& DataPack::operator[](std::string id)
     Child.push_back(DataPack(id, 0));
     return this->Child[this->Child.size() - 1];
 }
-GET_CPP(DataPack, int, Count)
+int DataPack::GetCount()
 {
     return this->Child.size();
 }
-SET_CPP(DataPack, int, Count)
+void DataPack::SetCount(int value)
 {
     this->Child.resize(value);
 }
@@ -206,6 +206,12 @@ DataPack::DataPack(const BYTE* data, int data_len)
         }
     }
 }
+
+DataPack::DataPack(const char* key)
+{
+    this->Id = key;
+    this->Value.resize(0);
+}
 DataPack::DataPack(std::string id, BYTE* data, int len)
 {
     this->Id = id;
@@ -307,9 +313,9 @@ std::vector<BYTE> DataPack::GetBytes()
                 list.insert(list.end(), (BYTE*)&vvlen, (BYTE*)&vvlen + 1);
             }
         }
+        list.insert(list.end(), this->Value.data(), this->Value.data() + this->Value.size());
+        list.push_back((BYTE)DataPachKey::ValueEnd);
     }
-    list.insert(list.end(), this->Value.data(), this->Value.data() + this->Value.size());
-    list.push_back((BYTE)DataPachKey::ValueEnd);
     for (auto sub : this->Child)
     {
         auto dta = sub.GetBytes();
