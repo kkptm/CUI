@@ -3,7 +3,25 @@ The goal of this repository is to implement a framework that supports rapid deve
 
 Use it like C#
 
-Button,CheckBox,ComboBox,,GridView,Label,Panel,PasswordBox,PictureBox,ProgressBar,RadioBox,RichTextBox,RoundTextBox,Switch,TabControl,TextBox
+Form
+Button
+CheckBox
+ComboBox
+GridView
+Label
+Panel
+PasswordBox
+PictureBox
+ProgressBar
+RadioBox
+RichTextBox
+RoundTextBox
+Switch
+TabControl
+TextBox
+TreeView
+NotifyIcon
+Taskbar
 
 Sample:
 
