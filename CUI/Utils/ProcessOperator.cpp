@@ -78,21 +78,29 @@ BOOL ProcessOperator::FreeMemory(ULONG64 addr, SIZE_T size, DWORD freeType)
 {
     return NT_SUCCESS(NtFreeVirtualMemory(this->Handle, (PVOID*)&addr, &size, freeType));
 }
-ULONG64 ProcessOperator::CallRemote(ULONG64 func,ULONG64 rcx,ULONG64 rdx,ULONG64 r8,ULONG64 r9)
+ULONG64 ProcessOperator::CallRemote(ULONG64 func,ULONG64 rcx,ULONG64 rdx,ULONG64 r8,ULONG64 r9, ULONG64 rsp20, ULONG64 rsp28, ULONG64 rsp30, ULONG64 rsp38)
 {
     BYTE code[] =
     {
         0x55,                                           //push rbp
         0x48,0x8B,0xEC,                                 //mov rbp,rsp
-        0x48,0x83,0xEC,0x20,                            //sub rsp,20
+        0x48,0x83,0xEC,0x50,                            //sub rsp,50
         0x48,0xB9,0,0,0,0,0,0,0,0,                      //mov rcx,0000000000000000
         0x48,0xBA,0,0,0,0,0,0,0,0,                      //mov rdx,0000000000000000
         0x49,0xB8,0,0,0,0,0,0,0,0,                      //mov r8,0000000000000000
         0x49,0xB9,0,0,0,0,0,0,0,0,                      //mov r9,0000000000000000
         0x48,0xB8,0,0,0,0,0,0,0,0,                      //mov rax,0000000000000000
+        0x48,0x89,0x44,0x24,0x20,                       //mov [rsp+20],rax
+        0x48,0xB8,0,0,0,0,0,0,0,0,                      //mov rax,0000000000000000
+        0x48,0x89,0x44,0x24,0x28,                       //mov [rsp+28],rax
+        0x48,0xB8,0,0,0,0,0,0,0,0,                      //mov rax,0000000000000000
+        0x48,0x89,0x44,0x24,0x30,                       //mov [rsp+30],rax
+        0x48,0xB8,0,0,0,0,0,0,0,0,                      //mov rax,0000000000000000
+        0x48,0x89,0x44,0x24,0x38,                       //mov [rsp+38],rax
+        0x48,0xB8,0,0,0,0,0,0,0,0,                      //mov rax,0000000000000000
         0xFF,0xD0,									    //call rax        
         0x48,0xA3,0,0,0,0,0,0,0,0,                      //mov [0000000000000000],rax
-        0x48,0x83,0xC4,0x20,                            //add rsp,20
+        0x48,0x83,0xC4,0x50,                            //add rsp,50
         0x48,0x8B,0xE5,                                 //mov rsp,rbp
         0x5D,                                           //pop rbp
         0xC3,                                           //ret
@@ -102,15 +110,25 @@ ULONG64 ProcessOperator::CallRemote(ULONG64 func,ULONG64 rcx,ULONG64 rdx,ULONG64
     ULONG64* p_rdx = (ULONG64*)(code + 20);
     ULONG64* p_r8 = (ULONG64*)(code + 30);
     ULONG64* p_r9 = (ULONG64*)(code + 40);
-    ULONG64* p_call = (ULONG64*)(code + 50);
-    ULONG64* p_rax = (ULONG64*)(code + 62);
+    ULONG64* p_rsp20 = (ULONG64*)(code + 50);
+    ULONG64* p_rsp28 = (ULONG64*)(code + 65);
+    ULONG64* p_rsp30 = (ULONG64*)(code + 80);
+    ULONG64* p_rsp38 = (ULONG64*)(code + 95);
+
+
+    ULONG64* p_call = (ULONG64*)(code + 110);
+    ULONG64* p_rax = (ULONG64*)(code + 122);
     *p_rcx = rcx;
     *p_rdx = rdx;
     *p_r8 = r8;
     *p_r9 = r9;
     *p_call = func;
+    *p_rsp20 = rsp20;
+    *p_rsp28 = rsp28;
+    *p_rsp30 = rsp30;
+    *p_rsp38 = rsp38;
     ULONG64 membase = this->AllocateMemory(sizeof(code), PAGE_EXECUTE_READWRITE, MEM_COMMIT, NULL);
-    *p_rax = ((ULONG64)membase + 79);
+    *p_rax = ((ULONG64)membase + (sizeof(code) - 8));
     if (membase)
     {
         if (this->Write(membase, code, sizeof(code)))

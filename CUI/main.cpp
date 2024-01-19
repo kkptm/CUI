@@ -28,9 +28,9 @@ int main()
         {
             auto title = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
             auto msg = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
-            cep.Write(title, (PVOID)"Hello", 6);
             cep.Write(msg, (PVOID)"Hello", 6);
-            auto v = cep.CallRemote((ULONG64)MessageBoxA, 0, title, msg, MB_OK);
+            cep.Write(title, (PVOID)"Title", 6);
+            auto v = cep.CallRemote((ULONG64)MessageBoxA, NULL, msg, title,MB_OK);
             cep.FreeMemory(title, 0x10);
             cep.FreeMemory(msg, 0x10);
         }

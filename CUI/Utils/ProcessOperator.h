@@ -19,7 +19,10 @@ public:
 	ULONG64 AllocateMemory(SIZE_T size, DWORD protect,DWORD type, ULONG64 baseAddr);
 	BOOL FreeMemory(ULONG64 addr, SIZE_T size, DWORD freeType = MEM_DECOMMIT);
 	//仅限于64位进程
-	ULONG64 CallRemote(ULONG64 func, ULONG64 rcx = NULL, ULONG64 rdx = NULL, ULONG64 r8 = NULL, ULONG64 r9 = NULL);
+	ULONG64 CallRemote(ULONG64 func,
+		ULONG64 a1 = NULL, ULONG64 a2 = NULL, ULONG64 a3 = NULL, ULONG64 a4 = NULL,
+		ULONG64 a5 = NULL, ULONG64 a6 = NULL, ULONG64 a7 = NULL, ULONG64 a8 = NULL
+	);
 	template<typename T>
 	T Read(ULONG64 addr)
 	{
