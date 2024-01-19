@@ -41,7 +41,7 @@ std::vector<Process> Process::GetProcessesByName(const std::string _name)
 		{
 			if (wcscmp(name.c_str(), pe.szExeFile) == 0)
 			{
-				result.push_back(Process(pe.th32ProcessID));
+				result.push_back(Process(pe.th32ProcessID,Convert::string_to_wstring(_name)));
 			}
 		} while (Process32Next(hSnapshot, &pe));
 	}
@@ -128,7 +128,7 @@ std::string Process::MainWindowTitle()
 	GetWindowTextA(hwnd, buffer.data(), length + 1);
 	return std::string(buffer.data());
 }
-int Process::ParentProcessId()
+HANDLE Process::ParentProcessId()
 {
 	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, this->Id);
 	if (hProcess == NULL) return 0;

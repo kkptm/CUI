@@ -1,21 +1,21 @@
 #include "TimeSpan.h"
-TimeSpan::TimeSpan(INT64 ticks)
+TimeSpan::TimeSpan(__int64 ticks)
 {
 	_ticks = ticks;
 }
 TimeSpan::TimeSpan(int hours, int minutes, int seconds)
 {
-	INT64 num = (INT64)hours * 3600L + (INT64)minutes * 60L + seconds;
+	__int64 num = (__int64)hours * 3600L + (__int64)minutes * 60L + seconds;
 	_ticks = num * 10000000;
 }
 TimeSpan::TimeSpan(int days, int hours, int minutes, int seconds)
 {
-	INT64 num = ((INT64)days * 3600L * 24 + (INT64)hours * 3600L + (INT64)minutes * 60L + seconds) * 1000 + 0;
+	__int64 num = ((__int64)days * 3600L * 24 + (__int64)hours * 3600L + (__int64)minutes * 60L + seconds) * 1000 + 0;
 	_ticks = num * 10000;
 }
 TimeSpan::TimeSpan(int days, int hours, int minutes, int seconds, int milliseconds)
 {
-	INT64 num = ((INT64)days * 3600L * 24 + (INT64)hours * 3600L + (INT64)minutes * 60L + seconds) * 1000 + milliseconds;
+	__int64 num = ((__int64)days * 3600L * 24 + (__int64)hours * 3600L + (__int64)minutes * 60L + seconds) * 1000 + milliseconds;
 	_ticks = num * 10000;
 }
 void TimeSpan::Add(TimeSpan ts)
@@ -24,52 +24,72 @@ void TimeSpan::Add(TimeSpan ts)
 }
 int TimeSpan::Days()
 {
-	return (int)(_ticks / 864000000000L);
+	return (int)(Hours() / 24);
 }
 int TimeSpan::Hours()
 {
-	return (int)(_ticks / 36000000000L % 24);
+	return (int)(Minutes() / 60);
 }
 int TimeSpan::Milliseconds()
 {
-	return (int)(_ticks / 10000 % 1000);
+	return (int)(_ticks / 10000);
 }
 int TimeSpan::Minutes()
 {
-	return (int)(_ticks / 600000000 % 60);
+	return (int)(Seconds() / 60);
 }
 int TimeSpan::Seconds()
 {
-	return (int)(_ticks / 10000000 % 60);
+	return (int)(Milliseconds() / 1000);
 }
-double TimeSpan::TotalDays()
-{
-	return (double)_ticks * 1.1574074074074074E-12;
-}
-double TimeSpan::TotalHours()
-{
-	return (double)_ticks * 2.7777777777777777E-11;
-}
-double TimeSpan::TotalMilliseconds()
-{
-	double num = (double)_ticks * 0.0001;
-	if (num > 922337203685477.0)
-	{
-		return 922337203685477.0;
-	}
 
-	if (num < -922337203685477.0)
-	{
-		return -922337203685477.0;
-	}
-
-	return num;
-}
-double TimeSpan::TotalMinutes()
+int TimeSpan::Ticks()
 {
-	return (double)_ticks * 1.6666666666666667E-09;
+	return (int)_ticks;
 }
-double TimeSpan::TotalSeconds()
+bool TimeSpan::operator==(TimeSpan ts)
 {
-	return (double)_ticks * 1E-07;
+	return this->_ticks == ts._ticks;
+}
+bool TimeSpan::operator!=(TimeSpan ts)
+{
+	return this->_ticks != ts._ticks;
+}
+bool TimeSpan::operator<(TimeSpan ts)
+{
+	return this->_ticks < ts._ticks;
+}
+bool TimeSpan::operator<=(TimeSpan ts)
+{
+	return this->_ticks <= ts._ticks;
+}
+bool TimeSpan::operator>(TimeSpan ts)
+{
+	return this->_ticks > ts._ticks;
+}
+bool TimeSpan::operator>=(TimeSpan ts)
+{
+	return this->_ticks >= ts._ticks;
+}
+TimeSpan TimeSpan::operator+(TimeSpan ts)
+{
+	TimeSpan result = {0};
+	result._ticks = this->_ticks + ts._ticks;
+	return result;
+}
+TimeSpan TimeSpan::operator-(TimeSpan ts)
+{
+	TimeSpan result = { 0 };
+	result._ticks = this->_ticks - ts._ticks;
+	return result;
+}
+TimeSpan TimeSpan::operator+=(TimeSpan ts)
+{
+	this->_ticks += ts._ticks;
+	return *this;
+}
+TimeSpan TimeSpan::operator-=(TimeSpan ts)
+{
+	this->_ticks -= ts._ticks;
+	return *this;
 }

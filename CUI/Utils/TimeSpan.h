@@ -1,10 +1,9 @@
 #pragma once
-#include <Windows.h>
 #include "defines.h"
 struct TimeSpan
 {
-	INT64 _ticks;
-	TimeSpan(INT64 ticks);
+	__int64 _ticks;
+	TimeSpan(__int64 ticks);
 	TimeSpan(int hours, int minutes, int seconds);
 	TimeSpan(int days, int hours, int minutes, int seconds);
 	TimeSpan(int days, int hours, int minutes, int seconds, int milliseconds);
@@ -14,9 +13,15 @@ struct TimeSpan
 	int Milliseconds();
 	int Minutes();
 	int Seconds();
-	double TotalDays();
-	double TotalHours();
-	double TotalMilliseconds();
-	double TotalMinutes();
-	double TotalSeconds();
+    int Ticks();
+	bool operator==(TimeSpan ts);
+	bool operator!=(TimeSpan ts);
+	bool operator<(TimeSpan ts);
+	bool operator<=(TimeSpan ts);
+	bool operator>(TimeSpan ts);
+	bool operator>=(TimeSpan ts);
+	TimeSpan operator+(TimeSpan ts);
+	TimeSpan operator-(TimeSpan ts);
+	TimeSpan operator+=(TimeSpan ts);
+	TimeSpan operator-=(TimeSpan ts);
 };

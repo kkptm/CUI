@@ -1,9 +1,8 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <vector>
 #include <string>
 
-#include "defines.h"
 #include "StringBuilder.h"
 #include "List.h"
 #include "File.h"
@@ -43,7 +42,9 @@ void* FindPattern(void* _begin, const char* sPattern, int search_size, int offse
 std::vector<void*> FindAllPattern(void* _begin, const char* sPattern, int search_size, int offset = 0);
 void PrintHex(void* ptr, int count, int splitLine);
 void PrintHex(void* ptr, int count);
-INT64 GetTick();
+__int64 GetTick();
 void MakePermute(std::vector<int> nums, std::vector<std::vector<int>>& result, int start = 0);
 
 std::string GetLastErrorMessage();
+PIMAGE_NT_HEADERS RtlImageNtHeader(PVOID Base);
+SIZE_T GetSectionSize(_In_ PVOID DllBase);

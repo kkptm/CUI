@@ -1,7 +1,6 @@
 #pragma once
 #include "defines.h"
 #include <vector>
-#include <windows.h>
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4018)

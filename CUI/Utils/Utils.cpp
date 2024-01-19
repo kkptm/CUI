@@ -249,7 +249,7 @@ void PrintHex(void* ptr, int count)
 		printf("%c%c ", keys[*b / 0x10], keys[*b % 0x10]);
 	}
 }
-INT64 GetTick()
+__int64 GetTick()
 {
 	return *(__int64*)0x7FFE0348;
 }
@@ -296,4 +296,33 @@ std::string GetLastErrorMessage()
 		errorMessage = "Î´ÖªµÄ´íÎó";
 	}
 	return errorMessage;
+}
+
+PIMAGE_NT_HEADERS RtlImageNtHeader(PVOID Base)
+{
+	static PIMAGE_NT_HEADERS(*_RtlImageNtHeader)(PVOID Base) = NULL;
+	if (_RtlImageNtHeader == NULL)
+	{
+		HMODULE NtBase = GetModuleHandleA("ntdll.dll");
+		_RtlImageNtHeader = (decltype(_RtlImageNtHeader))GetProcAddress(NtBase, "RtlImageNtHeader");
+	}
+	return _RtlImageNtHeader(Base);
+}
+
+SIZE_T GetSectionSize(_In_ PVOID DllBase)
+{
+	PIMAGE_NT_HEADERS64 pNTHeader = RtlImageNtHeader(DllBase);
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD64)pNTHeader + sizeof(IMAGE_NT_HEADERS64));
+	ULONG nAlign = pNTHeader->OptionalHeader.SectionAlignment;
+	SIZE_T ImageSize = (pNTHeader->OptionalHeader.SizeOfHeaders + nAlign - 1) / nAlign * nAlign;
+	for (int i = 0; i < pNTHeader->FileHeader.NumberOfSections; ++i)
+	{
+		int CodeSize = pSectionHeader[i].Misc.VirtualSize;
+		int LoadSize = pSectionHeader[i].SizeOfRawData;
+		int MaxSize = (LoadSize > CodeSize) ? (LoadSize) : (CodeSize);
+		int SectionSize = (pSectionHeader[i].VirtualAddress + MaxSize + nAlign - 1) / nAlign * nAlign;
+		if (ImageSize < SectionSize)
+			ImageSize = SectionSize;
+	}
+	return ImageSize;
 }

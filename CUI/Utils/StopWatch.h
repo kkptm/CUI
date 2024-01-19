@@ -5,10 +5,8 @@ class Stopwatch
 {
 private:
     BOOLEAN RUNNING = false;
-    LARGE_INTEGER starttime;
-    LARGE_INTEGER endtime;
-    static long long toInteger(LARGE_INTEGER const& integer);
-    static LARGE_INTEGER toLargeInteger(long long value);
+    __int64 starttime;
+    __int64 endtime;
 public:
     static Stopwatch* StartNew();
     bool IsRunning();

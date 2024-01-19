@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <string>
 #include <vector>
 class DataPack

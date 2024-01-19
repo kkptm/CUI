@@ -1,7 +1,8 @@
 ﻿#include "TestWindow.h"
 #include "GUI//ProcessSelectWindow.h"
 #include "Utils/StopWatch.h"
-#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
+//#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
+
 struct subpack
 {
     const char sname[16];
@@ -17,56 +18,71 @@ struct pack
     __int64 v3;
     subpack sub;
 };
+#include "Utils/ProcessOperator.h"
 int main()
 {
-    Clipboard::Clear();
-    Clipboard::SetFiles({ R"(C:\Windows\Win.ini)" ,R"(C:\Windows\system.ini)" });
-    auto clipBoardFiles= Clipboard::GetFiles();
-    Clipboard::SetImage(Graphics::CopyFromScreen(0,0,500,500));
-    HBITMAP clipBoardBitmap = Clipboard::GetImage();
-    Clipboard::SetText("123AAA456BBB789CCC");
-    auto clipBoardText = Clipboard::GetText();
-    StringBuilder sb;
-    for (int i = 0; i < 10; i++)
+    ProcessOperator cep = ProcessOperator(Process::GetProcessesByName("WeChat.exe")[0].Id);
+    if (cep.Open())
     {
-        sb.AppendLine(i);
-    }
-    sb << false << "\n" << 123456789 << "\n";
-    sb.AppendLine(true);
-    sb.AppendLine('A');
-    sb.AppendLine(L'B');
-    sb.AppendLine("AAA");
-    sb.AppendLine(L"AAA");
-    sb.AppendLine(0.789);
-    sb.AppendLine(0.789f);
-    sb.Lenght -= 5;
-    auto str = sb.ToWString();
-    //序列化测试
-    {
-        pack tmp =
+        while (1)
         {
-            "NAME",
-            100,
-            512.0f,
-            5000000,
-            subpack
-            {
-                "SUB_NAME",
-                200,
-                1024.0f,
-                80000000000,
-           }
-        };
-        DataPack pk = tmp;
-        pk["child_test"] = tmp;
-        pk["child_test"]["child_child_test"] = tmp;
-        auto bytes = pk.GetBytes();
-        auto unpackedobj = DataPack(bytes);
-        auto unpack = unpackedobj.convert<pack>();
-        auto unpack_child = unpackedobj["child_test"].convert<pack>();
-        auto unpack_child_child = unpackedobj["child_test"]["child_child_test"].convert<pack>();
-        Sleep(0);
+            auto title = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
+            auto msg = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
+            cep.Write(title, (PVOID)"Hello", 6);
+            cep.Write(msg, (PVOID)"Hello", 6);
+            auto v = cep.CallRemote((ULONG64)MessageBoxA, 0, title, msg, MB_OK);
+            cep.FreeMemory(title, 0x10);
+            cep.FreeMemory(msg, 0x10);
+        }
     }
+    //Clipboard::Clear();
+    //Clipboard::SetFiles({ R"(C:\Windows\Win.ini)" ,R"(C:\Windows\system.ini)" });
+    //auto clipBoardFiles= Clipboard::GetFiles();
+    //Clipboard::SetImage(Graphics::CopyFromScreen(0,0,500,500));
+    //HBITMAP clipBoardBitmap = Clipboard::GetImage();
+    //Clipboard::SetText("123AAA456BBB789CCC");
+    //auto clipBoardText = Clipboard::GetText();
+    //StringBuilder sb;
+    //for (int i = 0; i < 10; i++)
+    //{
+    //    sb.AppendLine(i);
+    //}
+    //sb << false << "\n" << 123456789 << "\n";
+    //sb.AppendLine(true);
+    //sb.AppendLine('A');
+    //sb.AppendLine(L'B');
+    //sb.AppendLine("AAA");
+    //sb.AppendLine(L"AAA");
+    //sb.AppendLine(0.789);
+    //sb.AppendLine(0.789f);
+    //sb.Lenght -= 5;
+    //auto str = sb.ToWString();
+    ////序列化测试
+    //{
+    //    pack tmp =
+    //    {
+    //        "NAME",
+    //        100,
+    //        512.0f,
+    //        5000000,
+    //        subpack
+    //        {
+    //            "SUB_NAME",
+    //            200,
+    //            1024.0f,
+    //            80000000000,
+    //       }
+    //    };
+    //    DataPack pk = tmp;
+    //    pk["child_test"] = tmp;
+    //    pk["child_test"]["child_child_test"] = tmp;
+    //    auto bytes = pk.GetBytes();
+    //    auto unpackedobj = DataPack(bytes);
+    //    auto unpack = unpackedobj.convert<pack>();
+    //    auto unpack_child = unpackedobj["child_test"].convert<pack>();
+    //    auto unpack_child_child = unpackedobj["child_test"]["child_child_test"].convert<pack>();
+    //    Sleep(0);
+    //}
     int index = 0;
     TestWindow* mainForm = new TestWindow();
     //mainForm->ShowInTaskBar = false;
@@ -75,22 +91,22 @@ int main()
     //顶层渲染测试
     mainForm->OnPaint += [](Form* sender)
         {
-            auto pbx = ((TestWindow*)sender)->picturebox1;
-            if (pbx->IsVisual)
-            {
+            //auto pbx = ((TestWindow*)sender)->picturebox1;
+            //if (pbx->IsVisual)
+            //{
 
-                auto size = sender->Render->GetScreenSize(0);
-                auto hBitmap = sender->Render->CopyFromScreen(0, 0, size.cx, size.cy);
-                auto bmp = sender->Render->CreateBitmap(hBitmap);
+            //    auto size = sender->Render->GetScreenSize(0);
+            //    auto hBitmap = sender->Render->CopyFromScreen(0, 0, size.cx, size.cy);
+            //    auto bmp = sender->Render->CreateBitmap(hBitmap);
 
-                auto loc = pbx->AbsLocation;
-                sender->Render->DrawBitmap(bmp, 0, 0, size.cx, size.cy, loc.x, loc.y, pbx->Width, pbx->Height, 1.0f);
-                bmp->Release(); 
-                DeleteObject(hBitmap);
-            }
-            //sender->Render->FillRect(0, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 1.0f,0.0f,0.0f,0.1f });
-            //sender->Render->FillRect(sender->Size.cx * 0.2f, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 0.0f,1.0f,0.0f,0.1f });
-            //sender->Render->FillRect(sender->Size.cx * 0.4f, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 0.0f,0.0f,1.0f,0.1f });
+            //    auto loc = pbx->AbsLocation;
+            //    sender->Render->DrawBitmap(bmp, 0, 0, size.cx, size.cy, loc.x, loc.y, pbx->Width, pbx->Height, 1.0f);
+            //    bmp->Release(); 
+            //    DeleteObject(hBitmap);
+            //}
+            sender->Render->FillRect(0, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 1.0f,0.0f,0.0f,0.1f });
+            sender->Render->FillRect(sender->Size.cx * 0.2f, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 0.0f,1.0f,0.0f,0.1f });
+            sender->Render->FillRect(sender->Size.cx * 0.4f, 0, sender->Size.cx * 0.2f, sender->Size.cy, D2D1_COLOR_F{ 0.0f,0.0f,1.0f,0.1f });
         };
     mainForm->Show();
     NotifyIcon notifyIcon;
@@ -108,12 +124,8 @@ int main()
     Taskbar* bar = new Taskbar(mainForm->Handle);
     while (1)
     {
-        //if (mainForm->textbox2->Text.size() > 1000)
-        //    mainForm->textbox2->Text = L"";
         mainForm->progressbar1->PercentageValue = ((GetTick() % 5000000) / 5000000.0f);
         bar->SetValue(mainForm->progressbar1->PercentageValue * 100, 100);
-        //mainForm->textbox2->AppendLine(std::to_wstring(index++));
-        //mainForm->textbox2->ScrollToEnd();-*/
         Form::DoEvent();
     }
     return 0;

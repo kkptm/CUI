@@ -1,8 +1,7 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <vector>
 #include <string>
-#include "defines.h"
 enum class FileAttributes
 {
     ReadOnly = 0x1,

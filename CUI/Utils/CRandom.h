@@ -1,7 +1,6 @@
 #pragma once
-#include <Windows.h>
-#include <vector>
 #include "defines.h"
+#include <vector>
 class Random
 {
 public:

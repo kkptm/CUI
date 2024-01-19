@@ -1,6 +1,5 @@
-#include "DataPack.h"
 #pragma once
-#include <Windows.h>
+#include "DataPack.h"
 #include <string>
 #include <vector>
 
@@ -20,6 +19,14 @@ enum class DataPachKey : BYTE
     ChildStart_Small_X = 0xD7,
 };
 
+int DataPack::GetCount()
+{
+    return this->Child.size();
+}
+void DataPack::SetCount(int value)
+{
+    this->Child.resize(value);
+}
 DataPack& DataPack::operator[](int index)
 {
     return this->Child[index];
@@ -35,14 +42,6 @@ DataPack& DataPack::operator[](std::string id)
     }
     Child.push_back(DataPack(id, 0));
     return this->Child[this->Child.size() - 1];
-}
-int DataPack::GetCount()
-{
-    return this->Child.size();
-}
-void DataPack::SetCount(int value)
-{
-    this->Child.resize(value);
 }
 
 void DataPack::operator=(const std::initializer_list<BYTE> data)

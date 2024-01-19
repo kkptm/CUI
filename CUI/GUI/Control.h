@@ -5,7 +5,6 @@
 #include "../Utils/Event.h"
 #include <string>
 #include <vector>
-#include <Windows.h>
 
 enum class ImageSizeMode : char
 {

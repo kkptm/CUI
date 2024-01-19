@@ -1,10 +1,9 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <string>
 #include <vector>
 #include <commdlg.h>
 #include <Shlobj.h>
-#include "defines.h"
 #undef MessageBox
 
 HWND GetCurrentActiveWindow();

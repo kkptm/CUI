@@ -192,6 +192,15 @@
     <ClInclude Include="GUI\NotifyIcon.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\MemLoadLibrary2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ProcessOperator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Veil.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics\Graphics.cpp">
@@ -346,6 +355,9 @@
     </ClCompile>
     <ClCompile Include="GUI\NotifyIcon.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\ProcessOperator.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

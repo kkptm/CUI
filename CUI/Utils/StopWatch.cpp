@@ -1,28 +1,8 @@
 #include "StopWatch.h"
-long long Stopwatch::toInteger(LARGE_INTEGER const& integer)
-{
-#ifndef MIDL_PASS
-    return integer.QuadPart;
-#else
-    return (static_cast<long long>(integer.HighPart) << 32) | integer.LowPart;
-#endif
-}
-LARGE_INTEGER Stopwatch::toLargeInteger(long long value)
-{
-    LARGE_INTEGER result;
-
-#ifndef MIDL_PASS
-    result.QuadPart = value;
-#else
-    result.high_part = value & 0xFFFFFFFF00000000;
-    result.low_part = value & 0xFFFFFFFF;
-#endif
-    return result;
-}
 Stopwatch* Stopwatch::StartNew()
 {
     Stopwatch* st = new Stopwatch();
-    QueryPerformanceCounter(&st->starttime);
+    st->starttime = *(__int64*)0x7FFE0348;
     st->RUNNING = true;
     return st;
 }
@@ -34,15 +14,15 @@ TimeSpan Stopwatch::Elapsed()
 {
     if (this->RUNNING)
     {
-        LARGE_INTEGER _endtime;
-        QueryPerformanceCounter(&_endtime);
-        INT64 v = toInteger(_endtime) - toInteger(starttime);
+        __int64 _endtime = {};
+        _endtime = *(__int64*)0x7FFE0348;
+        __int64 v = _endtime - starttime;
         TimeSpan tm = TimeSpan(v);
         return tm;
     }
     else
     {
-        INT64 v = toInteger(endtime) - toInteger(starttime);
+        __int64 v = endtime - starttime;
         TimeSpan tm = TimeSpan(v);
         return tm;
     }
@@ -50,10 +30,10 @@ TimeSpan Stopwatch::Elapsed()
 void Stopwatch::Stop()
 {
     this->RUNNING = false;
-    QueryPerformanceCounter(&this->endtime);
+    this->endtime = *(__int64*)0x7FFE0348;
 }
 void Stopwatch::Restart()
 {
     this->RUNNING = true;
-    QueryPerformanceCounter(&this->starttime);
+    this->starttime = *(__int64*)0x7FFE0348;
 }

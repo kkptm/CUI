@@ -1,8 +1,7 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <string>
 #include <vector>
-#include "defines.h"
 enum class SpecialFolderOption
 {
 	None = 0,

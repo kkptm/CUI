@@ -1,5 +1,5 @@
 #pragma once
-#include <windows.h>
+#include "defines.h"
 #include <iostream>
 #include <functional>
 #include <condition_variable>

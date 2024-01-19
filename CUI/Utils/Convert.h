@@ -1,9 +1,8 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <vector>
 #include <string>
 #include <codecvt>
-#include "defines.h"
 class Convert {
 public:
 	static std::string AnsiToUtf8(const std::string str);

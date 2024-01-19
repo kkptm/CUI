@@ -1,7 +1,7 @@
 #pragma once
+#include "defines.h"
 #include <string>
 #include <sstream>
-#include "defines.h"
 class StringBuilder
 {
 private:

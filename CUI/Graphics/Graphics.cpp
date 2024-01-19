@@ -1457,27 +1457,29 @@ HBITMAP Graphics::GetHBITMAPFromImageFile(const wchar_t* path)
 }
 HBITMAP Graphics::CopyFromScreen(int x, int y, int width, int height)
 {
-    HDC hScreen = GetDC(NULL);
-    HDC hDC = CreateCompatibleDC(hScreen);
-    HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, width, height);
-    HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
-    BOOL bRet = BitBlt(hDC, x, y, width, height, hScreen, 0, 0, SRCCOPY);
-    SelectObject(hDC, old_obj);
-    DeleteDC(hDC);
-    ReleaseDC(NULL, hScreen);
-    return hBitmap;
+    HDC sourceDC = GetDC(NULL);
+	HDC momDC;
+	momDC = ::CreateCompatibleDC(sourceDC);
+	HBITMAP memBitmap;
+	memBitmap = ::CreateCompatibleBitmap(sourceDC, width, height);
+	SelectObject(momDC, memBitmap);
+	BitBlt(momDC, 0, 0, width, height, sourceDC, x, y, SRCCOPY);
+	DeleteDC(momDC);
+	ReleaseDC(NULL, sourceDC);
+	return memBitmap;
 }
-HBITMAP Graphics::CopyFromWidnow(HWND handle, int x, int y, int width, int height)
+HBITMAP Graphics::CopyFromWidnow(HWND hWnd, int x, int y, int width, int height)
 {
-    HDC hScreen = GetDC(handle);
-    HDC hDC = CreateCompatibleDC(hScreen);
-    HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, width, height);
-    HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
-    BOOL bRet = BitBlt(hDC, x, y, width, height, hScreen, 0, 0, SRCCOPY);
-    SelectObject(hDC, old_obj);
-    DeleteDC(hDC);
-    ReleaseDC(NULL, hScreen);
-    return hBitmap;
+    HDC sourceDC = GetDC(hWnd);
+	HDC momDC;
+	momDC = ::CreateCompatibleDC(sourceDC);
+	HBITMAP memBitmap;
+	memBitmap = ::CreateCompatibleBitmap(sourceDC, width, height);
+	SelectObject(momDC, memBitmap);
+	BitBlt(momDC, 0, 0, width, height, sourceDC, x, y, SRCCOPY);
+	DeleteDC(momDC);
+	ReleaseDC(hWnd, sourceDC);
+	return memBitmap;
 }
 SIZE Graphics::GetScreenSize(int index)
 {

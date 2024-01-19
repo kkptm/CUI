@@ -1,11 +1,10 @@
 #pragma once
-#include <Windows.h>
+#include "defines.h"
 #include <vector>
 #include <string>
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <winternl.h>
-#include "defines.h"
 class Process
 {
 public:
@@ -25,7 +24,7 @@ public:
 	HWND MainWindowHandle();
 	std::vector<HWND> Forms();
 	std::string MainWindowTitle();
-	int ParentProcessId();
+	HANDLE ParentProcessId();
 	int SessionId();
 	int BasePriority();
 	std::string MachineName();

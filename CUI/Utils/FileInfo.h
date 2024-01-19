@@ -1,7 +1,7 @@
 #pragma once
+#include "defines.h"
 #include <filesystem>
 #include <fstream>
-#include "defines.h"
 class FileInfo
 {
 private:

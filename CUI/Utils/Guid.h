@@ -1,7 +1,6 @@
 #pragma once
-#include <Windows.h>
-#include <string>
 #include "defines.h"
+#include <string>
 class Guid
 {
 public:

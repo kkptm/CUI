@@ -3,7 +3,6 @@
 #include "List.h"
 #include <string>
 #include <vector>
-#include <Windows.h>
 enum class MouseButtons
 {
 	None = 0x00000000,
