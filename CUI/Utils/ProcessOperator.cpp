@@ -78,6 +78,98 @@ BOOL ProcessOperator::FreeMemory(ULONG64 addr, SIZE_T size, DWORD freeType)
 {
     return NT_SUCCESS(NtFreeVirtualMemory(this->Handle, (PVOID*)&addr, &size, freeType));
 }
+ULONG64 ProcessOperator::CallRemote(ULONG64 func, std::vector<ULONG64> args)
+{
+    std::vector<BYTE> code = std::vector<BYTE>();
+    auto pushcode = [](std::vector<BYTE>&codeList, const void* code, int size){
+            codeList.insert(codeList.end(),(BYTE*)code, (BYTE*)code+size);
+    };
+    pushcode(code, "\x55", 1);
+    pushcode(code, "\x48\x8B\xEC", 3);
+    if (args.size() < 16)
+        pushcode(code, "\x48\x83\xEC", 3);
+    else
+        pushcode(code, "\x48\x81\xEC", 3);
+    if (args.size() > 4){
+        if (args.size() < 16)
+            code.push_back((args.size() + 1) * 8);
+        else{
+            int val = (args.size() + 1) * 8;
+            pushcode(code, &val, 4);
+        }
+    }
+    else{
+        code.push_back(0x20);
+    }
+    for (int i = 0; i < args.size(); i++){
+        if (i == 0)
+            pushcode(code, "\x48\xB9", 2);
+        else if (i == 1)
+            pushcode(code, "\x48\xBA", 2);
+        else if (i == 2)
+            pushcode(code, "\x49\xB8", 2);
+        else if (i == 3)
+            pushcode(code, "\x49\xB9", 2);
+        else
+            pushcode(code, "\x48\xB8", 2);
+        pushcode(code, &args[i], 8);
+        if (i > 3){
+            if (i < 16){
+                pushcode(code, "\x48\x89\x44\x24", 4);
+                code.push_back(i * 8);
+            }
+            else {
+                pushcode(code, "\x48\x89\x84\x24", 4);
+                int tmpVal = i * 8;
+                pushcode(code, &tmpVal, 4);
+
+            }
+        }
+    }
+    pushcode(code, "\x48\xB8", 2);
+    pushcode(code, &func, 8);
+    pushcode(code, "\xFF\xD0", 2);
+    pushcode(code, "\x48\xA3", 2);
+    pushcode(code, "00000000", 8);
+    if (args.size() < 16)
+        pushcode(code, "\x48\x83\xC4", 3);
+    else
+        pushcode(code, "\x48\x81\xC4", 3);
+    if (args.size() > 4) {
+        if (args.size() < 16)
+            code.push_back((args.size() + 1) * 8);
+        else{
+            int val = (args.size() + 1) * 8;
+            pushcode(code, &val, 4);
+        }
+    }
+    else {
+        code.push_back(0x20);
+    }
+    pushcode(code, "\x48\x8B\xE5", 3);
+    pushcode(code, "\x5D", 1);
+    pushcode(code, "\xC3", 1);
+    pushcode(code, "\x00\x00\x00\x00\x00\x00\x00\x00", 8);
+    ULONG64 membase = this->AllocateMemory(code.size(), PAGE_EXECUTE_READWRITE, MEM_COMMIT, NULL);
+    ULONG64* p_rax = (ULONG64*)(code.data() + (code.size() - ((args.size() < 16) ? 25 : 28)));
+    *p_rax = (membase + (code.size() - 8));
+    if (membase){
+        if (this->Write(membase, code.data(), code.size())){
+            ULONG64 result = NULL;
+            HANDLE tHadnle = CreateRemoteThread(this->Handle, NULL, 0x400, (LPTHREAD_START_ROUTINE)membase, 0, 0, 0);
+            if (tHadnle){
+                if (WaitForSingleObject(tHadnle, INFINITE) != WAIT_FAILED)
+                    result = this->Read<ULONG64>(membase + (code.size() - 8));
+            }
+            this->FreeMemory(membase, code.size());
+            return result;
+        }
+        this->FreeMemory(membase, code.size());
+    }
+    return NULL;
+
+    return 0;
+}
 ULONG64 ProcessOperator::CallRemote(ULONG64 func,ULONG64 rcx,ULONG64 rdx,ULONG64 r8,ULONG64 r9, ULONG64 rsp20, ULONG64 rsp28, ULONG64 rsp30, ULONG64 rsp38)
 {
     BYTE code[] =
@@ -138,7 +230,7 @@ ULONG64 ProcessOperator::CallRemote(ULONG64 func,ULONG64 rcx,ULONG64 rdx,ULONG64
             if (tHadnle)
             {
                 if(WaitForSingleObject(tHadnle, INFINITE)!= WAIT_FAILED)
-                    result = this->Read<ULONG64>(((ULONG64)membase + 67));
+                    result = this->Read<ULONG64>(((ULONG64)membase + (sizeof(code) - 8)));
             }
             this->FreeMemory(membase, sizeof(code));
             return result;

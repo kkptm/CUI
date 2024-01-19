@@ -26,13 +26,18 @@ int main()
     {
         while (1)
         {
+            std::string str = StringHelper::Format("GetTickCount = %d", GetTickCount());
             auto title = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
             auto msg = cep.AllocateMemory(0x10, PAGE_READWRITE, MEM_COMMIT, NULL);
-            cep.Write(msg, (PVOID)"Hello", 6);
-            cep.Write(title, (PVOID)"Title", 6);
-            auto v = cep.CallRemote((ULONG64)MessageBoxA, NULL, msg, title,MB_OK);
+            cep.Write(msg, (PVOID)str.c_str(), str.size() + 1);
+            cep.Write(title, (PVOID)"Hello", 6);
+            auto v = cep.CallRemote(
+                (ULONG64)MessageBoxA, 
+                { NULL, msg, title,MB_YESNO,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}//可以传递任意数量的参数(INT_MAX / 8)
+            );
             cep.FreeMemory(title, 0x10);
             cep.FreeMemory(msg, 0x10);
+            printf("%d\n",v);
         }
     }
     //Clipboard::Clear();
