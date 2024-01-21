@@ -39,7 +39,7 @@ std::vector<Process> Process::GetProcessesByName(const std::string _name)
 	{
 		do
 		{
-			if (wcscmp(name.c_str(), pe.szExeFile) == 0)
+			if (_wcsicmp(name.c_str(), pe.szExeFile) == 0)
 			{
 				result.push_back(Process(pe.th32ProcessID,Convert::string_to_wstring(_name)));
 			}

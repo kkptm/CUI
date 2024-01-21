@@ -28,11 +28,11 @@ BOOL ProcessOperator::Close()
 {
 	return NtClose(this->Handle);
 }
-BOOL ProcessOperator::Read(ULONG64 addr, PVOID buffer, SIZE_T size)
+BOOL ProcessOperator::Read(ULONG64 addr, const PVOID buffer, SIZE_T size)
 {
     return NT_SUCCESS(NtReadVirtualMemory(this->Handle, PVOID(addr), buffer, size, NULL));
 }
-BOOL ProcessOperator::Write(ULONG64 addr, PVOID buffer, SIZE_T size)
+BOOL ProcessOperator::Write(ULONG64 addr, const PVOID buffer, SIZE_T size)
 {
     return NT_SUCCESS(NtWriteVirtualMemory(this->Handle, PVOID(addr), buffer, size, NULL));
 }
@@ -74,6 +74,26 @@ ULONG64 ProcessOperator::AllocateMemory(SIZE_T size, DWORD protect, DWORD type,U
     return NULL;
 }
 
+ULONG64 ProcessOperator::AllocateString(std::string s)
+{
+    ULONG64 ptr = AllocateMemory(s.size() + 1, PAGE_READWRITE, MEM_COMMIT, NULL);
+    if (ptr)
+    {
+        this->Write(ptr, (void*)s.c_str(), s.size() + 1);
+        return ptr;
+    }
+    return NULL;
+}
+ULONG64 ProcessOperator::AllocateWString(std::wstring s)
+{
+    ULONG64 ptr = AllocateMemory((s.size() + 1) * sizeof(wchar_t), PAGE_READWRITE, MEM_COMMIT, NULL);
+    if (ptr)
+    {
+        this->Write(ptr, (void*)s.c_str(), (s.size() + 1) * sizeof(wchar_t));
+        return ptr;
+    }
+    return NULL;
+}
 BOOL ProcessOperator::FreeMemory(ULONG64 addr, SIZE_T size, DWORD freeType)
 {
     return NT_SUCCESS(NtFreeVirtualMemory(this->Handle, (PVOID*)&addr, &size, freeType));
@@ -81,9 +101,7 @@ BOOL ProcessOperator::FreeMemory(ULONG64 addr, SIZE_T size, DWORD freeType)
 ULONG64 ProcessOperator::CallRemote(ULONG64 func, std::vector<ULONG64> args)
 {
     std::vector<BYTE> code = std::vector<BYTE>();
-    auto pushcode = [](std::vector<BYTE>&codeList, const void* code, int size){
-            codeList.insert(codeList.end(),(BYTE*)code, (BYTE*)code+size);
-    };
+    auto pushcode = [](std::vector<BYTE>&codeList, const void* code, int size){ codeList.insert(codeList.end(),(BYTE*)code, (BYTE*)code+size); };
     pushcode(code, "\x55", 1);
     pushcode(code, "\x48\x8B\xEC", 3);
     if (args.size() < 16)
@@ -280,11 +298,71 @@ ULONG64 ProcessOperator::InjectDll(BYTE* buffer,SIZE_T size)
                 WriteProcessMemory(this->Handle, (PVOID)jmpmem, (PVOID)shellcode, sizeof(shellcode), &tmpSize);
                 HANDLE tHadnle = CreateRemoteThread(this->Handle, NULL, 0, (LPTHREAD_START_ROUTINE)jmpmem, 0, 0, 0);
                 WaitForSingleObject(tHadnle, INFINITE);
-                DWORD exitCode;
-                GetExitCodeThread(tHadnle, (PDWORD)&exitCode);
+                this->FreeMemory(jmpmem);
+                this->FreeMemory((ULONG64)dllbase);
+                this->FreeMemory((ULONG64)RemoteMemLoadLibrary2Param);
+                this->FreeMemory((ULONG64)MemLoadLibrary2Address);
+
             }
         }
         return (ULONG64)MemLoadLibrary2Param.pMemoryAddress;
     }
+    return NULL;
+}
+ULONG64 ProcessOperator::FindPattern(const char* szModule, const char* sPattern, int offset)
+{
+    ULONG64 offset_ = 0;
+    std::vector<__int16> pattern = ParserPattern(sPattern);
+    if (pattern.size() == 0) return NULL;
+    MODULEINFO mi{ };
+    ULONG64 md_str = this->AllocateString(szModule);
+    HMODULE remote_hModule = (HMODULE)this->CallRemote((ULONG64)GetModuleHandleA, md_str);
+    this->FreeMemory(md_str);
+    if (K32GetModuleInformation(this->Handle, remote_hModule, &mi, sizeof(mi)))
+    {
+        BYTE* begin = new BYTE[mi.SizeOfImage];
+        this->Read((ULONG64)mi.lpBaseOfDll, begin, mi.SizeOfImage);
+        DWORD size = mi.SizeOfImage;
+        for (BYTE* p = begin + offset; p < (begin + size) - (pattern.size() + 1); p++)
+        {
+            for (int o = 0; o < pattern.size(); o++)
+            {
+                if (p[o] != pattern[o] && pattern[o] != -1)
+                {
+                    goto nxt;
+                }
+            }
+            offset_ = (p - begin);
+            delete[] begin;
+            return offset_ + (ULONG64)mi.lpBaseOfDll;
+        nxt:;
+        }
+        delete[] begin;
+    }
+    return NULL;
+
+}
+ULONG64 ProcessOperator::FindPattern(ULONG64 _begin, const char* sPattern, int search_size, int offset)
+{
+    ULONG64 offset_ = 0;
+    std::vector<__int16> pattern = ParserPattern(sPattern);
+    if (pattern.size() == 0) return NULL;
+    BYTE* begin = new BYTE[search_size];
+    this->Read((ULONG64)_begin, begin, search_size);
+    for (unsigned char* p = begin + offset; p < (begin + search_size) - (pattern.size() + 1); p++)
+    {
+        for (int o = 0; o < pattern.size(); o++)
+        {
+            if (p[o] != pattern[o] && pattern[o] != -1)
+            {
+                goto nxt;
+            }
+        }
+        offset_ = (p - begin);
+        delete[] begin;
+        return offset_ + (ULONG64)_begin;
+    nxt:;
+    }
+    delete[] begin;
     return NULL;
 }
