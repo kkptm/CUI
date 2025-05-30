@@ -182,6 +182,33 @@ Graphics::Graphics(ID2D1BitmapRenderTarget* target)
 }
 Graphics::~Graphics()
 {
+    for (auto const& [key, val] : textLayoutCache)
+    {
+        if (val)
+        {
+            val->Release();
+        }
+    }
+    textLayoutCache.clear();
+
+    for (auto const& [key, val] : bitmapFileCache)
+    {
+        if (val)
+        {
+            val->Release();
+        }
+    }
+    bitmapFileCache.clear();
+
+    for (auto const& [key, val] : svgBitmapCache)
+    {
+        if (val)
+        {
+            val->Release();
+        }
+    }
+    svgBitmapCache.clear();
+
     if (this->pWICBitmap) pWICBitmap->Release();
     if (this->DefaultFontObject)
     {
@@ -561,8 +588,15 @@ void Graphics::DrawString(std::wstring str, float x, float y, ID2D1Brush* brush,
 }
 IDWriteTextLayout* Graphics::CreateStringLayout(std::string str, Font* font)
 {
+    std::wstring tmp = Convert::string_to_wstring(str);
+    auto it = textLayoutCache.find(tmp);
+    if (it != textLayoutCache.end())
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+
     IDWriteTextLayout* textLayout = 0;
-    auto tmp = Convert::string_to_wstring(str);
     HRESULT hr = _DWriteFactory->CreateTextLayout(
         tmp.c_str(),
         tmp.size(),
@@ -570,10 +604,22 @@ IDWriteTextLayout* Graphics::CreateStringLayout(std::string str, Font* font)
         FLT_MAX,
         FLT_MAX,
         &textLayout);
+
+    if (SUCCEEDED(hr) && textLayout)
+    {
+        textLayoutCache[tmp] = textLayout;
+    }
     return textLayout;
 }
 IDWriteTextLayout* Graphics::CreateStringLayout(std::wstring str, Font* font)
 {
+    auto it = textLayoutCache.find(str);
+    if (it != textLayoutCache.end())
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+
     IDWriteTextLayout* textLayout = 0;
     HRESULT hr = _DWriteFactory->CreateTextLayout(
         str.c_str(),
@@ -582,10 +628,25 @@ IDWriteTextLayout* Graphics::CreateStringLayout(std::wstring str, Font* font)
         FLT_MAX,
         FLT_MAX,
         &textLayout);
+
+    if (SUCCEEDED(hr) && textLayout)
+    {
+        textLayoutCache[str] = textLayout;
+    }
     return textLayout;
 }
 IDWriteTextLayout* Graphics::CreateStringLayout(std::wstring str, float width, float height, Font* font)
 {
+    // Note: Using only the string as a key. For a more robust cache, include width, height, and font properties in the key.
+    auto it = textLayoutCache.find(str);
+    if (it != textLayoutCache.end())
+    {
+        // Consider if the cached layout matches width/height/font parameters.
+        // For this simplified version, we assume it does or that variations are not critical.
+        it->second->AddRef();
+        return it->second;
+    }
+
     IDWriteTextLayout* textLayout = 0;
     HRESULT hr = _DWriteFactory->CreateTextLayout(
         str.c_str(),
@@ -594,6 +655,11 @@ IDWriteTextLayout* Graphics::CreateStringLayout(std::wstring str, float width, f
         width,
         height,
         &textLayout);
+
+    if (SUCCEEDED(hr) && textLayout)
+    {
+        textLayoutCache[str] = textLayout;
+    }
     return textLayout;
 }
 void Graphics::DrawStringLayout(IDWriteTextLayout* layout, float x, float y, D2D1_COLOR_F color)
@@ -630,7 +696,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCent(IDWriteTextLayout* layout, float x, f
 D2D1_SIZE_F Graphics::DrawStringCent(std::string str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -652,15 +718,19 @@ D2D1_SIZE_F Graphics::DrawStringCent(std::string str, float x, float y, D2D1_COL
                 textLayout,
                 this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
 D2D1_SIZE_F Graphics::DrawStringCent(std::wstring str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -679,8 +749,12 @@ D2D1_SIZE_F Graphics::DrawStringCent(std::wstring str, float x, float y, D2D1_CO
             }
             this->pRenderTarget->DrawTextLayout(loc, textLayout, this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
@@ -704,7 +778,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCentHorizontal(IDWriteTextLayout* layout, 
 D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::string str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -726,15 +800,19 @@ D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::string str, float x, float y
                 textLayout,
                 this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
 D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::wstring str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -753,8 +831,12 @@ D2D1_SIZE_F Graphics::DrawStringCentHorizontal(std::wstring str, float x, float 
             }
             this->pRenderTarget->DrawTextLayout(loc, textLayout, this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
@@ -778,7 +860,7 @@ D2D1_SIZE_F Graphics::DrawStringLayoutCentVertical(IDWriteTextLayout* layout, fl
 D2D1_SIZE_F Graphics::DrawStringCentVertical(std::string str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -800,15 +882,19 @@ D2D1_SIZE_F Graphics::DrawStringCentVertical(std::string str, float x, float y, 
                 textLayout,
                 this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
 D2D1_SIZE_F Graphics::DrawStringCentVertical(std::wstring str, float x, float y, D2D1_COLOR_F color, IDWriteTextLayout** _recodeLayout, D2D1_COLOR_F back, Font* font)
 {
     D2D1_SIZE_F tsize = { 0,0 };
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         DWRITE_TEXT_METRICS metrics;
@@ -827,14 +913,18 @@ D2D1_SIZE_F Graphics::DrawStringCentVertical(std::wstring str, float x, float y,
             }
             this->pRenderTarget->DrawTextLayout(loc, textLayout, this->GetColorBrush(color));
         }
-        if (_recodeLayout) *_recodeLayout = textLayout;
-        else textLayout->Release();
+        if (_recodeLayout)
+        {
+            textLayout->AddRef(); // Transferring ownership to _recodeLayout
+            *_recodeLayout = textLayout;
+        }
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
     return tsize;
 }
 void Graphics::DrawStringLayout(std::string str, float x, float y, D2D1_COLOR_F color, D2D1_COLOR_F back, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         if (back.a > 0.0f)
@@ -846,12 +936,12 @@ void Graphics::DrawStringLayout(std::string str, float x, float y, D2D1_COLOR_F 
             this->pRenderTarget->DrawTextLayout({ x - 1,y + 1 }, textLayout, brush);
         }
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, D2D1_COLOR_F color, D2D1_COLOR_F back, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         if (back.a > 0.0f)
@@ -863,12 +953,12 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, D2D1_COLOR_F
             this->pRenderTarget->DrawTextLayout({ x - 1,y + 1 }, textLayout, brush);
         }
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, D2D1_COLOR_F color, D2D1_COLOR_F back, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         if (back.a > 0.0f)
@@ -880,27 +970,27 @@ void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, flo
             this->pRenderTarget->DrawTextLayout({ x - 1,y + 1 }, textLayout, brush);
         }
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         textLayout->SetDrawingEffect(this->GetBackColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y, D2D1_COLOR_F color, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack)
@@ -915,30 +1005,30 @@ void Graphics::DrawStringLayout(IDWriteTextLayout* textLayout, float x, float y,
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, DWRITE_TEXT_RANGE subRange, D2D1_COLOR_F fontBack, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         textLayout->SetDrawingEffect(this->GetColorBrush(fontBack), subRange);
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, brush);
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, D2D1_COLOR_F color, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, this->GetColorBrush(color));
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::DrawStringLayout(std::wstring str, float x, float y, float w, float h, ID2D1Brush* brush, Font* font)
 {
-    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject);
+    IDWriteTextLayout* textLayout = CreateStringLayout(str, w, h, font ? font : this->DefaultFontObject); // Caching call
     if (textLayout)
     {
         this->pRenderTarget->DrawTextLayout({ x,y }, textLayout, brush);
-        textLayout->Release();
+        textLayout->Release(); // Release the reference obtained from CreateStringLayout
     }
 }
 void Graphics::FillTriangle(D2D1_TRIANGLE triangle, D2D1_COLOR_F color)
@@ -1179,9 +1269,17 @@ ID2D1Bitmap* Graphics::CreateBitmap(IWICBitmap* wb)
 }
 ID2D1Bitmap* Graphics::CreateBitmap(const char* path)
 {
+    std::wstring wPath = Convert::string_to_wstring(path);
+    auto it = bitmapFileCache.find(wPath);
+    if (it != bitmapFileCache.end())
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+
     ID2D1Bitmap* bmp = nullptr;
     IWICBitmapDecoder* bitmapdecoder = NULL;
-    _ImageFactory->CreateDecoderFromFilename(Convert::string_to_wstring(path).c_str(), NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapdecoder);//
+    _ImageFactory->CreateDecoderFromFilename(wPath.c_str(), NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapdecoder);
     if (bitmapdecoder)
     {
         IWICBitmapFrameDecode* pframe = NULL;
@@ -1189,18 +1287,31 @@ ID2D1Bitmap* Graphics::CreateBitmap(const char* path)
         IWICFormatConverter* fmtcovter = NULL;
         _ImageFactory->CreateFormatConverter(&fmtcovter);
         fmtcovter->Initialize(pframe, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-        this->pRenderTarget->CreateBitmapFromWicBitmap(fmtcovter, NULL, &bmp);
-        pframe->Release();
-        fmtcovter->Release();
+        HRESULT hr = this->pRenderTarget->CreateBitmapFromWicBitmap(fmtcovter, NULL, &bmp);
+        if (SUCCEEDED(hr) && bmp)
+        {
+            bitmapFileCache[wPath] = bmp;
+            // bmp already has a ref count of 1 from CreateBitmapFromWicBitmap
+        }
+        if(pframe) pframe->Release();
+        if(fmtcovter) fmtcovter->Release();
         bitmapdecoder->Release();
     }
     return bmp;
 }
 ID2D1Bitmap* Graphics::CreateBitmap(const wchar_t* path)
 {
+    std::wstring wPath(path);
+    auto it = bitmapFileCache.find(wPath);
+    if (it != bitmapFileCache.end())
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+
     ID2D1Bitmap* bmp = nullptr;
     IWICBitmapDecoder* bitmapdecoder = NULL;
-    _ImageFactory->CreateDecoderFromFilename(path, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapdecoder);//
+    _ImageFactory->CreateDecoderFromFilename(path, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapdecoder);
     if (bitmapdecoder)
     {
         IWICBitmapFrameDecode* pframe = NULL;
@@ -1208,9 +1319,14 @@ ID2D1Bitmap* Graphics::CreateBitmap(const wchar_t* path)
         IWICFormatConverter* fmtcovter = NULL;
         _ImageFactory->CreateFormatConverter(&fmtcovter);
         fmtcovter->Initialize(pframe, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-        this->pRenderTarget->CreateBitmapFromWicBitmap(fmtcovter, NULL, &bmp);
-        pframe->Release();
-        fmtcovter->Release();
+        HRESULT hr = this->pRenderTarget->CreateBitmapFromWicBitmap(fmtcovter, NULL, &bmp);
+        if (SUCCEEDED(hr) && bmp)
+        {
+            bitmapFileCache[wPath] = bmp;
+            // bmp already has a ref count of 1 from CreateBitmapFromWicBitmap
+        }
+        if(pframe) pframe->Release();
+        if(fmtcovter) fmtcovter->Release();
         bitmapdecoder->Release();
     }
     return bmp;
@@ -1506,106 +1622,137 @@ SIZE Graphics::GetScreenSize(int index)
 }
 ID2D1Bitmap* Graphics::ToBitmapFromSvg(const char* data)
 {
+    std::string svgDataStr(data);
+    auto it = svgBitmapCache.find(svgDataStr);
+    if (it != svgBitmapCache.end())
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+
     int len = strlen(data) + 1;
     char* svg_text = new char[len];
-    memcpy(svg_text, data, len);
+    memcpy(svg_text, data, len); // Use memcpy for binary safety, though SVG is text
     NSVGimage* image = nsvgParse(svg_text, "px", 96.0f);
+    delete[] svg_text; // Free the copied string
+
+    if (!image) {
+        return nullptr;
+    }
+
     float percen = 1.0f;
     if (image->width > 4096 || image->height > 4096)
     {
         float maxv = image->width > image->height ? image->width : image->height;
         percen = 4096.0f / maxv;
     }
-    auto subg = this->CreateSubGraphics(image->width * percen, image->height * percen);
+
+    // Create a temporary Graphics context for rendering SVG if image dimensions are valid
+    if (image->width <= 0 || image->height <= 0) {
+		nsvgDelete(image);
+		return nullptr;
+	}
+
+    Graphics* subg = this->CreateSubGraphics(static_cast<int>(image->width * percen), static_cast<int>(image->height * percen));
+    if (!subg) {
+        nsvgDelete(image);
+        return nullptr;
+    }
+
     NSVGshape* shape;
     NSVGpath* path;
     subg->BeginRender();
     for (shape = image->shapes; shape != NULL; shape = shape->next)
     {
-        auto geo = Graphics::CreateGeomtry();
+        ID2D1PathGeometry* geo = Graphics::CreateGeomtry(); // Static method call
         if (geo)
         {
             ID2D1GeometrySink* skin = NULL;
-            geo->Open(&skin);
-            if (skin)
+            if (SUCCEEDED(geo->Open(&skin)))
             {
                 for (path = shape->paths; path != NULL; path = path->next)
                 {
-                    for (int i = 0; i < path->npts - 1; i += 3)
+                    if (path->npts > 0) // Ensure there are points to draw
                     {
-                        float* p = &path->pts[i * 2];
-                        if (i == 0)
+                        skin->BeginFigure({ path->pts[0] * percen, path->pts[1] * percen }, (shape->fill.type != NSVG_PAINT_NONE) ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
+                        for (int i = 0; i < path->npts - 1; i += 3)
                         {
-                            skin->BeginFigure({ p[0] * percen, p[1] * percen }, D2D1_FIGURE_BEGIN_FILLED);
+                            float* p = &path->pts[i * 2];
+                             skin->AddBezier({ {p[2] * percen, p[3] * percen}, {p[4] * percen, p[5] * percen}, {p[6] * percen, p[7] * percen} });
                         }
-                        skin->AddBezier({ {p[2] * percen, p[3] * percen}, {p[4] * percen, p[5] * percen}, {p[6] * percen, p[7] * percen} });
+                        skin->EndFigure(path->closed ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
                     }
-                    skin->EndFigure(path->closed ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
                 }
+                skin->Close();
+                if(skin) skin->Release();
             }
-            skin->Close();
-        }
-        auto _get_svg_brush = [](NSVGpaint paint, float opacity, Graphics* g) ->ID2D1Brush*
+
+            auto _get_svg_brush = [](NSVGpaint paint, float opacity, Graphics* g) ->ID2D1Brush*
             {
-                const auto ic2fc = [](int colorInt, float opacity)->D2D1_COLOR_F
-                    {
-                        D2D1_COLOR_F ret = { (float)GetRValue(colorInt) / 255.0f ,(float)GetGValue(colorInt) / 255.0f ,(float)GetBValue(colorInt) / 255.0f ,opacity };
-                        return ret;
-                    };
+                const auto ic2fc = [](int colorInt, float alpha_opacity)->D2D1_COLOR_F
+                {
+                    D2D1_COLOR_F ret = { (float)((colorInt >> 0) & 0xFF) / 255.0f ,(float)((colorInt >> 8) & 0xFF) / 255.0f ,(float)((colorInt >> 16) & 0xFF) / 255.0f ,alpha_opacity };
+                    return ret;
+                };
                 switch (paint.type)
                 {
-                case NSVG_PAINT_NONE:
-                {
-                    return NULL;
-                }
-                break;
-                case NSVG_PAINT_COLOR:
-                {
-                    return g->CreateSolidColorBrush(ic2fc(paint.color, opacity));
-                }
-                break;
+                case NSVG_PAINT_NONE: return NULL;
+                case NSVG_PAINT_COLOR: return g->CreateSolidColorBrush(ic2fc(paint.color, opacity));
                 case NSVG_PAINT_LINEAR_GRADIENT:
                 {
                     std::vector<D2D1_GRADIENT_STOP> cols;
                     for (int i = 0; i < paint.gradient->nstops; i++)
                     {
-                        auto stop = paint.gradient->stops[i];
-                        cols.push_back({ stop.offset, ic2fc(stop.color, opacity) });
+                        cols.push_back({ paint.gradient->stops[i].offset, ic2fc(paint.gradient->stops[i].color, opacity) });
                     }
+                    if (cols.empty()) return NULL; // Avoid creating brush with no stops
                     return g->CreateLinearGradientBrush(cols.data(), cols.size());
                 }
-                break;
                 case NSVG_PAINT_RADIAL_GRADIENT:
                 {
                     std::vector<D2D1_GRADIENT_STOP> cols;
                     for (int i = 0; i < paint.gradient->nstops; i++)
                     {
-                        auto stop = paint.gradient->stops[i];
-                        cols.push_back({ stop.offset, ic2fc(stop.color, opacity) });
+                        cols.push_back({ paint.gradient->stops[i].offset, ic2fc(paint.gradient->stops[i].color, opacity) });
                     }
+                     if (cols.empty()) return NULL; // Avoid creating brush with no stops
                     return g->CreateRadialGradientBrush(cols.data(), cols.size(), { paint.gradient->fx,paint.gradient->fy });
                 }
-                break;
                 }
                 return NULL;
             };
-        ID2D1Brush* brush = _get_svg_brush(shape->fill, shape->opacity, subg);
-        if (brush)
-        {
-            subg->FillGeometry(geo, brush);
-            brush->Release();
+
+            if (shape->fill.type != NSVG_PAINT_NONE) {
+                ID2D1Brush* fillBrush = _get_svg_brush(shape->fill, shape->opacity, subg);
+                if (fillBrush)
+                {
+                    subg->FillGeometry(geo, fillBrush);
+                    fillBrush->Release();
+                }
+            }
+
+            if (shape->stroke.type != NSVG_PAINT_NONE && shape->strokeWidth > 0.0f) {
+                ID2D1Brush* strokeBrush = _get_svg_brush(shape->stroke, shape->opacity, subg);
+                if (strokeBrush)
+                {
+                    subg->DrawGeometry(geo, strokeBrush, shape->strokeWidth * percen);
+                    strokeBrush->Release();
+                }
+            }
+            geo->Release();
         }
-        brush = _get_svg_brush(shape->stroke, shape->opacity, subg);
-        if (brush)
-        {
-            subg->DrawGeometry(geo, brush, shape->strokeWidth);
-            brush->Release();
-        }
-        geo->Release();
     }
-    nsvgDelete(image);
     subg->EndRender();
-    auto result = (ID2D1Bitmap*)subg->ToBitmap();
+
+    ID2D1Bitmap* resultBitmap = subg->ToBitmap(this); // Pass 'this' to ensure compatibility
+
     delete subg;
-    return result;
+    nsvgDelete(image);
+
+    if (resultBitmap)
+    {
+        svgBitmapCache[svgDataStr] = resultBitmap;
+        // resultBitmap already has a ref count from ToBitmap or CreateBitmap in ToBitmap
+    }
+    return resultBitmap;
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "Font.h"
 #include "Colors.h"
+#include <map>
+#include <string>
 class Graphics
 {
     enum class target_type
@@ -14,6 +16,9 @@ class Graphics
 private:
     target_type _Target_Type = target_type::__hwnd;
     IWICBitmap* pWICBitmap = NULL;
+    std::map<std::wstring, IDWriteTextLayout*> textLayoutCache;
+    std::map<std::wstring, ID2D1Bitmap*> bitmapFileCache;
+    std::map<std::string, ID2D1Bitmap*> svgBitmapCache;
     int brush_get_index = 0;
     ID2D1RenderTarget* pRenderTarget = nullptr;
     ID2D1SolidColorBrush* Default_Brush = NULL;
