@@ -33,7 +33,7 @@ Simplest example:
 	    {
 	        Button* btn = (Button*)sender;
 	        btn->Text = std::to_string(btn->Flag++);
-	        TestWindow* window = (TestWindow*)btn->btn->ParentForm;
+	        TestWindow* window = (TestWindow*)btn->ParentForm;
 	        MessageBoxA(window->Handle,"button1_OnMouseClick","",MB_OK);
 	    }
 	public:
