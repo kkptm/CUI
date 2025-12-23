@@ -1,4 +1,5 @@
 # CUI
+项目已迁移到https://github.com/JieML1100/CUI继续更新
 The goal of this repository is to implement a framework that supports rapid development of GUI applications(Commercially available without any copyright restrictions)
 
 Use it like C#,Use Direct2D hardware acceleration,Powerful drawing function library,Basic libraries (strings, files, streams, registry, clipboard, conversions, events, HTTP/s, processes, threads, TCP/UDP, containers like C#)
